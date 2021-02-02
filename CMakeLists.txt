@@ -21,6 +21,7 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(turtle_interfaces REQUIRED)
 
 add_library(libsocketcan STATIC src/libsocketcan.c)
@@ -30,9 +31,8 @@ add_executable(can_interface src/can_interface.cpp src/can_handler.cpp)
 target_include_directories(can_interface PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-target_link_libraries(can_interface libsocketcan)
-target_link_libraries(can_interface can_messages)
-#add_dependencies(can_interface libsocketcan)
+target_link_libraries(can_interface libsocketcan can_messages)
+add_dependencies(can_interface libsocketcan can_messages)
 ament_target_dependencies(can_interface rclcpp turtle_interfaces)
 
 install(TARGETS can_interface

@@ -1,0 +1,14 @@
+CanInterface:
+  ros__parameters:
+    publishAMI505: true     # can_rotary_switch
+    publishAux166: true     # can_brakelight
+    publishAux336: true     # can_ebs_pressure_raw
+    publishAux357: true     # can_rear_hall
+    publishAux384: true     # can_aux_safe_state
+    publishDash101: true    # can_apps_raw
+    publishDash107: true    # can_front_hall
+    publishDash198: true    # can_brake_raw
+    publishDash204: true    # can_dash_leds
+    publishDash279: true    # can_dash_buttons
+    publishEBS550: true    # can_ebs_status
+    publishSWA510: true    # can_steering_actual
