@@ -45,9 +45,9 @@ typedef struct {
     bool publishDash279;
     bool publishEBS550;
     bool publishSWA510;
-    //CAN messages to transmite
-    bool transmiteAPU660;
-    bool transmiteSWA539;
+    //CAN messages to transmit
+    bool transmitAPU660;
+    bool transmitSWA539;
 
 } RosConfig;
 
@@ -123,16 +123,16 @@ class CanHandler : public rclcpp::Node
         turtle_interfaces::msg::Steering msgSWA510;
         void publish_swa_510();
 
-        //Variables and functions for CAN transmite
+        //Variables and functions for CAN transmit
         uint16_t canTimerCounter;
         rclcpp::TimerBase::SharedPtr canSendTimer;        
-        void handleCanTransmite();
+        void handleCanTransmit();
 
         struct can_as_dash_aux_apu_660_t frameAPU660;
-        void transmite_apu_660();
+        void transmit_apu_660();
 
         struct can_as_dash_aux_swa_530_t frameSWA530;
-        void transmite_swa_530();
+        void transmit_swa_530();
 
     public:
         CanHandler(rclcpp::NodeOptions nOpt);

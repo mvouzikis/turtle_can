@@ -18,6 +18,6 @@ CanInterface:
     publishEBS550: true     # /ebs_supervisor_info
     publishSWA510: true     # /steering_actual
 
-    # CAN messages to transmite
-    transmiteAPU660: true   #can_as_state_mission
-    transmiteSWA539: true   #can_steering_target
+    # CAN messages to transmit
+    transmitAPU660: true   #can_as_state_mission
+    transmitSWA539: true   #can_steering_target

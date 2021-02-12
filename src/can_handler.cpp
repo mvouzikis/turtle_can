@@ -46,7 +46,7 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
 
     //initialize timers
     this->canRecvTimer = this->create_wall_timer(500us, std::bind(&CanHandler::handleCanReceive,    this));
-    this->canSendTimer = this->create_wall_timer(1ms,   std::bind(&CanHandler::handleCanTransmite,  this));
+    this->canSendTimer = this->create_wall_timer(1ms,   std::bind(&CanHandler::handleCanTransmit,   this));
 
     RCLCPP_INFO(this->get_logger(), "Can interface initialized");
 }
@@ -77,9 +77,9 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<bool>("publishDash279", this->rosConf.publishDash279, true);
     this->get_parameter_or<bool>("publishEBS550", this->rosConf.publishEBS550, true);
     this->get_parameter_or<bool>("publishSWA510", this->rosConf.publishSWA510, true);
-    //CAN messages to transmite
-    this->get_parameter_or<bool>("transmiteAPU660", this->rosConf.transmiteAPU660, true);
-    this->get_parameter_or<bool>("transmiteSWA539", this->rosConf.transmiteSWA539, true);
+    //CAN messages to transmit
+    this->get_parameter_or<bool>("transmitAPU660", this->rosConf.transmitAPU660, true);
+    this->get_parameter_or<bool>("transmitSWA539", this->rosConf.transmitSWA539, true);
 }
 
 void CanHandler::variablesInit()
@@ -139,11 +139,11 @@ void CanHandler::variablesInit()
     }
 
     //Initialize CAN Tx messages
-    if (this->rosConf.transmiteAPU660) {
+    if (this->rosConf.transmitAPU660) {
         this->frameAPU660.as_mission = CAN_AS_DASH_AUX_APU_660_AS_MISSION_NO_MISSION_CHOICE;
         this->frameAPU660.as_state = CAN_AS_DASH_AUX_APU_660_AS_STATE_AS_OFF_CHOICE;
     }
-    if (this->rosConf.transmiteSWA539) {
+    if (this->rosConf.transmitSWA539) {
         this->frameSWA530.steering_target = 0;
     }
 }
@@ -230,7 +230,7 @@ void CanHandler::publish_aux_166()
     }
 
     this->createHeader(&this->msgAux166.header);
-    this->msgAux166.brakelight = msg.brakelight;
+    this->msgAux166.brakelight = (msg.brakelight == CAN_AS_DASH_AUX_AUX_166_BRAKELIGHT_ON_CHOICE);
 
     this->pubAux166->publish(this->msgAux166);
 }
@@ -273,7 +273,7 @@ void CanHandler::publish_aux_384()
     }
 
     this->createHeader(&this->msgAux384.header);
-    this->msgAux384.safestate = msg.safe_state;
+    this->msgAux384.safestate = (msg.safe_state == CAN_AS_DASH_AUX_AUX_384_SAFE_STATE_ON_CHOICE);
 
     this->pubAux357->publish(this->msgAux357);
 }
@@ -292,9 +292,9 @@ void CanHandler::publish_aux_412()
     this->msgAux412.accufanspwm = msg.accu_fans_pwm;
     this->msgAux412.leftfanspwm = msg.left_fans_pwm;
     this->msgAux412.rightfanspwm = msg.right_fans_pwm;
-    this->msgAux412.accufans = msg.accu_fans;
-    this->msgAux412.leftfans = msg.left_fans;
-    this->msgAux412.rightfans = msg.right_fans;
+    this->msgAux412.accufans = (msg.accu_fans == CAN_AS_DASH_AUX_AUX_412_ACCU_FANS_ON_CHOICE);
+    this->msgAux412.leftfans = (msg.left_fans == CAN_AS_DASH_AUX_AUX_412_LEFT_FANS_ON_CHOICE);
+    this->msgAux412.rightfans = (msg.right_fans == CAN_AS_DASH_AUX_AUX_412_RIGHT_FANS_ON_CHOICE);
 
     this->pubAux412->publish(this->msgAux412);
 }
@@ -352,12 +352,12 @@ void CanHandler::publish_dash_204()
 
     this->createHeader(&this->msgDash204.header);
     this->msgDash204.fanpwm = msg.fan_pwm;
-    this->msgDash204.buzzer = msg.buzzer;
-    this->msgDash204.safestate1 = msg.safe_state_1;
-    this->msgDash204.enableout = msg.enable_out;
-    this->msgDash204.sensorerror = msg.sensor_error;
-    this->msgDash204.scsoftware = msg.sc_software;
-    this->msgDash204.plactive = msg.pl_active;
+    this->msgDash204.buzzer = (bool)msg.buzzer;
+    this->msgDash204.safestate1 = (bool)msg.safe_state_1;
+    this->msgDash204.enableout = (bool)msg.enable_out;
+    this->msgDash204.sensorerror = (bool)msg.sensor_error;
+    this->msgDash204.scsoftware = (bool)msg.sc_software;
+    this->msgDash204.plactive = (bool)msg.pl_active;
 
     this->pubDash204->publish(this->msgDash204);
 }
@@ -371,13 +371,13 @@ void CanHandler::publish_dash_279()
     }
 
     this->createHeader(&this->msgDash279.header);
-    this->msgDash279.enabletoggle = msg.enable_toggle;
-    this->msgDash279.secondtoggle = msg.second_toggle;
-    this->msgDash279.thirdtogglenotused = msg.third_toggle_notused;
-    this->msgDash279.start = msg.start;
-    this->msgDash279.adact = msg.ad_act;
-    this->msgDash279.greentsal = msg.green_tsal;
-    this->msgDash279.scstate = msg.sc_state;
+    this->msgDash279.enabletoggle = (bool)msg.enable_toggle;
+    this->msgDash279.secondtoggle = (bool)msg.second_toggle;
+    this->msgDash279.thirdtogglenotused = (bool)msg.third_toggle_notused;
+    this->msgDash279.start = (bool)msg.start;
+    this->msgDash279.adact = (bool)msg.ad_act;
+    this->msgDash279.greentsal = (bool)msg.green_tsal;
+    this->msgDash279.scstate = (bool)msg.sc_state;
 
     this->pubDash279->publish(this->msgDash279);
 }
@@ -391,12 +391,12 @@ void CanHandler::publish_ebs_550()
     }
 
     this->createHeader(&this->msgEBS550.header);
-    this->msgEBS550.asmsstate = msg.asms_state;
-    this->msgEBS550.tsmsout = msg.tsms_out;
-    this->msgEBS550.ebsengaged = msg.ebs_engaged;
-    this->msgEBS550.ebsisarmed = msg.ebs_is_armed;
-    this->msgEBS550.ebsled = msg.ebs_led;
-    this->msgEBS550.k2state = msg.k2_state;
+    this->msgEBS550.asmsstate = (bool)msg.asms_state;
+    this->msgEBS550.tsmsout = (bool)msg.tsms_out;
+    this->msgEBS550.ebsengaged = (bool)msg.ebs_engaged;
+    this->msgEBS550.ebsisarmed = (bool)msg.ebs_is_armed;
+    this->msgEBS550.ebsled = (bool)msg.ebs_led;
+    this->msgEBS550.k2state = (bool)msg.k2_state;
 
     this->pubEBS550->publish(this->msgEBS550);
 }
@@ -415,22 +415,22 @@ void CanHandler::publish_swa_510()
     this->pubSWA510->publish(this->msgSWA510);
 }
 
-//Functions for CAN transmite
-void CanHandler::handleCanTransmite()
+//Functions for CAN transmit
+void CanHandler::handleCanTransmit()
 {
     this->canTimerCounter++;                //another 1ms passed
     if (this->canTimerCounter == 1001U)     //after 1sec
         this->canTimerCounter = 1U;         //reset counter to prevent overflow
 
-    if (this->rosConf.transmiteAPU660 && !(this->canTimerCounter % CAN_AS_DASH_AUX_APU_660_CYCLE_TIME_MS)) {
-        this->transmite_apu_660();
+    if (this->rosConf.transmitAPU660 && !(this->canTimerCounter % CAN_AS_DASH_AUX_APU_660_CYCLE_TIME_MS)) {
+        this->transmit_apu_660();
     }
-    if (this->rosConf.transmiteSWA539 && !(this->canTimerCounter % CAN_AS_DASH_AUX_SWA_530_CYCLE_TIME_MS)) {
-        this->transmite_swa_530();
+    if (this->rosConf.transmitSWA539 && !(this->canTimerCounter % CAN_AS_DASH_AUX_SWA_530_CYCLE_TIME_MS)) {
+        this->transmit_swa_530();
     }
 }
 
-void CanHandler::transmite_apu_660()
+void CanHandler::transmit_apu_660()
 {
     this->sendFrame.can_id = CAN_AS_DASH_AUX_APU_660_FRAME_ID;
     this->sendFrame.can_dlc = CAN_AS_DASH_AUX_APU_660_LENGTH;
@@ -441,11 +441,11 @@ void CanHandler::transmite_apu_660()
 
     //send(this->can0Socket, &this->sendFrame, sizeof(this->sendFrame), 0);
     if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_APU_660_LENGTH) {
-        RCLCPP_ERROR(this->get_logger(), "Error during transmite of APU_660");
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_660");
     }
 }
 
-void CanHandler::transmite_swa_530()
+void CanHandler::transmit_swa_530()
 {
     this->sendFrame.can_id = CAN_AS_DASH_AUX_SWA_530_FRAME_ID;
     this->sendFrame.can_dlc = CAN_AS_DASH_AUX_SWA_530_LENGTH;
@@ -455,6 +455,6 @@ void CanHandler::transmite_swa_530()
     }
 
     if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_SWA_530_LENGTH) {
-        RCLCPP_ERROR(this->get_logger(), "Error during transmite of SWA_530");
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of SWA_530");
     }
 }
