@@ -32,6 +32,12 @@ double convertBrakePressure(uint16_t brakeRaw)
     return (brake / 14.5038);                   //PsiToBar
 }
 
+double convertEbsPressure(uint16_t ebsRaw)
+{
+    double pressure = 2.5 * ((double)ebsRaw) - 2.5; //linear conversion
+    return pressure;                                //1V -> 0bar | 5V -> 10bar
+}
+
 uint16_t convertFrontRPM(uint16_t hall)
 {
     return (uint16_t)(((1/30.0)/((float)(hall)*0.000001))*60.0);

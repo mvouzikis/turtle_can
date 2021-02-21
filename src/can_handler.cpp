@@ -244,7 +244,7 @@ void CanHandler::publish_aux_336()
     }
 
     this->createHeader(&this->msgAux336.header);
-    this->msgAux336.ebspressureraw = msg.ebs_pressure_raw;
+    this->msgAux336.ebspressureraw = convertEbsPressure(msg.ebs_pressure_raw);
 
     this->pubAux336->publish(this->msgAux336);
 }
