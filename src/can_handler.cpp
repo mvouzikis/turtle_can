@@ -17,31 +17,31 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
     this->variablesInit();
 
     //initialize can0
-    /*if ((this->rosConf.channel0 != "vcan0") && (can_do_stop(this->rosConf.channel0.c_str()) != 0)) {
-        RCLCPP_ERROR(this->get_logger(), "Unable to stop can0.");
-        return;
-    }
-    if ((this->rosConf.channel0 != "vcan0") && (can_set_bitrate(this->rosConf.channel0.c_str(), this->rosConf.bitrate0) != 0)) {
-        RCLCPP_ERROR(this->get_logger(), "Unable to set the bitrate on can0.");
-        return;
-    }
-    if ((this->rosConf.channel0 != "vcan0") && (can_do_start(this->rosConf.channel0.c_str()) != 0)) {
-        RCLCPP_ERROR(this->get_logger(), "Unable to start can0.");
-        return;
-    }*/  
+    // if ((this->rosConf.channel0 != "vcan0") && (can_do_stop(this->rosConf.channel0.c_str()) != 0)) {
+    //     RCLCPP_ERROR(this->get_logger(), "Unable to stop %s.", this->rosConf.channel0.c_str());
+    //     return;
+    // }
+    // if ((this->rosConf.channel0 != "vcan0") && (can_set_bitrate(this->rosConf.channel0.c_str(), this->rosConf.bitrate0) != 0)) {
+    //     RCLCPP_ERROR(this->get_logger(), "Unable to set the bitrate on %s.", this->rosConf.channel0.c_str());
+    //     return;
+    // }
+    // if ((this->rosConf.channel0 != "vcan0") && (can_do_start(this->rosConf.channel0.c_str()) != 0)) {
+    //     RCLCPP_ERROR(this->get_logger(), "Unable to start %s.", this->rosConf.channel0.c_str());
+    //     return;
+    // }  
     this->can0Socket = socket(PF_CAN, SOCK_RAW, CAN_RAW);
     if (this->can0Socket < 0) {
-        RCLCPP_ERROR(this->get_logger(), "Unable to create can0 socket.");
+        RCLCPP_ERROR(this->get_logger(), "Unable to create socket for %s.", this->rosConf.channel0.c_str());
     }
     strcpy(this->ifr0.ifr_name, this->rosConf.channel0.c_str());
     if (ioctl(this->can0Socket, SIOCGIFINDEX, &this->ifr0) == -1) {
-        RCLCPP_ERROR(this->get_logger(), "Unable to perform ioctl for can0.\n");
+        RCLCPP_ERROR(this->get_logger(), "Unable to perform ioctl for %s.", this->rosConf.channel0.c_str());
         return;
     }
     this->addr0.can_family = AF_CAN;
     this->addr0.can_ifindex = this->ifr0.ifr_ifindex;
     if (bind(this->can0Socket, (struct sockaddr*)&this->addr0, sizeof(this->addr0)) < 0){
-        RCLCPP_ERROR(this->get_logger(), "Unable to bind socket with can0.\n");
+        RCLCPP_ERROR(this->get_logger(), "Unable to bind socket with %s.", this->rosConf.channel0.c_str());
         return;
     }
 
@@ -49,7 +49,7 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
     this->canRecvTimer = this->create_wall_timer(500us, std::bind(&CanHandler::handleCanReceive,    this));
     this->canSendTimer = this->create_wall_timer(1ms,   std::bind(&CanHandler::handleCanTransmit,   this));
 
-    RCLCPP_INFO(this->get_logger(), "Can interface initialized");
+    RCLCPP_INFO(this->get_logger(), "%s interface initialized", this->rosConf.channel0.c_str());
 }
 
 CanHandler::~CanHandler()
@@ -171,7 +171,8 @@ void CanHandler::variablesInit()
 //Functions for CAN receive
 void CanHandler::handleCanReceive()
 {
-    while (recvfrom(this->can0Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, &this->len) >= 8) {
+    ssize_t recEr;
+    while ( recEr = recvfrom(this->can0Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, &this->len) >= 8) {
         ioctl(this->can0Socket, SIOCGSTAMP, &this->recvTime);  //get message timestamp
 
         if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AMI_SELECTED_MISSION_FRAME_ID && this->rosConf.publishAmiSelectedMission) {
@@ -214,6 +215,10 @@ void CanHandler::handleCanReceive()
             this->publish_swa_actual();
         }
     }
+    if (recEr == -1)
+        printf("ERROR %s\n", strerror(errno));
+    else 
+        printf("GOT %ld\n", recEr);
 }
 
 void CanHandler::createHeader(std_msgs::msg::Header *header)
@@ -493,8 +498,9 @@ void CanHandler::transmit_apu_state_mission()
         return;
     }
 
-    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_APU_STATE_MISSION_LENGTH) {
-        RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_STATE_MISSION");
+    ssize_t errc;
+    if (errc = sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_APU_STATE_MISSION_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_STATE_MISSION, %d", errc);
     }
 }
 
@@ -522,6 +528,7 @@ void CanHandler::transmit_swa_commanded()
     }
 
     if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_SWA_COMMANDED_LENGTH) {
+        printf("%s\n", strerror(errno));
         RCLCPP_ERROR(this->get_logger(), "Error during transmit of SWA_COMMANDED");
     }
 }
