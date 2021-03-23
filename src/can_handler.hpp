@@ -133,13 +133,13 @@ class CanHandler : public rclcpp::Node
         void handleCanTransmit();
 
         rclcpp::Subscription<turtle_interfaces::msg::StateMachineState>::SharedPtr subApuState;
-        void apu_state_callback(turtle_interfaces::msg::StateMachineState msgApuState);
+        void apu_state_callback(turtle_interfaces::msg::StateMachineState::SharedPtr msgApuState);
 
         rclcpp::Subscription<turtle_interfaces::msg::Mission>::SharedPtr subApuMission;                
-        void apu_mission_callback(turtle_interfaces::msg::Mission msgApuMission);
+        void apu_mission_callback(turtle_interfaces::msg::Mission::SharedPtr msgApuMission);
 
         rclcpp::Subscription<turtle_interfaces::msg::ActuatorCmd>::SharedPtr subActuatorCmd;        
-        void actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd msgActuatorCmd);
+        void actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::SharedPtr msgActuatorCmd);
 
         struct can_as_dash_aux_apu_state_mission_t frameApuStateMission;
         void transmit_apu_state_mission();

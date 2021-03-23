@@ -439,29 +439,29 @@ void CanHandler::publish_swa_actual()
 }
 
 //Functions for CAN transmit
-void CanHandler::apu_state_callback(turtle_interfaces::msg::StateMachineState msgApuState)
+void CanHandler::apu_state_callback(turtle_interfaces::msg::StateMachineState::SharedPtr msgApuState)
 {
-    this->frameApuStateMission.as_state = msgApuState.state;
+    this->frameApuStateMission.as_state = msgApuState->state;
 }
 
-void CanHandler::apu_mission_callback(turtle_interfaces::msg::Mission msgApuMission)
+void CanHandler::apu_mission_callback(turtle_interfaces::msg::Mission::SharedPtr msgApuMission)
 {
-    this->frameApuStateMission.as_mission = msgApuMission.mission;
+    this->frameApuStateMission.as_mission = msgApuMission->mission;
 }
 
-void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd msgActuatorCmd)
+void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::SharedPtr msgActuatorCmd)
 {
-    this->frameSwaCommanded.steering_angle_commanded = convertSteeringAngleTarget(msgActuatorCmd.steering);
-    this->frameSwaCommanded.steering_rate_commanded = convertSteeringRateTarget(msgActuatorCmd.steering);
-    this->frameSwaCommanded.steering_mode = msgActuatorCmd.steering_mode;
-    this->frameSwaCommanded.steering_rate_direction = msgActuatorCmd.steering > 0.0 ? 
+    this->frameSwaCommanded.steering_angle_commanded = convertSteeringAngleTarget(msgActuatorCmd->steering);
+    this->frameSwaCommanded.steering_rate_commanded = convertSteeringRateTarget(msgActuatorCmd->steering);
+    this->frameSwaCommanded.steering_mode = msgActuatorCmd->steering_mode;
+    this->frameSwaCommanded.steering_rate_direction = msgActuatorCmd->steering > 0.0 ? 
                                                     CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_DIRECTION_COUNTER_CLOCKWISE_CHOICE :
                                                     CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_DIRECTION_CLOCKWISE_CHOICE;
-    this->frameSwaCommanded.steering_rate_is_zero = (msgActuatorCmd.steering < 0.01) && (msgActuatorCmd.steering > -0.01) ? 
+    this->frameSwaCommanded.steering_rate_is_zero = (msgActuatorCmd->steering < 0.01) && (msgActuatorCmd->steering > -0.01) ? 
                                                     CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_IS_ZERO_TRUE_CHOICE :
                                                     CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_IS_ZERO_FALSE_CHOICE;
 
-    this->frameApuCommand.throttle_brake_commanded = convertThrottleTarget(msgActuatorCmd.throttle);
+    this->frameApuCommand.throttle_brake_commanded = convertThrottleTarget(msgActuatorCmd->throttle);
 }
 
 void CanHandler::handleCanTransmit()

@@ -76,9 +76,9 @@ uint32_t convertSteeringRateTarget(float targetSteeringRate)
     return steeringRateRaw;
 }
 
-uint16_t convertThrottleTarget(float targetThrottle) 
+int16_t convertThrottleTarget(float targetThrottle) 
 {
-    return (uint16_t)((targetThrottle + 1.0)*USHRT_MAX/2.0);
+    return (uint16_t)(targetThrottle*SHRT_MAX);
 }
 
 #endif
