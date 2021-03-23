@@ -4,20 +4,21 @@ CanInterface:
     channel0: "can0"
     bitrate0: 1000000
     # CAN messages to publish in ROS
-    publishAMI505: true     # /ami_selected_mission
-    publishAux166: true     # /brake_light
-    publishAux336: true     # /ebs_tank_pressure
-    publishAux357: true     # /rpm_rear
-    publishAux384: true     # /tsal_safe_state
-    publishAux412: true     # /cooling_info
-    publishDash101: true    # /apps
-    publishDash107: true    # /rpm_front
-    publishDash198: true    # /brake
-    publishDash204: true    # /dash_leds
-    publishDash279: true    # /dash_buttons
-    publishEBS550: true     # /ebs_supervisor_info
-    publishSWA510: true     # /steering_actual
-
+    publishDashApps: true           # /apps
+    publishDashBrake: true          # /brake
+    publishDashButtons: true        # /dash_buttons
+    pubishDashFrontRPM: true        # /rpm_front
+    publishAuxRearRPM: true         # /rpm_rear
+    publishAuxTsalSafeState: true   # /tsal_safe_state
+    publishAuxPumpsFans: true       # /cooling_info
+    publishAuxBrakelight: true      # /brake_light
+    publishDashLEDs: true           # /dash_leds
+    publishAuxTankPressure: true    # /ebs_tank_pressure
+    publishAmiSelectedMission: true # /ami_selected_mission
+    publishSwaActual: true          # /steering_actual
+    publishEbsSupervisor: true      # /ebs_supervisor_info
     # CAN messages to transmit
-    transmitAPU660: true   #can_as_state_mission
-    transmitSWA539: true   #can_steering_target
+    transmitApuStateMission: true # TODO fill subscriber topics
+    transmitEbsServiceBrake: true # TODO fill subscriber topics
+    transmitSwaCommanded: true    # TODO fill subscriber topics
+    transmitApuCommand: true      # TODO fill subscriber topics

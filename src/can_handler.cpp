@@ -9,6 +9,7 @@
 #include "raw_conversions.hpp"
 
 using namespace std::chrono_literals;
+using std::placeholders::_1;
 
 CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
 {
@@ -64,87 +65,106 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<std::string>("channel0", this->rosConf.channel0, "vcan0");
     this->get_parameter_or<uint32_t>("bitrate0", this->rosConf.bitrate0, 1000000);
     //CAN messages to publish in ROS
-    this->get_parameter_or<bool>("publishAMI505", this->rosConf.publishAMI505, true);
-    this->get_parameter_or<bool>("publishAux166", this->rosConf.publishAux166, true);
-    this->get_parameter_or<bool>("publishAux336", this->rosConf.publishAux336, true);
-    this->get_parameter_or<bool>("publishAux357", this->rosConf.publishAux357, true);
-    this->get_parameter_or<bool>("publishAux384", this->rosConf.publishAux384, true);
-    this->get_parameter_or<bool>("publishAux412", this->rosConf.publishAux412, true);
-    this->get_parameter_or<bool>("publishDash101", this->rosConf.publishDash101, true);
-    this->get_parameter_or<bool>("publishDash107", this->rosConf.publishDash107, true);
-    this->get_parameter_or<bool>("publishDash198", this->rosConf.publishDash198, true);
-    this->get_parameter_or<bool>("publishDash204", this->rosConf.publishDash204, true);
-    this->get_parameter_or<bool>("publishDash279", this->rosConf.publishDash279, true);
-    this->get_parameter_or<bool>("publishEBS550", this->rosConf.publishEBS550, true);
-    this->get_parameter_or<bool>("publishSWA510", this->rosConf.publishSWA510, true);
+    this->get_parameter_or<bool>("publishDashApps", this->rosConf.publishDashApps, true);
+    this->get_parameter_or<bool>("publishDashBrake", this->rosConf.publishDashBrake, true);
+    this->get_parameter_or<bool>("publishDashButtons", this->rosConf.publishDashButtons, true);
+    this->get_parameter_or<bool>("pubishDashFrontRPM", this->rosConf.pubishDashFrontRPM, true);
+    this->get_parameter_or<bool>("publishAuxRearRPM", this->rosConf.publishAuxRearRPM, true);
+    this->get_parameter_or<bool>("publishAuxTsalSafeState", this->rosConf.publishAuxTsalSafeState, true);
+    this->get_parameter_or<bool>("publishAuxPumpsFans", this->rosConf.publishAuxPumpsFans, true);
+    this->get_parameter_or<bool>("publishAuxBrakelight", this->rosConf.publishAuxBrakelight, true);
+    this->get_parameter_or<bool>("publishDashLEDs", this->rosConf.publishDashLEDs, true);
+    this->get_parameter_or<bool>("publishAuxTankPressure", this->rosConf.publishAuxTankPressure, true);
+    this->get_parameter_or<bool>("publishAmiSelectedMission", this->rosConf.publishAmiSelectedMission, true);
+    this->get_parameter_or<bool>("publishSwaActual", this->rosConf.publishSwaActual, true);
+    this->get_parameter_or<bool>("publishEbsSupervisor", this->rosConf.publishEbsSupervisor, true);
     //CAN messages to transmit
-    this->get_parameter_or<bool>("transmitAPU660", this->rosConf.transmitAPU660, true);
-    this->get_parameter_or<bool>("transmitSWA539", this->rosConf.transmitSWA539, true);
+    this->get_parameter_or<bool>("transmitApuStateMission", this->rosConf.transmitApuStateMission, true);
+    this->get_parameter_or<bool>("transmitEbsServiceBrake", this->rosConf.transmitEbsServiceBrake, true);
+    this->get_parameter_or<bool>("transmitSwaCommanded", this->rosConf.transmitSwaCommanded, true);
+    this->get_parameter_or<bool>("transmitApuCommand", this->rosConf.transmitApuCommand, true);
 }
 
 void CanHandler::variablesInit()
 {
     //Initialize publishers
-    if (this->rosConf.publishAMI505) {
-        this->pubAMI505 = this->create_publisher<turtle_interfaces::msg::Mission>("ami_selected_mission", 10);
-        this->msgAMI505 = turtle_interfaces::msg::Mission();
+    if (this->rosConf.publishAmiSelectedMission) {
+        this->pubAmiSelectedMission = this->create_publisher<turtle_interfaces::msg::Mission>("ami_selected_mission", 10);
+        this->msgAmiSelectedMission = turtle_interfaces::msg::Mission();
     }
-    if (this->rosConf.publishAux166) {
-        this->pubAux166 = this->create_publisher<turtle_interfaces::msg::BrakeLight>("brake_light", 10);
-        this->msgAux166 = turtle_interfaces::msg::BrakeLight();
+    if (this->rosConf.publishAuxBrakelight) {
+        this->pubAuxBrakelight = this->create_publisher<turtle_interfaces::msg::BrakeLight>("brake_light", 10);
+        this->msgAuxBrakelight = turtle_interfaces::msg::BrakeLight();
     }
-    if (this->rosConf.publishAux336) {
-        this->pubAux336 = this->create_publisher<turtle_interfaces::msg::EbsTankPressure>("ebs_tank_pressure", 10);
-        this->msgAux336 = turtle_interfaces::msg::EbsTankPressure();
+    if (this->rosConf.publishAuxTankPressure) {
+        this->pubAuxTankPressure = this->create_publisher<turtle_interfaces::msg::EbsTankPressure>("ebs_tank_pressure", 10);
+        this->msgAuxTankPressure = turtle_interfaces::msg::EbsTankPressure();
     }
-    if (this->rosConf.publishAux357) {
-        this->pubAux357 = this->create_publisher<turtle_interfaces::msg::RPM>("rpm_rear", 10);
-        this->msgAux357 = turtle_interfaces::msg::RPM();
+    if (this->rosConf.publishAuxRearRPM) {
+        this->pubAuxRearRPM = this->create_publisher<turtle_interfaces::msg::RPM>("rpm_rear", 10);
+        this->msgAuxRearRPM = turtle_interfaces::msg::RPM();
     }
-    if (this->rosConf.publishAux384) {
-        this->pubAux384 = this->create_publisher<turtle_interfaces::msg::TsalSafeState>("tsal_safe_state", 10);
-        this->msgAux384 = turtle_interfaces::msg::TsalSafeState();
+    if (this->rosConf.publishAuxTsalSafeState) {
+        this->pubAuxTsalSafeState = this->create_publisher<turtle_interfaces::msg::TsalSafeState>("tsal_safe_state", 10);
+        this->msgAuxTsalSafeState = turtle_interfaces::msg::TsalSafeState();
     }
-    if (this->rosConf.publishAux412) {
-        this->pubAux412 = this->create_publisher<turtle_interfaces::msg::CoolingInfo>("cooling_info", 10);
-        this->msgAux412 = turtle_interfaces::msg::CoolingInfo();
+    if (this->rosConf.publishAuxPumpsFans) {
+        this->pubAuxPumpsFans = this->create_publisher<turtle_interfaces::msg::CoolingInfo>("cooling_info", 10);
+        this->msgAuxPumpsFans = turtle_interfaces::msg::CoolingInfo();
     }
-    if (this->rosConf.publishDash101) {
-        this->pubDash101 = this->create_publisher<turtle_interfaces::msg::Apps>("apps", 10);
-        this->msgDash101 = turtle_interfaces::msg::Apps();
+    if (this->rosConf.publishDashApps) {
+        this->pubDashApps = this->create_publisher<turtle_interfaces::msg::Apps>("apps", 10);
+        this->msgDashApps = turtle_interfaces::msg::Apps();
     }
-    if (this->rosConf.publishDash107) {
-        this->pubDash107 = this->create_publisher<turtle_interfaces::msg::RPM>("rpm_front", 10);
-        this->msgDash107 = turtle_interfaces::msg::RPM();
+    if (this->rosConf.pubishDashFrontRPM) {
+        this->pubDashFrontRPM = this->create_publisher<turtle_interfaces::msg::RPM>("rpm_front", 10);
+        this->msgDashFrontRPM = turtle_interfaces::msg::RPM();
     }
-    if (this->rosConf.publishDash198) {
-        this->pubDash198 = this->create_publisher<turtle_interfaces::msg::Brake>("brake", 10);
-        this->msgDash198 = turtle_interfaces::msg::Brake();
+    if (this->rosConf.publishDashBrake) {
+        this->pubDashBrake = this->create_publisher<turtle_interfaces::msg::Brake>("brake", 10);
+        this->msgDashBrake = turtle_interfaces::msg::Brake();
     }
-    if (this->rosConf.publishDash204) {
-        this->pubDash204 = this->create_publisher<turtle_interfaces::msg::DashLeds>("dash_leds", 10);
-        this->msgDash204 = turtle_interfaces::msg::DashLeds();
+    if (this->rosConf.publishDashLEDs) {
+        this->pubDashLEDs = this->create_publisher<turtle_interfaces::msg::DashLeds>("dash_leds", 10);
+        this->msgDashLEDs = turtle_interfaces::msg::DashLeds();
     }
-    if (this->rosConf.publishDash279) {
-        this->pubDash279 = this->create_publisher<turtle_interfaces::msg::DashButtons>("dash_buttons", 10);
-        this->msgDash279 = turtle_interfaces::msg::DashButtons();
+    if (this->rosConf.publishDashButtons) {
+        this->pubDashButtons = this->create_publisher<turtle_interfaces::msg::DashButtons>("dash_buttons", 10);
+        this->msgDashButtons = turtle_interfaces::msg::DashButtons();
     }
-    if (this->rosConf.publishEBS550) {
-        this->pubEBS550= this->create_publisher<turtle_interfaces::msg::EbsSupervisorInfo>("ebs_supervisor_info", 10);
-        this->msgEBS550 = turtle_interfaces::msg::EbsSupervisorInfo();
+    if (this->rosConf.publishEbsSupervisor) {
+        this->pubEbsSupervisor= this->create_publisher<turtle_interfaces::msg::EbsSupervisorInfo>("ebs_supervisor_info", 10);
+        this->msgEbsSupervisor = turtle_interfaces::msg::EbsSupervisorInfo();
     } 
-    if (this->rosConf.publishSWA510) {
-        this->pubSWA510 = this->create_publisher<turtle_interfaces::msg::Steering>("steering_actual", 10);
-        this->msgSWA510 = turtle_interfaces::msg::Steering();
+    if (this->rosConf.publishSwaActual) {
+        this->pubSwaActual = this->create_publisher<turtle_interfaces::msg::Steering>("steering_actual", 10);
+        this->msgSwaActual = turtle_interfaces::msg::Steering();
     }
 
     //Initialize CAN Tx messages
-    if (this->rosConf.transmitAPU660) {
-        this->frameAPU660.as_mission = CAN_AS_DASH_AUX_APU_660_AS_MISSION_NO_MISSION_CHOICE;
-        this->frameAPU660.as_state = CAN_AS_DASH_AUX_APU_660_AS_STATE_AS_OFF_CHOICE;
+    if (this->rosConf.transmitApuStateMission) {
+        this->subApuState = this->create_subscription<turtle_interfaces::msg::StateMachineState>("state_machine_state", 10, std::bind(&CanHandler::apu_state_callback, this, _1));
+        this->subApuMission = this->create_subscription<turtle_interfaces::msg::Mission>("current_mission", 10, std::bind(&CanHandler::apu_mission_callback, this, _1));
+
+        this->frameApuStateMission.as_mission = CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_MISSION_NO_MISSION_CHOICE;
+        this->frameApuStateMission.as_state = CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_STATE_AS_OFF_CHOICE;
     }
-    if (this->rosConf.transmitSWA539) {
-        this->frameSWA530.steering_target = 0;
+    if (this->rosConf.transmitEbsServiceBrake) {
+        this->frameEbsServiceBrake.servo_commanded_percentage = 0;
+    }
+    if (this->rosConf.transmitSwaCommanded || this->rosConf.transmitApuCommand) {
+        this->subActuatorCmd = this->create_subscription<turtle_interfaces::msg::ActuatorCmd>("cmd", 10, std::bind(&CanHandler::actuator_cmd_callback, this, _1));
+    }
+    if (this->rosConf.transmitSwaCommanded) {
+        this->frameSwaCommanded.steering_angle_commanded = convertSteeringAngleTarget(0.0);
+        this->frameSwaCommanded.steering_rate_commanded = convertSteeringRateTarget(0.01);
+        this->frameSwaCommanded.steering_mode = CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_MODE_STEERING_ANGLE_CONTROL_CHOICE;
+        this->frameSwaCommanded.steering_rate_direction = 0.01 > 0.0    ? CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_DIRECTION_COUNTER_CLOCKWISE_CHOICE
+                                                                        : CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_DIRECTION_CLOCKWISE_CHOICE;
+        this->frameSwaCommanded.steering_rate_is_zero = CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_IS_ZERO_TRUE_CHOICE;
+    }
+    if (this->rosConf.transmitApuCommand) {
+        this->frameApuCommand.throttle_brake_commanded = convertThrottleTarget(0.0);
     }
 }
 
@@ -154,44 +174,44 @@ void CanHandler::handleCanReceive()
     while (recvfrom(this->can0Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, &this->len) >= 8) {
         ioctl(this->can0Socket, SIOCGSTAMP, &this->recvTime);  //get message timestamp
 
-        if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AMI_505_FRAME_ID && this->rosConf.publishAMI505) {
-            this->publish_ami_505();
+        if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AMI_SELECTED_MISSION_FRAME_ID && this->rosConf.publishAmiSelectedMission) {
+            this->publish_ami_selected_mission();
         }
-        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AUX_166_FRAME_ID && this->rosConf.publishAux166) {
-            this->publish_aux_166();
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AUX_BRAKELIGHT_FRAME_ID && this->rosConf.publishAuxBrakelight) {
+            this->publish_aux_brakelight();
         }
-        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AUX_336_FRAME_ID && this->rosConf.publishAux336) {
-            this->publish_aux_336();
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AUX_TANK_PRESSURE_FRAME_ID && this->rosConf.publishAuxTankPressure) {
+            this->publish_aux_tank_pressure();
         }
-        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AUX_357_FRAME_ID && this->rosConf.publishAux357) {
-            this->publish_aux_357();
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AUX_REAR_HALL_FRAME_ID && this->rosConf.publishAuxRearRPM) {
+            this->publish_aux_rear_rpm();
         }
-        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AUX_384_FRAME_ID && this->rosConf.publishAux384) {
-            this->publish_aux_384();
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AUX_TSAL_SAFE_STATE_FRAME_ID && this->rosConf.publishAuxTsalSafeState) {
+            this->publish_aux_tsal_safe_state();
         }
-        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AUX_412_FRAME_ID && this->rosConf.publishAux412) {
-            this->publish_aux_412();
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AUX_PUMPS_FANS_FRAME_ID && this->rosConf.publishAuxPumpsFans) {
+            this->publish_aux_pumps_fans();
         }
-        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_DASH_101_FRAME_ID && this->rosConf.publishDash101) {
-            this->publish_dash_101();
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_DASH_APPS_FRAME_ID && this->rosConf.publishDashApps) {
+            this->publish_dash_apps();
         }
-        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_DASH_107_FRAME_ID && this->rosConf.publishDash107) {
-            this->publish_dash_107();
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_DASH_FRONT_HALL_FRAME_ID && this->rosConf.pubishDashFrontRPM) {
+            this->publish_dash_front_rpm();
         }
-        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_DASH_198_FRAME_ID && this->rosConf.publishDash198) {
-            this->publish_dash_198();
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_DASH_BRAKE_FRAME_ID && this->rosConf.publishDashBrake) {
+            this->publish_dash_brake();
         }
-        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_DASH_204_FRAME_ID && this->rosConf.publishDash204) {
-            this->publish_dash_204();
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_DASH_LEDS_FRAME_ID && this->rosConf.publishDashLEDs) {
+            this->publish_dash_leds();
         }
-        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_DASH_279_FRAME_ID && this->rosConf.publishDash279) {
-            this->publish_dash_279();
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_DASH_BUTTONS_FRAME_ID && this->rosConf.publishDashButtons) {
+            this->publish_dash_buttons();
         }
-        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_EBS_550_FRAME_ID && this->rosConf.publishEBS550) {
-            this->publish_ebs_550();
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_EBS_SUPERVISOR_FRAME_ID && this->rosConf.publishEbsSupervisor) {
+            this->publish_ebs_supervisor();
         }
-        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_SWA_510_FRAME_ID && this->rosConf.publishSWA510) {
-            this->publish_swa_510();
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_SWA_ACTUAL_FRAME_ID && this->rosConf.publishSwaActual) {
+            this->publish_swa_actual();
         }
     }
 }
@@ -203,258 +223,319 @@ void CanHandler::createHeader(std_msgs::msg::Header *header)
     header->stamp.nanosec = this->recvTime.tv_usec*1000;
 }
 
-void CanHandler::publish_ami_505()
+void CanHandler::publish_ami_selected_mission()
 {
-    can_as_dash_aux_ami_505_t msg;
-    if (can_as_dash_aux_ami_505_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of AMI_505");
+    can_as_dash_aux_ami_selected_mission_t msg;
+    if (can_as_dash_aux_ami_selected_mission_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of AMI_SELECTED_MISSION");
         return;
     }
 
-    this->createHeader(&this->msgAMI505.header);
-    this->msgAMI505.mission = msg.ami_mission;
+    this->createHeader(&this->msgAmiSelectedMission.header);
+    this->msgAmiSelectedMission.mission = msg.ami_mission;
 
-    this->pubAMI505->publish(this->msgAMI505);
+    this->pubAmiSelectedMission->publish(this->msgAmiSelectedMission);
 
     /********************************************************/
-    this->frameAPU660.as_mission = this->msgAMI505.mission;
+    //this->frameAPU660.as_mission = this->msgAMI505.mission;
     /********************************************************/
 }
 
-void CanHandler::publish_aux_166()
+void CanHandler::publish_aux_brakelight()
 {
-    can_as_dash_aux_aux_166_t msg;
-    if (can_as_dash_aux_aux_166_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of AUX_166");
+    can_as_dash_aux_aux_brakelight_t msg;
+    if (can_as_dash_aux_aux_brakelight_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of AUX_BRAKELIGHT");
         return;
     }
 
-    this->createHeader(&this->msgAux166.header);
-    this->msgAux166.brakelight = (msg.brakelight == CAN_AS_DASH_AUX_AUX_166_BRAKELIGHT_ON_CHOICE);
+    this->createHeader(&this->msgAuxBrakelight.header);
+    this->msgAuxBrakelight.brakelight = (msg.brakelight == CAN_AS_DASH_AUX_AUX_BRAKELIGHT_BRAKELIGHT_ON_CHOICE);
 
-    this->pubAux166->publish(this->msgAux166);
+    this->pubAuxBrakelight->publish(this->msgAuxBrakelight);
 }
 
-void CanHandler::publish_aux_336()
+void CanHandler::publish_aux_tank_pressure()
 {
-    can_as_dash_aux_aux_336_t msg;
-    if (can_as_dash_aux_aux_336_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of AUX_336");
+    can_as_dash_aux_aux_tank_pressure_t msg;
+    if (can_as_dash_aux_aux_tank_pressure_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of AUX_TANK_PRESSURE");
         return;
     }
 
-    this->createHeader(&this->msgAux336.header);
-    this->msgAux336.ebspressureraw = convertEbsPressure(msg.ebs_pressure_raw);
+    this->createHeader(&this->msgAuxTankPressure.header);
+    this->msgAuxTankPressure.ebspressureraw = convertEbsPressure(msg.ebs_pressure_raw);
 
-    this->pubAux336->publish(this->msgAux336);
+    this->pubAuxTankPressure->publish(this->msgAuxTankPressure);
 }
 
-void CanHandler::publish_aux_357()
+void CanHandler::publish_aux_rear_rpm()
 {
-    can_as_dash_aux_aux_357_t msg;
-    if (can_as_dash_aux_aux_357_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of AUX_357");
+    can_as_dash_aux_aux_rear_hall_t msg;
+    if (can_as_dash_aux_aux_rear_hall_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of AUX_REAR_HALL");
         return;
     }
 
-    this->createHeader(&this->msgAux357.header);
-    this->msgAux357.left = convertRearRPM(msg.hall_rl);
-    this->msgAux357.right = convertRearRPM(msg.hall_rr);
+    this->createHeader(&this->msgAuxRearRPM.header);
+    this->msgAuxRearRPM.left = convertRearRPM(msg.hall_rl);
+    this->msgAuxRearRPM.right = convertRearRPM(msg.hall_rr);
 
-    this->pubAux357->publish(this->msgAux357);
+    this->pubAuxRearRPM->publish(this->msgAuxRearRPM);
 }
 
-void CanHandler::publish_aux_384()
+void CanHandler::publish_aux_tsal_safe_state()
 {
-    can_as_dash_aux_aux_384_t msg;
-    if (can_as_dash_aux_aux_384_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of AUX_384");
+    can_as_dash_aux_aux_tsal_safe_state_t msg;
+    if (can_as_dash_aux_aux_tsal_safe_state_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of AUX_TSAL_SAFE_STATE");
         return;
     }
 
-    this->createHeader(&this->msgAux384.header);
-    this->msgAux384.safestate = (msg.safe_state == CAN_AS_DASH_AUX_AUX_384_SAFE_STATE_ON_CHOICE);
+    this->createHeader(&this->msgAuxTsalSafeState.header);
+    this->msgAuxTsalSafeState.safestate = (msg.safe_state == CAN_AS_DASH_AUX_AUX_TSAL_SAFE_STATE_SAFE_STATE_ON_CHOICE);
 
-    this->pubAux357->publish(this->msgAux357);
+    this->pubAuxTsalSafeState->publish(this->msgAuxTsalSafeState);
 }
 
-void CanHandler::publish_aux_412()
+void CanHandler::publish_aux_pumps_fans()
 {
-    can_as_dash_aux_aux_412_t msg;
-    if (can_as_dash_aux_aux_412_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of AUX_412");
+    can_as_dash_aux_aux_pumps_fans_t msg;
+    if (can_as_dash_aux_aux_pumps_fans_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of AUX_PUMPS_FANS");
         return;
     }
 
-    this->createHeader(&this->msgAux412.header);
-    this->msgAux412.leftpumpsignal = msg.left_pump_signal;
-    this->msgAux412.rightpumpsignal = msg.right_pump_signal;
-    this->msgAux412.accufanspwm = msg.accu_fans_pwm;
-    this->msgAux412.leftfanspwm = msg.left_fans_pwm;
-    this->msgAux412.rightfanspwm = msg.right_fans_pwm;
-    this->msgAux412.accufans = (msg.accu_fans == CAN_AS_DASH_AUX_AUX_412_ACCU_FANS_ON_CHOICE);
-    this->msgAux412.leftfans = (msg.left_fans == CAN_AS_DASH_AUX_AUX_412_LEFT_FANS_ON_CHOICE);
-    this->msgAux412.rightfans = (msg.right_fans == CAN_AS_DASH_AUX_AUX_412_RIGHT_FANS_ON_CHOICE);
+    this->createHeader(&this->msgAuxPumpsFans.header);
+    this->msgAuxPumpsFans.leftpumpsignal = msg.left_pump_signal;
+    this->msgAuxPumpsFans.rightpumpsignal = msg.right_pump_signal;
+    this->msgAuxPumpsFans.accufanspwm = msg.accu_fans_pwm;
+    this->msgAuxPumpsFans.leftfanspwm = msg.left_fans_pwm;
+    this->msgAuxPumpsFans.rightfanspwm = msg.right_fans_pwm;
+    this->msgAuxPumpsFans.accufans = (msg.accu_fans == 13);//CAN_AS_DASH_AUX_AUX_PUMPS_FANS_ACCU_FANS_ON_CHOICE);
+    this->msgAuxPumpsFans.leftfans = (msg.left_fans == 13);//CAN_AS_DASH_AUX_AUX_PUMPS_FANS_LEFT_FANS_ON_CHOICE);
+    this->msgAuxPumpsFans.rightfans = (msg.right_fans == 13);//CAN_AS_DASH_AUX_AUX_PUMPS_FANS_RIGHT_FANS_ON_CHOICE);
 
-    this->pubAux412->publish(this->msgAux412);
+    this->pubAuxPumpsFans->publish(this->msgAuxPumpsFans);
 }
 
-void CanHandler::publish_dash_101()
+void CanHandler::publish_dash_apps()
 {
-    can_as_dash_aux_dash_101_t msg;
-    if (can_as_dash_aux_dash_101_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of DASH_101");
+    can_as_dash_aux_dash_apps_t msg;
+    if (can_as_dash_aux_dash_apps_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of DASH_APPS");
         return;
     }
 
-    this->createHeader(&this->msgDash101.header);
-    this->msgDash101.apps = convertAPPS(msg.apps1_raw, msg.apps2_raw);
+    this->createHeader(&this->msgDashApps.header);
+    this->msgDashApps.apps = convertAPPS(msg.apps1_raw, msg.apps2_raw);
 
-    this->pubDash101->publish(this->msgDash101);
+    this->pubDashApps->publish(this->msgDashApps);
 }
 
-void CanHandler::publish_dash_107()
+void CanHandler::publish_dash_front_rpm()
 {
-    can_as_dash_aux_dash_107_t msg;
-    if (can_as_dash_aux_dash_107_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of DASH_107");
+    can_as_dash_aux_dash_front_hall_t msg;
+    if (can_as_dash_aux_dash_front_hall_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of DASH_FRONT_HALL");
         return;
     }
 
-    this->createHeader(&this->msgDash107.header);
-    this->msgDash107.left = convertFrontRPM(msg.hall_fl);
-    this->msgDash107.right = convertFrontRPM(msg.hall_fr);
+    this->createHeader(&this->msgDashFrontRPM.header);
+    this->msgDashFrontRPM.left = convertFrontRPM(msg.hall_fl);
+    this->msgDashFrontRPM.right = convertFrontRPM(msg.hall_fr);
 
-    this->pubDash107->publish(this->msgDash107);
+    this->pubDashFrontRPM->publish(this->msgDashFrontRPM);
 }
 
-void CanHandler::publish_dash_198()
+void CanHandler::publish_dash_brake()
 {
-    can_as_dash_aux_dash_198_t msg;
-    if (can_as_dash_aux_dash_198_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of DASH_198");
+    can_as_dash_aux_dash_brake_t msg;
+    if (can_as_dash_aux_dash_brake_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of DASH_BRAKE");
         return;
     }
 
-    this->createHeader(&this->msgDash198.header);
-    this->msgDash198.brake = convertBrakePressure(msg.brake_raw);
+    this->createHeader(&this->msgDashBrake.header);
+    this->msgDashBrake.brake = convertBrakePressure(msg.brake_raw);
 
-    this->pubDash198->publish(this->msgDash198);
+    this->pubDashBrake->publish(this->msgDashBrake);
 }
 
-void CanHandler::publish_dash_204()
+void CanHandler::publish_dash_leds()
 {
-    can_as_dash_aux_dash_204_t msg;
-    if (can_as_dash_aux_dash_204_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of DASH_204");
+    can_as_dash_aux_dash_leds_t msg;
+    if (can_as_dash_aux_dash_leds_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of DASH_LEDS");
         return;
     }
 
-    this->createHeader(&this->msgDash204.header);
-    this->msgDash204.fanpwm = msg.fan_pwm;
-    this->msgDash204.buzzer = (bool)msg.buzzer;
-    this->msgDash204.safestate1 = (bool)msg.safe_state_1;
-    this->msgDash204.enableout = (bool)msg.enable_out;
-    this->msgDash204.sensorerror = (bool)msg.sensor_error;
-    this->msgDash204.scsoftware = (bool)msg.sc_software;
-    this->msgDash204.plactive = (bool)msg.pl_active;
+    this->createHeader(&this->msgDashLEDs.header);
+    this->msgDashLEDs.fanpwm = msg.fan_pwm;
+    this->msgDashLEDs.buzzer = (msg.buzzer == 13);
+    this->msgDashLEDs.safestate1 = (msg.safe_state_1 == 13);
+    this->msgDashLEDs.enableout = (msg.enable_out == 13);
+    this->msgDashLEDs.sensorerror = (msg.sensor_error == 13);
+    this->msgDashLEDs.scsoftware = (msg.sc_software == 1);
+    this->msgDashLEDs.plactive = (msg.pl_active == 1);
 
-    this->pubDash204->publish(this->msgDash204);
+    this->pubDashLEDs->publish(this->msgDashLEDs);
 }
 
-void CanHandler::publish_dash_279()
+void CanHandler::publish_dash_buttons()
 {
-    can_as_dash_aux_dash_279_t msg;
-    if (can_as_dash_aux_dash_279_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of DASH_279");
+    can_as_dash_aux_dash_buttons_t msg;
+    if (can_as_dash_aux_dash_buttons_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of DASH_BUTTONS");
         return;
     }
 
-    this->createHeader(&this->msgDash279.header);
-    this->msgDash279.enabletoggle = (bool)msg.enable_toggle;
-    this->msgDash279.secondtoggle = (bool)msg.second_toggle;
-    this->msgDash279.thirdtogglenotused = (bool)msg.third_toggle_notused;
-    this->msgDash279.start = (bool)msg.start;
-    this->msgDash279.adact = (bool)msg.ad_act;
-    this->msgDash279.greentsal = (bool)msg.green_tsal;
-    this->msgDash279.scstate = (bool)msg.sc_state;
+    this->createHeader(&this->msgDashButtons.header);
+    this->msgDashButtons.enabletoggle = (bool)msg.enable_toggle;
+    this->msgDashButtons.secondtoggle = (bool)msg.second_toggle;
+    this->msgDashButtons.thirdtogglenotused = (bool)msg.third_toggle_notused;
+    this->msgDashButtons.start = (bool)msg.start;
+    this->msgDashButtons.adact = (bool)msg.ad_act;
+    this->msgDashButtons.greentsal = (bool)msg.green_tsal;
+    this->msgDashButtons.scstate = (bool)msg.sc_state;
 
-    this->pubDash279->publish(this->msgDash279);
+    this->pubDashButtons->publish(this->msgDashButtons);
 }
 
-void CanHandler::publish_ebs_550()
+void CanHandler::publish_ebs_supervisor()
 {
-    can_as_dash_aux_ebs_550_t msg;
-    if (can_as_dash_aux_ebs_550_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of EBS_550");
+    can_as_dash_aux_ebs_supervisor_t msg;
+    if (can_as_dash_aux_ebs_supervisor_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of EBS_SUPERVISOR");
         return;
     }
 
-    this->createHeader(&this->msgEBS550.header);
-    this->msgEBS550.asmsstate = (bool)msg.asms_state;
-    this->msgEBS550.tsmsout = (bool)msg.tsms_out;
-    this->msgEBS550.ebsengaged = (bool)msg.ebs_engaged;
-    this->msgEBS550.ebsisarmed = (bool)msg.ebs_is_armed;
-    this->msgEBS550.ebsled = (bool)msg.ebs_led;
-    this->msgEBS550.k2state = (bool)msg.k2_state;
+    this->createHeader(&this->msgEbsSupervisor.header);
+    this->msgEbsSupervisor.asmsstate = (msg.asms_state == CAN_AS_DASH_AUX_EBS_SUPERVISOR_ASMS_STATE_ON_CHOICE);
+    this->msgEbsSupervisor.tsmsout = (msg.tsms_out == CAN_AS_DASH_AUX_EBS_SUPERVISOR_TSMS_OUT_SDC_ON_CHOICE);
+    this->msgEbsSupervisor.k2state = (msg.k2_state == CAN_AS_DASH_AUX_EBS_SUPERVISOR_K2_STATE_RES_GO_PRESSED_CHOICE);
+    this->msgEbsSupervisor.ebsisarmed = (msg.ebs_armed == CAN_AS_DASH_AUX_EBS_SUPERVISOR_EBS_ARMED_YES_CHOICE);
+    this->msgEbsSupervisor.ebsengaged = (msg.ebs_engaged == CAN_AS_DASH_AUX_EBS_SUPERVISOR_EBS_ENGAGED_YES_CHOICE);
+    this->msgEbsSupervisor.ebsled = (msg.ebs_led == CAN_AS_DASH_AUX_EBS_SUPERVISOR_EBS_LED_ON_CHOICE);
+    this->msgEbsSupervisor.initialchecked = (msg.initial_checked == CAN_AS_DASH_AUX_EBS_SUPERVISOR_INITIAL_CHECKED_YES_CHOICE);
+    this->msgEbsSupervisor.servicebrakestatus = msg.service_brake_status;
+    
 
-    this->pubEBS550->publish(this->msgEBS550);
+    this->pubEbsSupervisor->publish(this->msgEbsSupervisor);
 }
 
-void CanHandler::publish_swa_510()
+void CanHandler::publish_swa_actual()
 {
-    can_as_dash_aux_swa_510_t msg;
-    if (can_as_dash_aux_swa_510_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of SWA_510");
+    can_as_dash_aux_swa_actual_t msg;
+    if (can_as_dash_aux_swa_actual_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of SWA_ACTUAL");
         return;
     }
 
-    this->createHeader(&this->msgSWA510.header);
-    this->msgSWA510.steering = msg.steering_actual;
+    this->createHeader(&this->msgSwaActual.header);
+    this->msgSwaActual.steering = convertSteeringActual(msg.steering_actual);
 
-    this->pubSWA510->publish(this->msgSWA510);
+    this->pubSwaActual->publish(this->msgSwaActual);
 }
 
 //Functions for CAN transmit
+void CanHandler::apu_state_callback(turtle_interfaces::msg::StateMachineState msgApuState)
+{
+    this->frameApuStateMission.as_state = msgApuState.state;
+}
+
+void CanHandler::apu_mission_callback(turtle_interfaces::msg::Mission msgApuMission)
+{
+    this->frameApuStateMission.as_mission = msgApuMission.mission;
+}
+
+void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd msgActuatorCmd)
+{
+    this->frameSwaCommanded.steering_angle_commanded = convertSteeringAngleTarget(msgActuatorCmd.steering);
+    this->frameSwaCommanded.steering_rate_commanded = convertSteeringRateTarget(msgActuatorCmd.steering);
+    this->frameSwaCommanded.steering_mode = msgActuatorCmd.steering_mode;
+    this->frameSwaCommanded.steering_rate_direction = msgActuatorCmd.steering > 0.0 ? 
+                                                    CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_DIRECTION_COUNTER_CLOCKWISE_CHOICE :
+                                                    CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_DIRECTION_CLOCKWISE_CHOICE;
+    this->frameSwaCommanded.steering_rate_is_zero = (msgActuatorCmd.steering < 0.01) && (msgActuatorCmd.steering > -0.01) ? 
+                                                    CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_IS_ZERO_TRUE_CHOICE :
+                                                    CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_IS_ZERO_FALSE_CHOICE;
+
+    this->frameApuCommand.throttle_brake_commanded = convertThrottleTarget(msgActuatorCmd.throttle);
+}
+
 void CanHandler::handleCanTransmit()
 {
     this->canTimerCounter++;                //another 1ms passed
     if (this->canTimerCounter == 1001U)     //after 1sec
         this->canTimerCounter = 1U;         //reset counter to prevent overflow
 
-    if (this->rosConf.transmitAPU660 && !(this->canTimerCounter % CAN_AS_DASH_AUX_APU_660_CYCLE_TIME_MS)) {
-        this->transmit_apu_660();
+    if (this->rosConf.transmitApuStateMission && !(this->canTimerCounter % CAN_AS_DASH_AUX_APU_STATE_MISSION_CYCLE_TIME_MS)) {
+        this->transmit_apu_state_mission();
     }
-    if (this->rosConf.transmitSWA539 && !(this->canTimerCounter % CAN_AS_DASH_AUX_SWA_530_CYCLE_TIME_MS)) {
-        this->transmit_swa_530();
+    if (this->rosConf.transmitEbsServiceBrake && !(this->canTimerCounter % CAN_AS_DASH_AUX_EBS_SERVICE_BRAKE_CYCLE_TIME_MS)) {
+        this->transmit_ebs_service_brake();
     }
-}
-
-void CanHandler::transmit_apu_660()
-{
-    this->sendFrame.can_id = CAN_AS_DASH_AUX_APU_660_FRAME_ID;
-    this->sendFrame.can_dlc = CAN_AS_DASH_AUX_APU_660_LENGTH;
-    if (can_as_dash_aux_apu_660_pack(this->sendFrame.data, &this->frameAPU660, sizeof(sendFrame.data)) != CAN_AS_DASH_AUX_APU_660_LENGTH){
-        RCLCPP_ERROR(this->get_logger(), "Error during pack of APU_660");
-        return;
+    if (this->rosConf.transmitSwaCommanded && !(this->canTimerCounter % CAN_AS_DASH_AUX_SWA_COMMANDED_CYCLE_TIME_MS)) {
+        this->transmit_swa_commanded();
     }
-
-    //send(this->can0Socket, &this->sendFrame, sizeof(this->sendFrame), 0);
-    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_APU_660_LENGTH) {
-        RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_660");
+    if (this->rosConf.transmitApuCommand && !(this->canTimerCounter % CAN_AS_DASH_AUX_SWA_COMMANDED_CYCLE_TIME_MS)) {
+        this->transmit_apu_command();
     }
 }
 
-void CanHandler::transmit_swa_530()
+void CanHandler::transmit_apu_state_mission()
 {
-    this->sendFrame.can_id = CAN_AS_DASH_AUX_SWA_530_FRAME_ID;
-    this->sendFrame.can_dlc = CAN_AS_DASH_AUX_SWA_530_LENGTH;
-    if (can_as_dash_aux_swa_530_pack(this->sendFrame.data, &this->frameSWA530, sizeof(sendFrame.data)) != CAN_AS_DASH_AUX_SWA_530_LENGTH){
-        RCLCPP_ERROR(this->get_logger(), "Error during pack of SWA_530");
+    this->sendFrame.can_id = CAN_AS_DASH_AUX_APU_STATE_MISSION_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_AS_DASH_AUX_APU_STATE_MISSION_LENGTH;
+    if (can_as_dash_aux_apu_state_mission_pack(this->sendFrame.data, &this->frameApuStateMission, sizeof(sendFrame.data)) != CAN_AS_DASH_AUX_APU_STATE_MISSION_LENGTH){
+        RCLCPP_ERROR(this->get_logger(), "Error during pack of APU_STATE_MISSION");
         return;
     }
 
-    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_SWA_530_LENGTH) {
-        RCLCPP_ERROR(this->get_logger(), "Error during transmit of SWA_530");
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_APU_STATE_MISSION_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_STATE_MISSION");
+    }
+}
+
+void CanHandler::transmit_ebs_service_brake()
+{
+    this->sendFrame.can_id = CAN_AS_DASH_AUX_EBS_SERVICE_BRAKE_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_AS_DASH_AUX_EBS_SERVICE_BRAKE_LENGTH;
+    if (can_as_dash_aux_ebs_service_brake_pack(this->sendFrame.data, &this->frameEbsServiceBrake, sizeof(sendFrame.data)) != CAN_AS_DASH_AUX_EBS_SERVICE_BRAKE_LENGTH){
+        RCLCPP_ERROR(this->get_logger(), "Error during pack of EBS_SERVICE_BRAKE");
+        return;
+    }
+
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_EBS_SERVICE_BRAKE_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of EBS_SERVICE_BRAKE");
+    }
+}
+
+void CanHandler::transmit_swa_commanded()
+{
+    this->sendFrame.can_id = CAN_AS_DASH_AUX_SWA_COMMANDED_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_AS_DASH_AUX_SWA_COMMANDED_LENGTH;
+    if (can_as_dash_aux_swa_commanded_pack(this->sendFrame.data, &this->frameSwaCommanded, sizeof(sendFrame.data)) != CAN_AS_DASH_AUX_SWA_COMMANDED_LENGTH){
+        RCLCPP_ERROR(this->get_logger(), "Error during pack of SWA_COMMANDED");
+        return;
+    }
+
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_SWA_COMMANDED_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of SWA_COMMANDED");
+    }
+}
+
+void CanHandler::transmit_apu_command()
+{
+    this->sendFrame.can_id = CAN_AS_DASH_AUX_APU_COMMAND_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_AS_DASH_AUX_APU_COMMAND_LENGTH;
+    if (can_as_dash_aux_apu_command_pack(this->sendFrame.data, &this->frameApuCommand, sizeof(sendFrame.data)) != CAN_AS_DASH_AUX_APU_COMMAND_LENGTH){
+        RCLCPP_ERROR(this->get_logger(), "Error during pack of APU_COMMAND");
+        return;
+    }
+
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_APU_COMMAND_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_COMMAND");
     }
 }

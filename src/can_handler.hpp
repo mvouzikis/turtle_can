@@ -19,6 +19,8 @@
 #include "turtle_interfaces/msg/dash_buttons.hpp"
 #include "turtle_interfaces/msg/ebs_supervisor_info.hpp"
 #include "turtle_interfaces/msg/steering.hpp"
+#include "turtle_interfaces/msg/state_machine_state.hpp"
+#include "turtle_interfaces/msg/actuator_cmd.hpp"
 
 #include "can_as_dash_aux.h"
 
@@ -32,23 +34,25 @@ typedef struct {
     std::string channel0;
     uint32_t bitrate0;
     //CAN messages to publish in ROS
-    bool publishAMI505;
-    bool publishAux166;
-    bool publishAux336;
-    bool publishAux357;
-    bool publishAux384;
-    bool publishAux412;
-    bool publishDash101;
-    bool publishDash107;
-    bool publishDash198;
-    bool publishDash204;
-    bool publishDash279;
-    bool publishEBS550;
-    bool publishSWA510;
-    //CAN messages to transmit
-    bool transmitAPU660;
-    bool transmitSWA539;
+    bool publishDashApps;
+    bool publishDashBrake;
+    bool publishDashButtons;
+    bool pubishDashFrontRPM;
+    bool publishAuxRearRPM;
+    bool publishAuxTsalSafeState;
+    bool publishAuxPumpsFans;
+    bool publishAuxBrakelight;
+    bool publishDashLEDs;
+    bool publishAuxTankPressure;
+    bool publishAmiSelectedMission;
+    bool publishSwaActual;
+    bool publishEbsSupervisor;
 
+    //CAN messages to transmit
+    bool transmitApuStateMission;    
+    bool transmitEbsServiceBrake;
+    bool transmitSwaCommanded;
+    bool transmitApuCommand;
 } RosConfig;
 
 class CanHandler : public rclcpp::Node
@@ -71,68 +75,84 @@ class CanHandler : public rclcpp::Node
         rclcpp::TimerBase::SharedPtr canRecvTimer;
         void handleCanReceive();
 
-        rclcpp::Publisher<turtle_interfaces::msg::Mission>::SharedPtr pubAMI505;
-        turtle_interfaces::msg::Mission msgAMI505;
-        void publish_ami_505();
+        rclcpp::Publisher<turtle_interfaces::msg::Apps>::SharedPtr pubDashApps;
+        turtle_interfaces::msg::Apps msgDashApps;
+        void publish_dash_apps();
 
-        rclcpp::Publisher<turtle_interfaces::msg::BrakeLight>::SharedPtr pubAux166;
-        turtle_interfaces::msg::BrakeLight msgAux166;
-        void publish_aux_166();
+        rclcpp::Publisher<turtle_interfaces::msg::Brake>::SharedPtr pubDashBrake;
+        turtle_interfaces::msg::Brake msgDashBrake;
+        void publish_dash_brake();
 
-        rclcpp::Publisher<turtle_interfaces::msg::EbsTankPressure>::SharedPtr pubAux336;
-        turtle_interfaces::msg::EbsTankPressure msgAux336;
-        void publish_aux_336();
+        rclcpp::Publisher<turtle_interfaces::msg::DashButtons>::SharedPtr pubDashButtons;
+        turtle_interfaces::msg::DashButtons msgDashButtons;
+        void publish_dash_buttons();
 
-        rclcpp::Publisher<turtle_interfaces::msg::RPM>::SharedPtr pubAux357;
-        turtle_interfaces::msg::RPM msgAux357;
-        void publish_aux_357();
+        rclcpp::Publisher<turtle_interfaces::msg::RPM>::SharedPtr pubDashFrontRPM;
+        turtle_interfaces::msg::RPM msgDashFrontRPM;
+        void publish_dash_front_rpm();
 
-        rclcpp::Publisher<turtle_interfaces::msg::TsalSafeState>::SharedPtr pubAux384;
-        turtle_interfaces::msg::TsalSafeState msgAux384;
-        void publish_aux_384();
+        rclcpp::Publisher<turtle_interfaces::msg::RPM>::SharedPtr pubAuxRearRPM;
+        turtle_interfaces::msg::RPM msgAuxRearRPM;
+        void publish_aux_rear_rpm();
 
-        rclcpp::Publisher<turtle_interfaces::msg::CoolingInfo>::SharedPtr pubAux412;
-        turtle_interfaces::msg::CoolingInfo msgAux412;
-        void publish_aux_412();
+        rclcpp::Publisher<turtle_interfaces::msg::TsalSafeState>::SharedPtr pubAuxTsalSafeState;
+        turtle_interfaces::msg::TsalSafeState msgAuxTsalSafeState;
+        void publish_aux_tsal_safe_state();
 
-        rclcpp::Publisher<turtle_interfaces::msg::Apps>::SharedPtr pubDash101;
-        turtle_interfaces::msg::Apps msgDash101;
-        void publish_dash_101();
+        rclcpp::Publisher<turtle_interfaces::msg::CoolingInfo>::SharedPtr pubAuxPumpsFans;
+        turtle_interfaces::msg::CoolingInfo msgAuxPumpsFans;
+        void publish_aux_pumps_fans();
 
-        rclcpp::Publisher<turtle_interfaces::msg::RPM>::SharedPtr pubDash107;
-        turtle_interfaces::msg::RPM msgDash107;
-        void publish_dash_107();
+        rclcpp::Publisher<turtle_interfaces::msg::BrakeLight>::SharedPtr pubAuxBrakelight;
+        turtle_interfaces::msg::BrakeLight msgAuxBrakelight;
+        void publish_aux_brakelight();
 
-        rclcpp::Publisher<turtle_interfaces::msg::Brake>::SharedPtr pubDash198;
-        turtle_interfaces::msg::Brake msgDash198;
-        void publish_dash_198();
+        rclcpp::Publisher<turtle_interfaces::msg::DashLeds>::SharedPtr pubDashLEDs;
+        turtle_interfaces::msg::DashLeds msgDashLEDs;
+        void publish_dash_leds();
 
-        rclcpp::Publisher<turtle_interfaces::msg::DashLeds>::SharedPtr pubDash204;
-        turtle_interfaces::msg::DashLeds msgDash204;
-        void publish_dash_204();
+        rclcpp::Publisher<turtle_interfaces::msg::EbsTankPressure>::SharedPtr pubAuxTankPressure;
+        turtle_interfaces::msg::EbsTankPressure msgAuxTankPressure;
+        void publish_aux_tank_pressure();
 
-        rclcpp::Publisher<turtle_interfaces::msg::DashButtons>::SharedPtr pubDash279;
-        turtle_interfaces::msg::DashButtons msgDash279;
-        void publish_dash_279();
+        rclcpp::Publisher<turtle_interfaces::msg::Mission>::SharedPtr pubAmiSelectedMission;
+        turtle_interfaces::msg::Mission msgAmiSelectedMission;
+        void publish_ami_selected_mission();
 
-        rclcpp::Publisher<turtle_interfaces::msg::EbsSupervisorInfo>::SharedPtr pubEBS550;
-        turtle_interfaces::msg::EbsSupervisorInfo msgEBS550;
-        void publish_ebs_550();
+        rclcpp::Publisher<turtle_interfaces::msg::Steering>::SharedPtr pubSwaActual;
+        turtle_interfaces::msg::Steering msgSwaActual;
+        void publish_swa_actual();
 
-        rclcpp::Publisher<turtle_interfaces::msg::Steering>::SharedPtr pubSWA510;
-        turtle_interfaces::msg::Steering msgSWA510;
-        void publish_swa_510();
+        rclcpp::Publisher<turtle_interfaces::msg::EbsSupervisorInfo>::SharedPtr pubEbsSupervisor;
+        turtle_interfaces::msg::EbsSupervisorInfo msgEbsSupervisor;
+        void publish_ebs_supervisor();     
 
         //Variables and functions for CAN transmit
         uint16_t canTimerCounter;
         rclcpp::TimerBase::SharedPtr canSendTimer;        
         void handleCanTransmit();
 
-        struct can_as_dash_aux_apu_660_t frameAPU660;
-        void transmit_apu_660();
+        rclcpp::Subscription<turtle_interfaces::msg::StateMachineState>::SharedPtr subApuState;
+        void apu_state_callback(turtle_interfaces::msg::StateMachineState msgApuState);
 
-        struct can_as_dash_aux_swa_530_t frameSWA530;
-        void transmit_swa_530();
+        rclcpp::Subscription<turtle_interfaces::msg::Mission>::SharedPtr subApuMission;                
+        void apu_mission_callback(turtle_interfaces::msg::Mission msgApuMission);
+
+        rclcpp::Subscription<turtle_interfaces::msg::ActuatorCmd>::SharedPtr subActuatorCmd;        
+        void actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd msgActuatorCmd);
+
+        struct can_as_dash_aux_apu_state_mission_t frameApuStateMission;
+        void transmit_apu_state_mission();
+
+        //TODO who's your pub?
+        struct can_as_dash_aux_ebs_service_brake_t frameEbsServiceBrake;
+        void transmit_ebs_service_brake();
+
+        struct can_as_dash_aux_swa_commanded_t frameSwaCommanded;
+        void transmit_swa_commanded();
+
+        struct can_as_dash_aux_apu_command_t frameApuCommand;
+        void transmit_apu_command();
 
     public:
         CanHandler(rclcpp::NodeOptions nOpt);
