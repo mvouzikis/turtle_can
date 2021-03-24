@@ -72,7 +72,7 @@ uint16_t convertSteeringAngleTarget(float targetSteeringAngle)
 
 uint32_t convertSteeringRateTarget(float targetSteeringRate)
 {
-    uint32_t steeringRateRaw = targetSteeringRate < 0.01 ? 0 : (uint32_t)(941.0/fabs(targetSteeringRate));
+    uint32_t steeringRateRaw = fabs(targetSteeringRate) < 0.01 ? 0 : (uint32_t)(941.0/fabs(targetSteeringRate));
     return steeringRateRaw;
 }
 
