@@ -55,7 +55,7 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
 CanHandler::~CanHandler()
 {
     if (close(this->can0Socket) < 0) {
-        RCLCPP_ERROR(this->get_logger(), "Unable to close can0.\n");
+        RCLCPP_ERROR(this->get_logger(), "Unable to close %s.\n", this->rosConf.channel0.c_str());
     }
 }
 
@@ -171,8 +171,7 @@ void CanHandler::variablesInit()
 //Functions for CAN receive
 void CanHandler::handleCanReceive()
 {
-    ssize_t recEr;
-    while ( recEr = recvfrom(this->can0Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, &this->len) >= 8) {
+    while (recvfrom(this->can0Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, &this->len) >= 8) {
         ioctl(this->can0Socket, SIOCGSTAMP, &this->recvTime);  //get message timestamp
 
         if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AMI_SELECTED_MISSION_FRAME_ID && this->rosConf.publishAmiSelectedMission) {
@@ -215,10 +214,6 @@ void CanHandler::handleCanReceive()
             this->publish_swa_actual();
         }
     }
-    if (recEr == -1)
-        printf("ERROR %s\n", strerror(errno));
-    else 
-        printf("GOT %ld\n", recEr);
 }
 
 void CanHandler::createHeader(std_msgs::msg::Header *header)
@@ -528,7 +523,6 @@ void CanHandler::transmit_swa_commanded()
     }
 
     if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_SWA_COMMANDED_LENGTH) {
-        printf("%s\n", strerror(errno));
         RCLCPP_ERROR(this->get_logger(), "Error during transmit of SWA_COMMANDED");
     }
 }
