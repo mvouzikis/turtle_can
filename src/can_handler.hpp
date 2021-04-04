@@ -18,11 +18,13 @@
 #include "turtle_interfaces/msg/dash_leds.hpp"
 #include "turtle_interfaces/msg/dash_buttons.hpp"
 #include "turtle_interfaces/msg/ebs_supervisor_info.hpp"
+#include "turtle_interfaces/msg/res_status.hpp"
 #include "turtle_interfaces/msg/steering.hpp"
 #include "turtle_interfaces/msg/state_machine_state.hpp"
 #include "turtle_interfaces/msg/actuator_cmd.hpp"
 
 #include "can_as_dash_aux.h"
+#include "can_as_apu_res_dlogger.h"
 
 #define CAN_ERROR      -1
 #define CAN_OK          0
@@ -33,6 +35,8 @@ typedef struct {
     //Channels configuration
     std::string channel0;
     uint32_t bitrate0;
+    std::string channel1;
+    uint32_t bitrate1;
     //CAN messages to publish in ROS
     bool publishDashApps;
     bool publishDashBrake;
@@ -47,6 +51,7 @@ typedef struct {
     bool publishAmiSelectedMission;
     bool publishSwaActual;
     bool publishEbsSupervisor;
+    bool publishResStatus;
 
     //CAN messages to transmit
     bool transmitApuStateMission;    
@@ -61,6 +66,10 @@ class CanHandler : public rclcpp::Node
         int can0Socket;
         struct sockaddr_can addr0;
         struct ifreq ifr0;
+
+        int can1Socket;
+        struct sockaddr_can addr1;
+        struct ifreq ifr1;
 
         struct timeval recvTime;
         socklen_t len = sizeof(this->addr0);
@@ -126,6 +135,10 @@ class CanHandler : public rclcpp::Node
         rclcpp::Publisher<turtle_interfaces::msg::EbsSupervisorInfo>::SharedPtr pubEbsSupervisor;
         turtle_interfaces::msg::EbsSupervisorInfo msgEbsSupervisor;
         void publish_ebs_supervisor();     
+
+        rclcpp::Publisher<turtle_interfaces::msg::ResStatus>::SharedPtr pubResStatus;
+        turtle_interfaces::msg::ResStatus msgResStatus;
+        void publish_res_status();
 
         //Variables and functions for CAN transmit
         uint16_t canTimerCounter;
