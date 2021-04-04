@@ -45,6 +45,22 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
         return;
     }
 
+    this->can1Socket = socket(PF_CAN, SOCK_RAW, CAN_RAW);
+    if (this->can1Socket < 0) {
+        RCLCPP_ERROR(this->get_logger(), "Unable to create socket for %s.", this->rosConf.channel1.c_str());
+    }
+    strcpy(this->ifr1.ifr_name, this->rosConf.channel1.c_str());
+    if (ioctl(this->can1Socket, SIOCGIFINDEX, &this->ifr1) == -1) {
+        RCLCPP_ERROR(this->get_logger(), "Unable to perform ioctl for %s.", this->rosConf.channel1.c_str());
+        return;
+    }
+    this->addr1.can_family = AF_CAN;
+    this->addr1.can_ifindex = this->ifr1.ifr_ifindex;
+    if (bind(this->can1Socket, (struct sockaddr*)&this->addr1, sizeof(this->addr0)) < 0){
+        RCLCPP_ERROR(this->get_logger(), "Unable to bind socket with %s.", this->rosConf.channel1.c_str());
+        return;
+    }
+
     //initialize timers
     this->canRecvTimer = this->create_wall_timer(500us, std::bind(&CanHandler::handleCanReceive,    this));
     this->canSendTimer = this->create_wall_timer(1ms,   std::bind(&CanHandler::handleCanTransmit,   this));
@@ -62,8 +78,10 @@ CanHandler::~CanHandler()
 void CanHandler::loadRosParams()
 {
     //Channels configuration
-    this->get_parameter_or<std::string>("channel0", this->rosConf.channel0, "vcan0");
+    this->get_parameter_or<std::string>("channel0", this->rosConf.channel0, "can0");
     this->get_parameter_or<uint32_t>("bitrate0", this->rosConf.bitrate0, 1000000);
+    this->get_parameter_or<std::string>("channel1", this->rosConf.channel1, "can1");
+    this->get_parameter_or<uint32_t>("bitrate1", this->rosConf.bitrate1, 500000);
     //CAN messages to publish in ROS
     this->get_parameter_or<bool>("publishDashApps", this->rosConf.publishDashApps, true);
     this->get_parameter_or<bool>("publishDashBrake", this->rosConf.publishDashBrake, true);
@@ -78,6 +96,7 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<bool>("publishAmiSelectedMission", this->rosConf.publishAmiSelectedMission, true);
     this->get_parameter_or<bool>("publishSwaActual", this->rosConf.publishSwaActual, true);
     this->get_parameter_or<bool>("publishEbsSupervisor", this->rosConf.publishEbsSupervisor, true);
+    this->get_parameter_or<bool>("publishResStatus", this->rosConf.publishResStatus, true);
     //CAN messages to transmit
     this->get_parameter_or<bool>("transmitApuStateMission", this->rosConf.transmitApuStateMission, true);
     this->get_parameter_or<bool>("transmitEbsServiceBrake", this->rosConf.transmitEbsServiceBrake, true);
@@ -87,6 +106,7 @@ void CanHandler::loadRosParams()
 
 void CanHandler::variablesInit()
 {
+    rclcpp::ServicesQoS serviceQos;
     //Initialize publishers
     if (this->rosConf.publishAmiSelectedMission) {
         this->pubAmiSelectedMission = this->create_publisher<turtle_interfaces::msg::Mission>("ami_selected_mission", 10);
@@ -139,6 +159,10 @@ void CanHandler::variablesInit()
     if (this->rosConf.publishSwaActual) {
         this->pubSwaActual = this->create_publisher<turtle_interfaces::msg::Steering>("steering_actual", 10);
         this->msgSwaActual = turtle_interfaces::msg::Steering();
+    }
+    if (this->rosConf.publishResStatus) {
+        this->pubResStatus = this->create_publisher<turtle_interfaces::msg::ResStatus>("res_status", serviceQos);
+        this->msgResStatus = turtle_interfaces::msg::ResStatus();
     }
 
     //Initialize CAN Tx messages
@@ -212,6 +236,13 @@ void CanHandler::handleCanReceive()
         }
         else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_SWA_ACTUAL_FRAME_ID && this->rosConf.publishSwaActual) {
             this->publish_swa_actual();
+        }
+    }
+
+    while (recvfrom(this->can1Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr1, &this->len) >= 8) {
+        ioctl(this->can1Socket, SIOCGSTAMP, &this->recvTime);  //get message timestamp
+        if (this->recvFrame.can_id == CAN_AS_APU_RES_DLOGGER_RES_STATUS_FRAME_ID && this->rosConf.publishResStatus) {
+            this->publish_res_status();
         }
     }
 }
@@ -438,6 +469,23 @@ void CanHandler::publish_swa_actual()
     this->pubSwaActual->publish(this->msgSwaActual);
 }
 
+void CanHandler::publish_res_status()
+{
+    can_as_apu_res_dlogger_res_status_t msg;
+    if (can_as_apu_res_dlogger_res_status_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of RES_STATUS");
+        return;
+    }
+
+    this->createHeader(&this->msgResStatus.header);
+    this->msgResStatus.stop = (msg.stop == CAN_AS_APU_RES_DLOGGER_RES_STATUS_STOP_ON_CHOICE);
+    this->msgResStatus.toggle = (msg.toggle == CAN_AS_APU_RES_DLOGGER_RES_STATUS_TOGGLE_ON_CHOICE);
+    this->msgResStatus.button = (msg.button == CAN_AS_APU_RES_DLOGGER_RES_STATUS_BUTTON_ON_CHOICE);
+    this->msgResStatus.signal_strength = msg.signal_strength;
+
+    this->pubResStatus->publish(this->msgResStatus);
+}
+
 //Functions for CAN transmit
 void CanHandler::apu_state_callback(turtle_interfaces::msg::StateMachineState::SharedPtr msgApuState)
 {
@@ -494,7 +542,7 @@ void CanHandler::transmit_apu_state_mission()
     }
 
     ssize_t errc;
-    if (errc = sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_APU_STATE_MISSION_LENGTH) {
+    if ((errc = sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len)) < CAN_AS_DASH_AUX_APU_STATE_MISSION_LENGTH) {
         RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_STATE_MISSION, %d", errc);
     }
 }

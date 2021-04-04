@@ -3,6 +3,8 @@ CanInterface:
     # Channels configuration
     channel0: "can0"
     bitrate0: 1000000
+    channel0: "can1"
+    bitrate0: 500000
     # CAN messages to publish in ROS
     publishDashApps: true           # /apps
     publishDashBrake: true          # /brake
@@ -17,6 +19,7 @@ CanInterface:
     publishAmiSelectedMission: true # /ami_selected_mission
     publishSwaActual: true          # /steering_actual
     publishEbsSupervisor: true      # /ebs_supervisor_info
+    publishResStatus: true          # /res_status
     # CAN messages to transmit
     transmitApuStateMission: true # TODO fill subscriber topics
     transmitEbsServiceBrake: true # TODO fill subscriber topics
