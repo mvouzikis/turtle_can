@@ -87,64 +87,67 @@ void CanHandler::loadRosParams()
 
 void CanHandler::variablesInit()
 {
+    rclcpp::SensorDataQoS sensorQos;
+    rclcpp::ServicesQoS serviceQos;
+
     //Initialize publishers
     if (this->rosConf.publishAmiSelectedMission) {
-        this->pubAmiSelectedMission = this->create_publisher<turtle_interfaces::msg::Mission>("ami_selected_mission", 10);
+        this->pubAmiSelectedMission = this->create_publisher<turtle_interfaces::msg::Mission>("ami_selected_mission", serviceQos);
         this->msgAmiSelectedMission = turtle_interfaces::msg::Mission();
     }
     if (this->rosConf.publishAuxBrakelight) {
-        this->pubAuxBrakelight = this->create_publisher<turtle_interfaces::msg::BrakeLight>("brake_light", 10);
+        this->pubAuxBrakelight = this->create_publisher<turtle_interfaces::msg::BrakeLight>("brake_light", sensorQos);
         this->msgAuxBrakelight = turtle_interfaces::msg::BrakeLight();
     }
     if (this->rosConf.publishAuxTankPressure) {
-        this->pubAuxTankPressure = this->create_publisher<turtle_interfaces::msg::EbsTankPressure>("ebs_tank_pressure", 10);
+        this->pubAuxTankPressure = this->create_publisher<turtle_interfaces::msg::EbsTankPressure>("ebs_tank_pressure", sensorQos);
         this->msgAuxTankPressure = turtle_interfaces::msg::EbsTankPressure();
     }
     if (this->rosConf.publishAuxRearRPM) {
-        this->pubAuxRearRPM = this->create_publisher<turtle_interfaces::msg::RPM>("rpm_rear", 10);
+        this->pubAuxRearRPM = this->create_publisher<turtle_interfaces::msg::RPM>("rpm_rear", sensorQos);
         this->msgAuxRearRPM = turtle_interfaces::msg::RPM();
     }
     if (this->rosConf.publishAuxTsalSafeState) {
-        this->pubAuxTsalSafeState = this->create_publisher<turtle_interfaces::msg::TsalSafeState>("tsal_safe_state", 10);
+        this->pubAuxTsalSafeState = this->create_publisher<turtle_interfaces::msg::TsalSafeState>("tsal_safe_state", sensorQos);
         this->msgAuxTsalSafeState = turtle_interfaces::msg::TsalSafeState();
     }
     if (this->rosConf.publishAuxPumpsFans) {
-        this->pubAuxPumpsFans = this->create_publisher<turtle_interfaces::msg::CoolingInfo>("cooling_info", 10);
+        this->pubAuxPumpsFans = this->create_publisher<turtle_interfaces::msg::CoolingInfo>("cooling_info", sensorQos);
         this->msgAuxPumpsFans = turtle_interfaces::msg::CoolingInfo();
     }
     if (this->rosConf.publishDashApps) {
-        this->pubDashApps = this->create_publisher<turtle_interfaces::msg::Apps>("apps", 10);
+        this->pubDashApps = this->create_publisher<turtle_interfaces::msg::Apps>("apps", sensorQos);
         this->msgDashApps = turtle_interfaces::msg::Apps();
     }
     if (this->rosConf.pubishDashFrontRPM) {
-        this->pubDashFrontRPM = this->create_publisher<turtle_interfaces::msg::RPM>("rpm_front", 10);
+        this->pubDashFrontRPM = this->create_publisher<turtle_interfaces::msg::RPM>("rpm_front", sensorQos);
         this->msgDashFrontRPM = turtle_interfaces::msg::RPM();
     }
     if (this->rosConf.publishDashBrake) {
-        this->pubDashBrake = this->create_publisher<turtle_interfaces::msg::Brake>("brake", 10);
+        this->pubDashBrake = this->create_publisher<turtle_interfaces::msg::Brake>("brake", sensorQos);
         this->msgDashBrake = turtle_interfaces::msg::Brake();
     }
     if (this->rosConf.publishDashLEDs) {
-        this->pubDashLEDs = this->create_publisher<turtle_interfaces::msg::DashLeds>("dash_leds", 10);
+        this->pubDashLEDs = this->create_publisher<turtle_interfaces::msg::DashLeds>("dash_leds", serviceQos);
         this->msgDashLEDs = turtle_interfaces::msg::DashLeds();
     }
     if (this->rosConf.publishDashButtons) {
-        this->pubDashButtons = this->create_publisher<turtle_interfaces::msg::DashButtons>("dash_buttons", 10);
+        this->pubDashButtons = this->create_publisher<turtle_interfaces::msg::DashButtons>("dash_buttons", serviceQos);
         this->msgDashButtons = turtle_interfaces::msg::DashButtons();
     }
     if (this->rosConf.publishEbsSupervisor) {
-        this->pubEbsSupervisor= this->create_publisher<turtle_interfaces::msg::EbsSupervisorInfo>("ebs_supervisor_info", 10);
+        this->pubEbsSupervisor= this->create_publisher<turtle_interfaces::msg::EbsSupervisorInfo>("ebs_supervisor_info", serviceQos);
         this->msgEbsSupervisor = turtle_interfaces::msg::EbsSupervisorInfo();
     } 
     if (this->rosConf.publishSwaActual) {
-        this->pubSwaActual = this->create_publisher<turtle_interfaces::msg::Steering>("steering_actual", 10);
+        this->pubSwaActual = this->create_publisher<turtle_interfaces::msg::Steering>("steering_actual", sensorQos);
         this->msgSwaActual = turtle_interfaces::msg::Steering();
     }
 
     //Initialize CAN Tx messages
     if (this->rosConf.transmitApuStateMission) {
-        this->subApuState = this->create_subscription<turtle_interfaces::msg::StateMachineState>("state_machine_state", 10, std::bind(&CanHandler::apu_state_callback, this, _1));
-        this->subApuMission = this->create_subscription<turtle_interfaces::msg::Mission>("current_mission", 10, std::bind(&CanHandler::apu_mission_callback, this, _1));
+        this->subApuState = this->create_subscription<turtle_interfaces::msg::StateMachineState>("state_machine_state", serviceQos, std::bind(&CanHandler::apu_state_callback, this, _1));
+        this->subApuMission = this->create_subscription<turtle_interfaces::msg::Mission>("current_mission", serviceQos, std::bind(&CanHandler::apu_mission_callback, this, _1));
 
         this->frameApuStateMission.as_mission = CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_MISSION_NO_MISSION_CHOICE;
         this->frameApuStateMission.as_state = CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_STATE_AS_OFF_CHOICE;
