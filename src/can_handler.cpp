@@ -191,7 +191,7 @@ void CanHandler::variablesInit()
         this->frameSwaCommanded.steering_rate_is_zero = CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_IS_ZERO_TRUE_CHOICE;
     }
     if (this->rosConf.transmitApuCommand) {
-        this->frameApuCommand.throttle_brake_commanded = convertThrottleTarget(0.0);
+        this->frameApuCommand.throttle_brake_commanded = 0.0;
     }
 }
 
@@ -237,14 +237,14 @@ void CanHandler::handleCanReceive()
         else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_EBS_SUPERVISOR_FRAME_ID && this->rosConf.publishEbsSupervisor) {
             this->publish_ebs_supervisor();
         }
-        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_SWA_ACTUAL_FRAME_ID && this->rosConf.publishSwaActual) {
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_SWA_STATUS_FRAME_ID && this->rosConf.publishSwaActual) {
             this->publish_swa_actual();
         }
     }
 
     while (recvfrom(this->can1Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr1, &this->len) >= 8) {
         ioctl(this->can1Socket, SIOCGSTAMP, &this->recvTime);  //get message timestamp
-        if (this->recvFrame.can_id == CAN_AS_APU_RES_DLOGGER_RES_STATUS_FRAME_ID && this->rosConf.publishResStatus) {
+        if (this->recvFrame.can_id == CAN_APU_RES_DLOGGER_RES_STATUS_FRAME_ID && this->rosConf.publishResStatus) {
             this->publish_res_status();
         }
     }
@@ -456,30 +456,34 @@ void CanHandler::publish_ebs_supervisor()
 
 void CanHandler::publish_swa_actual()
 {
-    can_as_dash_aux_swa_actual_t msg;
-    if (can_as_dash_aux_swa_actual_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of SWA_ACTUAL");
+    can_as_dash_aux_swa_status_t msg;
+    if (can_as_dash_aux_swa_status_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of SWA_STATUS");
         return;
     }
 
     this->createHeader(&this->msgSwaActual.header);
     this->msgSwaActual.steering = convertSteeringActual(msg.steering_actual);
 
+    if (msg.analog1_error || msg.analog2_error || msg.stall_occured) {
+        RCLCPP_WARN(this->get_logger(), "AN1 %u | AN2 %u | Stall %u", msg.analog1_error, msg.analog2_error, msg.stall_occured);
+    }
+
     this->pubSwaActual->publish(this->msgSwaActual);
 }
 
 void CanHandler::publish_res_status()
 {
-    can_as_apu_res_dlogger_res_status_t msg;
-    if (can_as_apu_res_dlogger_res_status_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+    can_apu_res_dlogger_res_status_t msg;
+    if (can_apu_res_dlogger_res_status_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
         RCLCPP_ERROR(this->get_logger(), "Error during unpack of RES_STATUS");
         return;
     }
 
     this->createHeader(&this->msgResStatus.header);
-    this->msgResStatus.stop = (msg.stop == CAN_AS_APU_RES_DLOGGER_RES_STATUS_STOP_ON_CHOICE);
-    this->msgResStatus.toggle = (msg.toggle == CAN_AS_APU_RES_DLOGGER_RES_STATUS_TOGGLE_ON_CHOICE);
-    this->msgResStatus.button = (msg.button == CAN_AS_APU_RES_DLOGGER_RES_STATUS_BUTTON_ON_CHOICE);
+    this->msgResStatus.stop = (msg.stop == CAN_APU_RES_DLOGGER_RES_STATUS_STOP_ON_CHOICE);
+    this->msgResStatus.toggle = (msg.toggle == CAN_APU_RES_DLOGGER_RES_STATUS_TOGGLE_ON_CHOICE);
+    this->msgResStatus.button = (msg.button == CAN_APU_RES_DLOGGER_RES_STATUS_BUTTON_ON_CHOICE);
     this->msgResStatus.signal_strength = msg.signal_strength;
 
     this->pubResStatus->publish(this->msgResStatus);
@@ -508,7 +512,7 @@ void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::Shar
                                                     CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_IS_ZERO_TRUE_CHOICE :
                                                     CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_IS_ZERO_FALSE_CHOICE;
 
-    this->frameApuCommand.throttle_brake_commanded = convertThrottleTarget(msgActuatorCmd->throttle);
+    this->frameApuCommand.throttle_brake_commanded = msgActuatorCmd->throttle;
 }
 
 void CanHandler::handleCanTransmit()
@@ -540,9 +544,8 @@ void CanHandler::transmit_apu_state_mission()
         return;
     }
 
-    ssize_t errc;
-    if ((errc = sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len)) < CAN_AS_DASH_AUX_APU_STATE_MISSION_LENGTH) {
-        RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_STATE_MISSION, %d", errc);
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_APU_STATE_MISSION_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_STATE_MISSION");
     }
 }
 

@@ -24,7 +24,7 @@
 #include "turtle_interfaces/msg/actuator_cmd.hpp"
 
 #include "can_as_dash_aux.h"
-#include "can_as_apu_res_dlogger.h"
+#include "can_apu_res_dlogger.h"
 
 #define CAN_ERROR      -1
 #define CAN_OK          0

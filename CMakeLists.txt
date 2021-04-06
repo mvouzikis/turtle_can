@@ -25,7 +25,7 @@ find_package(std_msgs REQUIRED)
 find_package(turtle_interfaces REQUIRED)
 
 add_library(libsocketcan STATIC src/libsocketcan.c)
-add_library(can_messages STATIC src/can_as_dash_aux.c src/can_as_apu_res_dlogger.c)
+add_library(can_messages STATIC src/can_as_dash_aux.c src/can_apu_res_dlogger.c)
 
 add_executable(can_interface src/can_interface.cpp src/can_handler.cpp)
 target_include_directories(can_interface PUBLIC
