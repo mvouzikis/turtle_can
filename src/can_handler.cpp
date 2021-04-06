@@ -16,7 +16,7 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
     this->loadRosParams();
     this->variablesInit();
 
-    //initialize can0
+    //initialize channel0
     // if ((this->rosConf.channel0 != "vcan0") && (can_do_stop(this->rosConf.channel0.c_str()) != 0)) {
     //     RCLCPP_ERROR(this->get_logger(), "Unable to stop %s.", this->rosConf.channel0.c_str());
     //     return;
@@ -44,7 +44,9 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
         RCLCPP_ERROR(this->get_logger(), "Unable to bind socket with %s.", this->rosConf.channel0.c_str());
         return;
     }
+    RCLCPP_INFO(this->get_logger(), "%s interface initialized", this->rosConf.channel0.c_str());
 
+    //initialize channel1
     this->can1Socket = socket(PF_CAN, SOCK_RAW, CAN_RAW);
     if (this->can1Socket < 0) {
         RCLCPP_ERROR(this->get_logger(), "Unable to create socket for %s.", this->rosConf.channel1.c_str());
@@ -60,12 +62,13 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
         RCLCPP_ERROR(this->get_logger(), "Unable to bind socket with %s.", this->rosConf.channel1.c_str());
         return;
     }
+    RCLCPP_INFO(this->get_logger(), "%s interface initialized", this->rosConf.channel1.c_str());
 
     //initialize timers
     this->canRecvTimer = this->create_wall_timer(500us, std::bind(&CanHandler::handleCanReceive,    this));
     this->canSendTimer = this->create_wall_timer(1ms,   std::bind(&CanHandler::handleCanTransmit,   this));
 
-    RCLCPP_INFO(this->get_logger(), "%s interface initialized", this->rosConf.channel0.c_str());
+    RCLCPP_INFO(this->get_logger(), "Communication started");
 }
 
 CanHandler::~CanHandler()
@@ -78,30 +81,30 @@ CanHandler::~CanHandler()
 void CanHandler::loadRosParams()
 {
     //Channels configuration
-    this->get_parameter_or<std::string>("channel0", this->rosConf.channel0, "can0");
-    this->get_parameter_or<uint32_t>("bitrate0", this->rosConf.bitrate0, 1000000);
-    this->get_parameter_or<std::string>("channel1", this->rosConf.channel1, "can1");
-    this->get_parameter_or<uint32_t>("bitrate1", this->rosConf.bitrate1, 500000);
+    this->get_parameter_or<std::string>("channel0", this->rosConf.channel0, "vcan0");
+    this->get_parameter_or<uint32_t>("bitrate0",    this->rosConf.bitrate0, 1000000);
+    this->get_parameter_or<std::string>("channel1", this->rosConf.channel1, "vcan1");
+    this->get_parameter_or<uint32_t>("bitrate1",    this->rosConf.bitrate1, 500000);
     //CAN messages to publish in ROS
-    this->get_parameter_or<bool>("publishDashApps", this->rosConf.publishDashApps, true);
-    this->get_parameter_or<bool>("publishDashBrake", this->rosConf.publishDashBrake, true);
-    this->get_parameter_or<bool>("publishDashButtons", this->rosConf.publishDashButtons, true);
-    this->get_parameter_or<bool>("pubishDashFrontRPM", this->rosConf.pubishDashFrontRPM, true);
-    this->get_parameter_or<bool>("publishAuxRearRPM", this->rosConf.publishAuxRearRPM, true);
-    this->get_parameter_or<bool>("publishAuxTsalSafeState", this->rosConf.publishAuxTsalSafeState, true);
-    this->get_parameter_or<bool>("publishAuxPumpsFans", this->rosConf.publishAuxPumpsFans, true);
-    this->get_parameter_or<bool>("publishAuxBrakelight", this->rosConf.publishAuxBrakelight, true);
-    this->get_parameter_or<bool>("publishDashLEDs", this->rosConf.publishDashLEDs, true);
-    this->get_parameter_or<bool>("publishAuxTankPressure", this->rosConf.publishAuxTankPressure, true);
-    this->get_parameter_or<bool>("publishAmiSelectedMission", this->rosConf.publishAmiSelectedMission, true);
-    this->get_parameter_or<bool>("publishSwaActual", this->rosConf.publishSwaActual, true);
-    this->get_parameter_or<bool>("publishEbsSupervisor", this->rosConf.publishEbsSupervisor, true);
-    this->get_parameter_or<bool>("publishResStatus", this->rosConf.publishResStatus, true);
+    this->get_parameter_or<bool>("publishDashApps",             this->rosConf.publishDashApps,              true);
+    this->get_parameter_or<bool>("publishDashBrake",            this->rosConf.publishDashBrake,             true);
+    this->get_parameter_or<bool>("publishDashButtons",          this->rosConf.publishDashButtons,           true);
+    this->get_parameter_or<bool>("pubishDashFrontRPM",          this->rosConf.pubishDashFrontRPM,           true);
+    this->get_parameter_or<bool>("publishAuxRearRPM",           this->rosConf.publishAuxRearRPM,            true);
+    this->get_parameter_or<bool>("publishAuxTsalSafeState",     this->rosConf.publishAuxTsalSafeState,      true);
+    this->get_parameter_or<bool>("publishAuxPumpsFans",         this->rosConf.publishAuxPumpsFans,          true);
+    this->get_parameter_or<bool>("publishAuxBrakelight",        this->rosConf.publishAuxBrakelight,         true);
+    this->get_parameter_or<bool>("publishDashLEDs",             this->rosConf.publishDashLEDs,              true);
+    this->get_parameter_or<bool>("publishAuxTankPressure",      this->rosConf.publishAuxTankPressure,       true);
+    this->get_parameter_or<bool>("publishAmiSelectedMission",   this->rosConf.publishAmiSelectedMission,    true);
+    this->get_parameter_or<bool>("publishSwaActual",            this->rosConf.publishSwaActual,             true);
+    this->get_parameter_or<bool>("publishEbsSupervisor",        this->rosConf.publishEbsSupervisor,         true);
+    this->get_parameter_or<bool>("publishResStatus",            this->rosConf.publishResStatus,             true);
     //CAN messages to transmit
-    this->get_parameter_or<bool>("transmitApuStateMission", this->rosConf.transmitApuStateMission, true);
-    this->get_parameter_or<bool>("transmitEbsServiceBrake", this->rosConf.transmitEbsServiceBrake, true);
-    this->get_parameter_or<bool>("transmitSwaCommanded", this->rosConf.transmitSwaCommanded, true);
-    this->get_parameter_or<bool>("transmitApuCommand", this->rosConf.transmitApuCommand, true);
+    this->get_parameter_or<bool>("transmitApuStateMission", this->rosConf.transmitApuStateMission,  true);
+    this->get_parameter_or<bool>("transmitEbsServiceBrake", this->rosConf.transmitEbsServiceBrake,  true);
+    this->get_parameter_or<bool>("transmitSwaCommanded",    this->rosConf.transmitSwaCommanded,     true);
+    this->get_parameter_or<bool>("transmitApuCommand",      this->rosConf.transmitApuCommand,       true);
 }
 
 void CanHandler::variablesInit()
@@ -266,10 +269,6 @@ void CanHandler::publish_ami_selected_mission()
     this->msgAmiSelectedMission.mission = msg.ami_mission;
 
     this->pubAmiSelectedMission->publish(this->msgAmiSelectedMission);
-
-    /********************************************************/
-    //this->frameAPU660.as_mission = this->msgAMI505.mission;
-    /********************************************************/
 }
 
 void CanHandler::publish_aux_brakelight()

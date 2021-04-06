@@ -1,9 +1,9 @@
 CanInterface:
   ros__parameters:
     # Channels configuration
-    channel0: "can0"
+    channel0: "can1"
     bitrate0: 1000000
-    channel1: "can1"
+    channel1: "can0"
     bitrate1: 500000
     # CAN messages to publish in ROS
     publishDashApps: true           # /apps
