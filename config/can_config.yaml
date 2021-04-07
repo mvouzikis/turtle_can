@@ -19,6 +19,8 @@ CanInterface:
     publishAmiSelectedMission: true # /ami_selected_mission
     publishSwaActual: true          # /steering_actual
     publishEbsSupervisor: true      # /ebs_supervisor_info
+    publishMotorRPM: true           # /rpm_motor
+    publishInvererCommands: true    # /inverter_commands
     publishResStatus: true          # /res_status
     # CAN messages to transmit
     transmitApuStateMission: true # TODO fill subscriber topics

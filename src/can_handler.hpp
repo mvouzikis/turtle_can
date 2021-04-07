@@ -22,6 +22,7 @@
 #include "turtle_interfaces/msg/steering.hpp"
 #include "turtle_interfaces/msg/state_machine_state.hpp"
 #include "turtle_interfaces/msg/actuator_cmd.hpp"
+#include "turtle_interfaces/msg/inverter_commands.hpp"
 
 #include "can_as_dash_aux.h"
 #include "can_apu_res_dlogger.h"
@@ -51,6 +52,8 @@ typedef struct {
     bool publishAmiSelectedMission;
     bool publishSwaActual;
     bool publishEbsSupervisor;
+    bool publishMotorRPM;
+    bool publishInvererCommands;
     bool publishResStatus;
 
     //CAN messages to transmit
@@ -103,6 +106,14 @@ class CanHandler : public rclcpp::Node
         rclcpp::Publisher<turtle_interfaces::msg::RPM>::SharedPtr pubAuxRearRPM;
         turtle_interfaces::msg::RPM msgAuxRearRPM;
         void publish_aux_rear_rpm();
+
+        rclcpp::Publisher<turtle_interfaces::msg::RPM>::SharedPtr pubMotorRPM;
+        turtle_interfaces::msg::RPM msgMotorRPM;
+        void publish_motor_rpm();
+
+        rclcpp::Publisher<turtle_interfaces::msg::InverterCommands>::SharedPtr pubInvCmds;
+        turtle_interfaces::msg::InverterCommands msgInvCmds;
+        void publish_inverter_commands();
 
         rclcpp::Publisher<turtle_interfaces::msg::TsalSafeState>::SharedPtr pubAuxTsalSafeState;
         turtle_interfaces::msg::TsalSafeState msgAuxTsalSafeState;

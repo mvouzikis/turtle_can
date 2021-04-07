@@ -99,6 +99,7 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<bool>("publishAmiSelectedMission",   this->rosConf.publishAmiSelectedMission,    true);
     this->get_parameter_or<bool>("publishSwaActual",            this->rosConf.publishSwaActual,             true);
     this->get_parameter_or<bool>("publishEbsSupervisor",        this->rosConf.publishEbsSupervisor,         true);
+    this->get_parameter_or<bool>("publishMotorRPM",             this->rosConf.publishMotorRPM,              true);
     this->get_parameter_or<bool>("publishResStatus",            this->rosConf.publishResStatus,             true);
     //CAN messages to transmit
     this->get_parameter_or<bool>("transmitApuStateMission", this->rosConf.transmitApuStateMission,  true);
@@ -126,6 +127,10 @@ void CanHandler::variablesInit()
     if (this->rosConf.publishAuxRearRPM) {
         this->pubAuxRearRPM = this->create_publisher<turtle_interfaces::msg::RPM>("rpm_rear", 10);
         this->msgAuxRearRPM = turtle_interfaces::msg::RPM();
+    }
+    if (this->rosConf.publishMotorRPM) {
+        this->pubMotorRPM = this->create_publisher<turtle_interfaces::msg::RPM>("rpm_motor", 10);
+        this->msgMotorRPM = turtle_interfaces::msg::RPM();
     }
     if (this->rosConf.publishAuxTsalSafeState) {
         this->pubAuxTsalSafeState = this->create_publisher<turtle_interfaces::msg::TsalSafeState>("tsal_safe_state", 10);
@@ -162,6 +167,10 @@ void CanHandler::variablesInit()
     if (this->rosConf.publishSwaActual) {
         this->pubSwaActual = this->create_publisher<turtle_interfaces::msg::Steering>("steering_actual", 10);
         this->msgSwaActual = turtle_interfaces::msg::Steering();
+    }
+    if (this->rosConf.publishInvererCommands) {
+        this->pubInvCmds = this->create_publisher<turtle_interfaces::msg::InverterCommands>("inverter_commands", 10);
+        this->msgInvCmds = turtle_interfaces::msg::InverterCommands();
     }
     if (this->rosConf.publishResStatus) {
         this->pubResStatus = this->create_publisher<turtle_interfaces::msg::ResStatus>("res_status", serviceQos);
@@ -239,6 +248,12 @@ void CanHandler::handleCanReceive()
         }
         else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_SWA_STATUS_FRAME_ID && this->rosConf.publishSwaActual) {
             this->publish_swa_actual();
+        }
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_INV_RESOLVERS_FRAME_ID) {
+            if (this->rosConf.publishMotorRPM)
+                this->publish_motor_rpm();
+            if (this->rosConf.publishInvererCommands)
+                this->publish_inverter_commands();
         }
     }
 
@@ -470,6 +485,36 @@ void CanHandler::publish_swa_actual()
     }
 
     this->pubSwaActual->publish(this->msgSwaActual);
+}
+
+void CanHandler::publish_motor_rpm()
+{
+    can_as_dash_aux_inv_resolvers_t msg;
+    if (can_as_dash_aux_inv_resolvers_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of INV_RESOLVERS(motor_rpm)");
+        return;
+    }
+
+    this->createHeader(&this->msgMotorRPM.header);
+    this->msgMotorRPM.left = (float)msg.motor_rpm_left;
+    this->msgMotorRPM.right = (float)msg.motor_rpm_right;
+
+    this->pubMotorRPM->publish(this->msgMotorRPM);
+}
+
+void CanHandler::publish_inverter_commands()
+{
+    can_as_dash_aux_inv_resolvers_t msg;
+    if (can_as_dash_aux_inv_resolvers_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of INV_RESOLVERS(inverter_commands)");
+        return;
+    }
+
+    this->createHeader(&this->msgInvCmds.header);
+    this->msgInvCmds.torqueleft = msg.commanded_torque_left;
+    this->msgInvCmds.torqueright = msg.commanded_torque_right;
+
+    this->pubInvCmds->publish(this->msgInvCmds);
 }
 
 void CanHandler::publish_res_status()
