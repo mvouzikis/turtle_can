@@ -60,14 +60,14 @@ uint16_t convertRearRPM(uint16_t hall)
 
 float convertSteeringActual(uint16_t steeringRaw)
 {
-    return (float)((-2.0*(float)steeringRaw/2353.0)+(3993.3/2353.0));
+    return (float)((-1.0*(float)steeringRaw/1095.0)+(2015/1095));
 }
 
 /*********************From APU to other devices*********************/
 
 uint16_t convertSteeringAngleTarget(float targetSteeringAngle)
 {
-    return (uint16_t)((-2353.0*targetSteeringAngle/2.0)+(3993.3/2.0));
+    return (uint16_t)((-1095.0*targetSteeringAngle)+(2015));
 }
 
 uint32_t convertSteeringRateTarget(float targetSteeringRate)
