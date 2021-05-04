@@ -424,7 +424,7 @@ void CanHandler::publish_dash_leds()
     this->msgDashLEDs.buzzer = (msg.buzzer == 13);
     this->msgDashLEDs.safestate1 = (msg.safe_state_1 == 13);
     this->msgDashLEDs.enableout = (msg.enable_out == 13);
-    this->msgDashLEDs.sensorerror = (msg.sensor_error == 13);
+    this->msgDashLEDs.ebsled = (msg.sensor_error == 13);
     this->msgDashLEDs.scsoftware = (msg.sc_software == 1);
     this->msgDashLEDs.plactive = (msg.pl_active == 1);
 
