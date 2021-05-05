@@ -44,8 +44,8 @@ float convertBrakePressure(uint16_t brakeRaw)
 
 float convertEbsPressure(uint16_t ebsRaw)
 {
-    double pressure = 2.5 * ((float)ebsRaw) - 2.5; //linear conversion
-    return pressure;                                //1V -> 0bar | 5V -> 10bar
+    float pressure = 2.5 * ((5.0/4095.0)*((float)ebsRaw)) - 2.5; //linear conversion
+    return pressure;                                           //1V -> 0bar | 5V -> 10bar
 }
 
 float convertFrontRPM(uint16_t hall)
