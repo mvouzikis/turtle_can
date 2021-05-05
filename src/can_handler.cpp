@@ -68,6 +68,8 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
     this->canRecvTimer = this->create_wall_timer(500us, std::bind(&CanHandler::handleCanReceive,    this));
     this->canSendTimer = this->create_wall_timer(1ms,   std::bind(&CanHandler::handleCanTransmit,   this));
 
+    res_initialized = false;
+
     RCLCPP_INFO(this->get_logger(), "Communication started");
 }
 
@@ -106,6 +108,7 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<bool>("transmitEbsServiceBrake", this->rosConf.transmitEbsServiceBrake,  true);
     this->get_parameter_or<bool>("transmitSwaCommanded",    this->rosConf.transmitSwaCommanded,     true);
     this->get_parameter_or<bool>("transmitApuCommand",      this->rosConf.transmitApuCommand,       true);
+    this->get_parameter_or<bool>("transmitApuResInit",      this->rosConf.transmitApuResInit,       true);
 }
 
 void CanHandler::variablesInit()
@@ -204,6 +207,10 @@ void CanHandler::variablesInit()
     if (this->rosConf.transmitApuCommand) {
         this->frameApuCommand.throttle_brake_commanded = 0.0;
     }
+    if (this->rosConf.transmitApuResInit) {
+        this->frameApuResInit.requested_state = CAN_APU_RES_DLOGGER_APU_RES_INIT_REQUESTED_STATE_OPERATIONAL_CHOICE;
+        this->frameApuResInit.addressed_node = 0x0111;
+    }
 }
 
 //Functions for CAN receive
@@ -264,6 +271,7 @@ void CanHandler::handleCanReceive()
     while (recvfrom(this->can1Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr1, &this->len) >= 8) {
         ioctl(this->can1Socket, SIOCGSTAMP, &this->recvTime);  //get message timestamp
         if (this->recvFrame.can_id == CAN_APU_RES_DLOGGER_RES_STATUS_FRAME_ID && this->rosConf.publishResStatus) {
+            res_initialized = true;
             this->publish_res_status();
         }
     }
@@ -584,6 +592,9 @@ void CanHandler::handleCanTransmit()
     if (this->rosConf.transmitApuCommand && !(this->canTimerCounter % CAN_AS_DASH_AUX_SWA_COMMANDED_CYCLE_TIME_MS)) {
         this->transmit_apu_command();
     }
+    if (this->rosConf.transmitApuResInit && !res_initialized && !(this->canTimerCounter % 1000)) {
+        this->transmit_apu_res_init();
+    }
 }
 
 void CanHandler::transmit_apu_state_mission()
@@ -639,5 +650,19 @@ void CanHandler::transmit_apu_command()
 
     if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_APU_COMMAND_LENGTH) {
         RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_COMMAND");
+    }
+}
+
+void CanHandler::transmit_apu_res_init() {
+    // send CAN initialization thing
+    this->sendFrame.can_id = CAN_APU_RES_DLOGGER_APU_RES_INIT_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH;
+    if (can_apu_res_dlogger_apu_res_init_pack(this->sendFrame.data, &this->frameApuResInit, sizeof(sendFrame.data)) != CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH){
+        RCLCPP_ERROR(this->get_logger(), "Error during pack of APU_RES_INIT");
+        return;
+    }
+
+    if (sendto(this->can1Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr1, this->len) < CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_RES_INIT");
     }
 }
