@@ -23,7 +23,8 @@ CanInterface:
     publishInvererCommands: true    # /inverter_commands
     publishResStatus: true          # /res_status
     # CAN messages to transmit
-    transmitApuStateMission: true # TODO fill subscriber topics
-    transmitEbsServiceBrake: true # TODO fill subscriber topics
-    transmitSwaCommanded: true    # TODO fill subscriber topics
-    transmitApuCommand: true      # TODO fill subscriber topics
+    transmitApuStateMission: true
+    transmitEbsServiceBrake: true
+    transmitSwaCommanded: true
+    transmitApuCommand: true
+    transmitApuResInit: true

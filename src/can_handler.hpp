@@ -61,6 +61,7 @@ typedef struct {
     bool transmitEbsServiceBrake;
     bool transmitSwaCommanded;
     bool transmitApuCommand;
+    bool transmitApuResInit;
 } RosConfig;
 
 class CanHandler : public rclcpp::Node
@@ -177,6 +178,11 @@ class CanHandler : public rclcpp::Node
 
         struct can_as_dash_aux_apu_command_t frameApuCommand;
         void transmit_apu_command();
+
+        // Send RES initialize message unitl it starts sending CAN messages
+        struct can_apu_res_dlogger_apu_res_init_t frameApuResInit;
+        bool res_initialized;
+        void transmit_apu_res_init();
 
     public:
         CanHandler(rclcpp::NodeOptions nOpt);
