@@ -406,8 +406,8 @@ void CanHandler::publish_dash_front_rpm()
     }
 
     this->createHeader(&this->msgDashFrontRPM.header);
-    this->msgDashFrontRPM.left = convertFrontRPM(msg.hall_fl);
-    this->msgDashFrontRPM.right = convertFrontRPM(msg.hall_fr);
+    this->msgDashFrontRPM.left = msg.rpm_fl;
+    this->msgDashFrontRPM.right = msg.rpm_fr;
 
     this->pubDashFrontRPM->publish(this->msgDashFrontRPM);
 }
