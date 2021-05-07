@@ -78,6 +78,9 @@ CanHandler::~CanHandler()
     if (close(this->can0Socket) < 0) {
         RCLCPP_ERROR(this->get_logger(), "Unable to close %s.\n", this->rosConf.channel0.c_str());
     }
+    if (close(this->can1Socket) < 0) {
+        RCLCPP_ERROR(this->get_logger(), "Unable to close %s.\n", this->rosConf.channel1.c_str());
+    }
 }
 
 void CanHandler::loadRosParams()
@@ -104,11 +107,11 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<bool>("publishMotorRPM",             this->rosConf.publishMotorRPM,              true);
     this->get_parameter_or<bool>("publishResStatus",            this->rosConf.publishResStatus,             true);
     //CAN messages to transmit
-    this->get_parameter_or<bool>("transmitApuStateMission", this->rosConf.transmitApuStateMission,  true);
-    this->get_parameter_or<bool>("transmitEbsServiceBrake", this->rosConf.transmitEbsServiceBrake,  true);
-    this->get_parameter_or<bool>("transmitSwaCommanded",    this->rosConf.transmitSwaCommanded,     true);
-    this->get_parameter_or<bool>("transmitApuCommand",      this->rosConf.transmitApuCommand,       true);
-    this->get_parameter_or<bool>("transmitApuResInit",      this->rosConf.transmitApuResInit,       true);
+    this->get_parameter_or<uint8_t>("transmitApuStateMission", this->rosConf.transmitApuStateMission,   1);
+    this->get_parameter_or<uint8_t>("transmitSwaCommanded",    this->rosConf.transmitSwaCommanded,      1);
+    this->get_parameter_or<uint8_t>("transmitApuCommand",      this->rosConf.transmitApuCommand,        1);
+    this->get_parameter_or<uint8_t>("transmitECUParams",       this->rosConf.transmitECUParams,         1);
+    this->get_parameter_or<bool>("transmitApuResInit",         this->rosConf.transmitApuResInit,        true);
 }
 
 void CanHandler::variablesInit()
@@ -190,9 +193,6 @@ void CanHandler::variablesInit()
         this->frameApuStateMission.as_mission = CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_MISSION_NO_MISSION_CHOICE;
         this->frameApuStateMission.as_state = CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_STATE_AS_OFF_CHOICE;
     }
-    if (this->rosConf.transmitEbsServiceBrake) {
-        this->frameEbsServiceBrake.servo_commanded_percentage = 0;
-    }
     if (this->rosConf.transmitSwaCommanded || this->rosConf.transmitApuCommand) {
         this->subActuatorCmd = this->create_subscription<turtle_interfaces::msg::ActuatorCmd>("cmd", sensorQos, std::bind(&CanHandler::actuator_cmd_callback, this, _1));
     }
@@ -207,9 +207,16 @@ void CanHandler::variablesInit()
     if (this->rosConf.transmitApuCommand) {
         this->frameApuCommand.throttle_brake_commanded = 0.0;
     }
+    if (this->rosConf.transmitECUParams) {
+        this->subECUParams = this->create_subscription<turtle_interfaces::msg::ECUParams>("ecu_params", serviceQos, std::bind(&CanHandler::ecu_params_callback, this, _1));
+
+        this->frameECUParams.inverter_rpm_max = 0;
+        this->frameECUParams.inverter_i_max = 0;
+        this->frameECUParams.power_target_kw = can_as_dash_aux_ecu_parameters_power_target_kw_encode(0.0);
+    }
     if (this->rosConf.transmitApuResInit) {
         this->frameApuResInit.requested_state = CAN_APU_RES_DLOGGER_APU_RES_INIT_REQUESTED_STATE_OPERATIONAL_CHOICE;
-        this->frameApuResInit.addressed_node = 0x0111;
+        this->frameApuResInit.addressed_node = CAN_APU_RES_DLOGGER_APU_RES_INIT_ADDRESSED_NODE_RES_ADDRESS_CHOICE;
     }
 }
 
@@ -226,7 +233,7 @@ void CanHandler::handleCanReceive()
         else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AUX_BRAKELIGHT_FRAME_ID && this->rosConf.publishAuxBrakelight) {
             this->publish_aux_brakelight();
         }
-        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AUX_TANK_PRESSURE_FRAME_ID && this->rosConf.publishAuxTankPressure) {
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_EBS_TANK_PRESSURE_FRAME_ID && this->rosConf.publishAuxTankPressure) {
             this->publish_aux_tank_pressure();
         }
         else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AUX_REAR_HALL_FRAME_ID && this->rosConf.publishAuxRearRPM) {
@@ -314,8 +321,8 @@ void CanHandler::publish_aux_brakelight()
 
 void CanHandler::publish_aux_tank_pressure()
 {
-    can_as_dash_aux_aux_tank_pressure_t msg;
-    if (can_as_dash_aux_aux_tank_pressure_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+    can_as_dash_aux_ebs_tank_pressure_t msg;
+    if (can_as_dash_aux_ebs_tank_pressure_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
         RCLCPP_ERROR(this->get_logger(), "Error during unpack of AUX_TANK_PRESSURE");
         return;
     }
@@ -429,12 +436,12 @@ void CanHandler::publish_dash_leds()
 
     this->createHeader(&this->msgDashLEDs.header);
     this->msgDashLEDs.fanpwm = msg.fan_pwm;
-    this->msgDashLEDs.buzzer = (msg.buzzer == 13);
-    this->msgDashLEDs.safestate1 = (msg.safe_state_1 == 13);
-    this->msgDashLEDs.enableout = (msg.enable_out == 13);
-    this->msgDashLEDs.ebsled = (msg.sensor_error == 13);
-    this->msgDashLEDs.scsoftware = (msg.sc_software == 1);
-    this->msgDashLEDs.plactive = (msg.pl_active == 1);
+    this->msgDashLEDs.buzzer = (msg.buzzer == CAN_AS_DASH_AUX_DASH_LEDS_BUZZER_ON_CHOICE);
+    this->msgDashLEDs.safestate1 = (msg.safe_state_1 == CAN_AS_DASH_AUX_DASH_LEDS_SAFE_STATE_1_ON_CHOICE);
+    this->msgDashLEDs.enableout = (msg.enable_out == CAN_AS_DASH_AUX_DASH_LEDS_ENABLE_OUT_ON_CHOICE);
+    this->msgDashLEDs.ebsled = (msg.ebs_led == CAN_AS_DASH_AUX_DASH_LEDS_EBS_LED_ON_CHOICE);
+    this->msgDashLEDs.scsoftware = (msg.sc_software == CAN_AS_DASH_AUX_DASH_LEDS_SC_SOFTWARE_CLOSED_CHOICE);
+    this->msgDashLEDs.plactive = (msg.pl_active == CAN_AS_DASH_AUX_DASH_LEDS_PL_ACTIVE_ON_CHOICE);
 
     this->pubDashLEDs->publish(this->msgDashLEDs);
 }
@@ -552,11 +559,15 @@ void CanHandler::publish_res_status()
 void CanHandler::apu_state_callback(turtle_interfaces::msg::StateMachineState::SharedPtr msgApuState)
 {
     this->frameApuStateMission.as_state = msgApuState->state;
+    if (this->rosConf.transmitApuStateMission == 1)
+        this->transmit_apu_state_mission();
 }
 
 void CanHandler::apu_mission_callback(turtle_interfaces::msg::Mission::SharedPtr msgApuMission)
 {
     this->frameApuStateMission.as_mission = msgApuMission->mission;
+    if (this->rosConf.transmitApuStateMission == 1)
+        this->transmit_apu_state_mission();
 }
 
 void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::SharedPtr msgActuatorCmd)
@@ -570,8 +581,26 @@ void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::Shar
     this->frameSwaCommanded.steering_rate_is_zero = (msgActuatorCmd->steering < 0.01) && (msgActuatorCmd->steering > -0.01) ? 
                                                     CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_IS_ZERO_TRUE_CHOICE :
                                                     CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_IS_ZERO_FALSE_CHOICE;
+    if (this->rosConf.transmitSwaCommanded == 1) {
+        this->transmit_swa_commanded();
+    }
+
 
     this->frameApuCommand.throttle_brake_commanded = msgActuatorCmd->throttle;
+    if (this->rosConf.transmitApuCommand == 1) {
+        this->transmit_apu_command();
+    }
+}
+
+void CanHandler::ecu_params_callback(turtle_interfaces::msg::ECUParams::SharedPtr msgECUParams)
+{
+    this->frameECUParams.inverter_rpm_max = msgECUParams->inverter_rpm_max;
+    this->frameECUParams.inverter_i_max = msgECUParams->inverter_i_rms_max;
+    this->frameECUParams.power_target_kw = can_as_dash_aux_ecu_parameters_power_target_kw_encode(msgECUParams->power_target_kw);
+
+    if (this->rosConf.transmitECUParams == 1) {
+        this->transmit_ecu_params();
+    }
 }
 
 void CanHandler::handleCanTransmit()
@@ -580,19 +609,19 @@ void CanHandler::handleCanTransmit()
     if (this->canTimerCounter == 1001U)     //after 1sec
         this->canTimerCounter = 1U;         //reset counter to prevent overflow
 
-    if (this->rosConf.transmitApuStateMission && !(this->canTimerCounter % CAN_AS_DASH_AUX_APU_STATE_MISSION_CYCLE_TIME_MS)) {
+    if ((this->rosConf.transmitApuStateMission == 2) && !(this->canTimerCounter % CAN_AS_DASH_AUX_APU_STATE_MISSION_CYCLE_TIME_MS)) {
         this->transmit_apu_state_mission();
     }
-    if (this->rosConf.transmitEbsServiceBrake && !(this->canTimerCounter % CAN_AS_DASH_AUX_EBS_SERVICE_BRAKE_CYCLE_TIME_MS)) {
-        this->transmit_ebs_service_brake();
-    }
-    if (this->rosConf.transmitSwaCommanded && !(this->canTimerCounter % CAN_AS_DASH_AUX_SWA_COMMANDED_CYCLE_TIME_MS)) {
+    if ((this->rosConf.transmitSwaCommanded == 2) && !(this->canTimerCounter % CAN_AS_DASH_AUX_SWA_COMMANDED_CYCLE_TIME_MS)) {
         this->transmit_swa_commanded();
     }
-    if (this->rosConf.transmitApuCommand && !(this->canTimerCounter % CAN_AS_DASH_AUX_SWA_COMMANDED_CYCLE_TIME_MS)) {
+    if ((this->rosConf.transmitApuCommand == 2) && !(this->canTimerCounter % CAN_AS_DASH_AUX_SWA_COMMANDED_CYCLE_TIME_MS)) {
         this->transmit_apu_command();
     }
-    if (this->rosConf.transmitApuResInit && !res_initialized && !(this->canTimerCounter % 1000)) {
+    if ((this->rosConf.transmitECUParams == 2) && !(this->canTimerCounter % CAN_AS_DASH_AUX_ECU_PARAMETERS_CYCLE_TIME_MS)) {
+        this->transmit_ecu_params();
+    }
+    if (this->rosConf.transmitApuResInit && !res_initialized && !(this->canTimerCounter % CAN_APU_RES_DLOGGER_APU_RES_INIT_CYCLE_TIME_MS)) {
         this->transmit_apu_res_init();
     }
 }
@@ -608,20 +637,6 @@ void CanHandler::transmit_apu_state_mission()
 
     if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_APU_STATE_MISSION_LENGTH) {
         RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_STATE_MISSION");
-    }
-}
-
-void CanHandler::transmit_ebs_service_brake()
-{
-    this->sendFrame.can_id = CAN_AS_DASH_AUX_EBS_SERVICE_BRAKE_FRAME_ID;
-    this->sendFrame.can_dlc = CAN_AS_DASH_AUX_EBS_SERVICE_BRAKE_LENGTH;
-    if (can_as_dash_aux_ebs_service_brake_pack(this->sendFrame.data, &this->frameEbsServiceBrake, sizeof(sendFrame.data)) != CAN_AS_DASH_AUX_EBS_SERVICE_BRAKE_LENGTH){
-        RCLCPP_ERROR(this->get_logger(), "Error during pack of EBS_SERVICE_BRAKE");
-        return;
-    }
-
-    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_EBS_SERVICE_BRAKE_LENGTH) {
-        RCLCPP_ERROR(this->get_logger(), "Error during transmit of EBS_SERVICE_BRAKE");
     }
 }
 
@@ -653,7 +668,22 @@ void CanHandler::transmit_apu_command()
     }
 }
 
-void CanHandler::transmit_apu_res_init() {
+void CanHandler::transmit_ecu_params()
+{
+    this->sendFrame.can_id = CAN_AS_DASH_AUX_ECU_PARAMETERS_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_AS_DASH_AUX_ECU_PARAMETERS_LENGTH;
+    if (can_as_dash_aux_ecu_parameters_pack(this->sendFrame.data, &this->frameECUParams, sizeof(sendFrame.data)) != CAN_AS_DASH_AUX_EBS_SERVICE_BRAKE_LENGTH) {
+         RCLCPP_ERROR(this->get_logger(), "Error during pack of ECU_PARAMETERS");
+        return;
+    }
+
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_ECU_PARAMETERS_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of ECU_PARAMETERS");
+    }
+}
+
+void CanHandler::transmit_apu_res_init() 
+{
     // send CAN initialization thing
     this->sendFrame.can_id = CAN_APU_RES_DLOGGER_APU_RES_INIT_FRAME_ID;
     this->sendFrame.can_dlc = CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH;

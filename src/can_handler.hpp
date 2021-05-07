@@ -23,6 +23,7 @@
 #include "turtle_interfaces/msg/state_machine_state.hpp"
 #include "turtle_interfaces/msg/actuator_cmd.hpp"
 #include "turtle_interfaces/msg/inverter_commands.hpp"
+#include "turtle_interfaces/msg/ecu_params.hpp"
 
 #include "can_as_dash_aux.h"
 #include "can_apu_res_dlogger.h"
@@ -57,10 +58,10 @@ typedef struct {
     bool publishResStatus;
 
     //CAN messages to transmit
-    bool transmitApuStateMission;    
-    bool transmitEbsServiceBrake;
-    bool transmitSwaCommanded;
-    bool transmitApuCommand;
+    uint8_t transmitApuStateMission;
+    uint8_t transmitSwaCommanded;
+    uint8_t transmitApuCommand;
+    uint8_t transmitECUParams;
     bool transmitApuResInit;
 } RosConfig;
 
@@ -166,18 +167,20 @@ class CanHandler : public rclcpp::Node
         rclcpp::Subscription<turtle_interfaces::msg::ActuatorCmd>::SharedPtr subActuatorCmd;        
         void actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::SharedPtr msgActuatorCmd);
 
+        rclcpp::Subscription<turtle_interfaces::msg::ECUParams>::SharedPtr subECUParams;        
+        void ecu_params_callback(turtle_interfaces::msg::ECUParams::SharedPtr msgECUParams);
+
         struct can_as_dash_aux_apu_state_mission_t frameApuStateMission;
         void transmit_apu_state_mission();
-
-        //TODO who's your pub?
-        struct can_as_dash_aux_ebs_service_brake_t frameEbsServiceBrake;
-        void transmit_ebs_service_brake();
 
         struct can_as_dash_aux_swa_commanded_t frameSwaCommanded;
         void transmit_swa_commanded();
 
         struct can_as_dash_aux_apu_command_t frameApuCommand;
         void transmit_apu_command();
+
+        struct can_as_dash_aux_ecu_parameters_t frameECUParams;
+        void transmit_ecu_params();
 
         // Send RES initialize message unitl it starts sending CAN messages
         struct can_apu_res_dlogger_apu_res_init_t frameApuResInit;

@@ -23,8 +23,9 @@ CanInterface:
     publishInvererCommands: true    # /inverter_commands
     publishResStatus: true          # /res_status
     # CAN messages to transmit
-    transmitApuStateMission: true
-    transmitEbsServiceBrake: true
-    transmitSwaCommanded: true
-    transmitApuCommand: true
-    transmitApuResInit: true
+    #(0: do not send, 1: use ros publisher callback, 2: use dbc cyclic time)
+    transmitApuStateMission: 1  # /state_machine_state /current_mission
+    transmitSwaCommanded: 1     # /cmd
+    transmitApuCommand: 1       # /cmd
+    transmitECUParams: 1        # /ecu_params
+    transmitApuResInit: true    #does not have publisher
