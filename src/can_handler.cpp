@@ -194,7 +194,7 @@ void CanHandler::variablesInit()
         this->frameEbsServiceBrake.servo_commanded_percentage = 0;
     }
     if (this->rosConf.transmitSwaCommanded || this->rosConf.transmitApuCommand) {
-        this->subActuatorCmd = this->create_subscription<turtle_interfaces::msg::ActuatorCmd>("cmd", 10, std::bind(&CanHandler::actuator_cmd_callback, this, _1));
+        this->subActuatorCmd = this->create_subscription<turtle_interfaces::msg::ActuatorCmd>("cmd", sensorQos, std::bind(&CanHandler::actuator_cmd_callback, this, _1));
     }
     if (this->rosConf.transmitSwaCommanded) {
         this->frameSwaCommanded.steering_angle_commanded = convertSteeringAngleTarget(0.0);
