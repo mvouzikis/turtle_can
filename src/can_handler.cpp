@@ -566,8 +566,8 @@ void CanHandler::apu_state_callback(turtle_interfaces::msg::StateMachineState::S
 void CanHandler::apu_mission_callback(turtle_interfaces::msg::Mission::SharedPtr msgApuMission)
 {
     this->frameApuStateMission.as_mission = msgApuMission->mission;
-    if (this->rosConf.transmitApuStateMission == 1)
-        this->transmit_apu_state_mission();
+    // if (this->rosConf.transmitApuStateMission == 1)
+    //     this->transmit_apu_state_mission();
 }
 
 void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::SharedPtr msgActuatorCmd)
@@ -672,7 +672,7 @@ void CanHandler::transmit_ecu_params()
 {
     this->sendFrame.can_id = CAN_AS_DASH_AUX_ECU_PARAMETERS_FRAME_ID;
     this->sendFrame.can_dlc = CAN_AS_DASH_AUX_ECU_PARAMETERS_LENGTH;
-    if (can_as_dash_aux_ecu_parameters_pack(this->sendFrame.data, &this->frameECUParams, sizeof(sendFrame.data)) != CAN_AS_DASH_AUX_EBS_SERVICE_BRAKE_LENGTH) {
+    if (can_as_dash_aux_ecu_parameters_pack(this->sendFrame.data, &this->frameECUParams, sizeof(sendFrame.data)) != CAN_AS_DASH_AUX_ECU_PARAMETERS_LENGTH) {
          RCLCPP_ERROR(this->get_logger(), "Error during pack of ECU_PARAMETERS");
         return;
     }
