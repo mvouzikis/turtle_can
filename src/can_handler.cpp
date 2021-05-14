@@ -65,8 +65,9 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
     RCLCPP_INFO(this->get_logger(), "%s interface initialized", this->rosConf.channel1.c_str());
 
     //initialize timers
-    this->canRecvTimer = this->create_wall_timer(500us, std::bind(&CanHandler::handleCanReceive,    this));
-    this->canSendTimer = this->create_wall_timer(1ms,   std::bind(&CanHandler::handleCanTransmit,   this));
+    this->canRecvTimer =    this->create_wall_timer(500us,  std::bind(&CanHandler::handleCanReceive,        this));
+    this->canRecvTimeout =  this->create_wall_timer(10ms,   std::bind(&CanHandler::handleReceiveTimeout,    this));
+    this->canSendTimer =    this->create_wall_timer(1ms,    std::bind(&CanHandler::handleCanTransmit,       this));
 
     res_initialized = false;
 
@@ -100,12 +101,14 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<bool>("publishAuxPumpsFans",         this->rosConf.publishAuxPumpsFans,          true);
     this->get_parameter_or<bool>("publishAuxBrakelight",        this->rosConf.publishAuxBrakelight,         true);
     this->get_parameter_or<bool>("publishDashLEDs",             this->rosConf.publishDashLEDs,              true);
-    this->get_parameter_or<bool>("publishAuxTankPressure",      this->rosConf.publishAuxTankPressure,       true);
+    this->get_parameter_or<bool>("publishEbsTankPressure",      this->rosConf.publishEbsTankPressure,       true);
     this->get_parameter_or<bool>("publishAmiSelectedMission",   this->rosConf.publishAmiSelectedMission,    true);
-    this->get_parameter_or<bool>("publishSwaActual",            this->rosConf.publishSwaActual,             true);
+    this->get_parameter_or<bool>("publishSwaActual",            this->rosConf.publishSwaStatus,             true);
+    this->get_parameter_or<bool>("publishEbsServiceBrake",      this->rosConf.publishEbsServiceBrake,       true);
     this->get_parameter_or<bool>("publishEbsSupervisor",        this->rosConf.publishEbsSupervisor,         true);
     this->get_parameter_or<bool>("publishMotorRPM",             this->rosConf.publishMotorRPM,              true);
     this->get_parameter_or<bool>("publishResStatus",            this->rosConf.publishResStatus,             true);
+    this->get_parameter_or<bool>("publishCanStatus",            this->rosConf.publishCanStatus,             true);
     //CAN messages to transmit
     this->get_parameter_or<uint8_t>("transmitApuStateMission", this->rosConf.transmitApuStateMission,   1);
     this->get_parameter_or<uint8_t>("transmitSwaCommanded",    this->rosConf.transmitSwaCommanded,      1);
@@ -128,9 +131,9 @@ void CanHandler::variablesInit()
         this->pubAuxBrakelight = this->create_publisher<turtle_interfaces::msg::BrakeLight>("brake_light", sensorQos);
         this->msgAuxBrakelight = turtle_interfaces::msg::BrakeLight();
     }
-    if (this->rosConf.publishAuxTankPressure) {
-        this->pubAuxTankPressure = this->create_publisher<turtle_interfaces::msg::EbsTankPressure>("ebs_tank_pressure", sensorQos);
-        this->msgAuxTankPressure = turtle_interfaces::msg::EbsTankPressure();
+    if (this->rosConf.publishEbsTankPressure) {
+        this->pubEbsTankPressure = this->create_publisher<turtle_interfaces::msg::EbsTankPressure>("ebs_tank_pressure", sensorQos);
+        this->msgEbsTankPressure = turtle_interfaces::msg::EbsTankPressure();
     }
     if (this->rosConf.publishAuxRearRPM) {
         this->pubAuxRearRPM = this->create_publisher<turtle_interfaces::msg::RPM>("rpm_rear", sensorQos);
@@ -168,11 +171,15 @@ void CanHandler::variablesInit()
         this->pubDashButtons = this->create_publisher<turtle_interfaces::msg::DashButtons>("dash_buttons", serviceQos);
         this->msgDashButtons = turtle_interfaces::msg::DashButtons();
     }
+    if (this->rosConf.publishEbsServiceBrake) {
+        this->pubEbsServiceBrake= this->create_publisher<turtle_interfaces::msg::EbsServiceBrake>("ebs_service_brake", serviceQos);
+        this->msgEbsServiceBrake = turtle_interfaces::msg::EbsServiceBrake();
+    }
     if (this->rosConf.publishEbsSupervisor) {
         this->pubEbsSupervisor= this->create_publisher<turtle_interfaces::msg::EbsSupervisorInfo>("ebs_supervisor_info", serviceQos);
         this->msgEbsSupervisor = turtle_interfaces::msg::EbsSupervisorInfo();
     } 
-    if (this->rosConf.publishSwaActual) {
+    if (this->rosConf.publishSwaStatus) {
         this->pubSwaActual = this->create_publisher<turtle_interfaces::msg::Steering>("steering_actual", sensorQos);
         this->msgSwaActual = turtle_interfaces::msg::Steering();
     }
@@ -183,6 +190,10 @@ void CanHandler::variablesInit()
     if (this->rosConf.publishResStatus) {
         this->pubResStatus = this->create_publisher<turtle_interfaces::msg::ResStatus>("res_status", serviceQos);
         this->msgResStatus = turtle_interfaces::msg::ResStatus();
+    }
+    if (this->rosConf.publishCanStatus) {
+        this->pubCanStatus = this->create_publisher<turtle_interfaces::msg::CanStatus>("can_status", serviceQos);
+        this->msgCanStatus = turtle_interfaces::msg::CanStatus();
     }
 
     //Initialize CAN Tx messages
@@ -233,8 +244,8 @@ void CanHandler::handleCanReceive()
         else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AUX_BRAKELIGHT_FRAME_ID && this->rosConf.publishAuxBrakelight) {
             this->publish_aux_brakelight();
         }
-        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_EBS_TANK_PRESSURE_FRAME_ID && this->rosConf.publishAuxTankPressure) {
-            this->publish_aux_tank_pressure();
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_EBS_TANK_PRESSURE_FRAME_ID && this->rosConf.publishEbsTankPressure) {
+            this->publish_ebs_tank_pressure();
         }
         else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_AUX_REAR_HALL_FRAME_ID && this->rosConf.publishAuxRearRPM) {
             this->publish_aux_rear_rpm();
@@ -260,10 +271,13 @@ void CanHandler::handleCanReceive()
         else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_DASH_BUTTONS_FRAME_ID && this->rosConf.publishDashButtons) {
             this->publish_dash_buttons();
         }
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_EBS_SERVICE_BRAKE_FRAME_ID && this->rosConf.publishEbsServiceBrake) {
+            this->publish_ebs_service_brake();
+        }
         else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_EBS_SUPERVISOR_FRAME_ID && this->rosConf.publishEbsSupervisor) {
             this->publish_ebs_supervisor();
         }
-        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_SWA_STATUS_FRAME_ID && this->rosConf.publishSwaActual) {
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_SWA_STATUS_FRAME_ID && this->rosConf.publishSwaStatus) {
             this->publish_swa_actual();
         }
         else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_INV_RESOLVERS_FRAME_ID) {
@@ -319,18 +333,18 @@ void CanHandler::publish_aux_brakelight()
     this->pubAuxBrakelight->publish(this->msgAuxBrakelight);
 }
 
-void CanHandler::publish_aux_tank_pressure()
+void CanHandler::publish_ebs_tank_pressure()
 {
     can_as_dash_aux_ebs_tank_pressure_t msg;
     if (can_as_dash_aux_ebs_tank_pressure_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of AUX_TANK_PRESSURE");
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of EBS_TANK_PRESSURE");
         return;
     }
 
-    this->createHeader(&this->msgAuxTankPressure.header);
-    this->msgAuxTankPressure.ebspressureraw = convertEbsPressure(msg.ebs_pressure_raw);
+    this->createHeader(&this->msgEbsTankPressure.header);
+    this->msgEbsTankPressure.ebspressureraw = convertEbsPressure(msg.ebs_pressure_raw);
 
-    this->pubAuxTankPressure->publish(this->msgAuxTankPressure);
+    this->pubEbsTankPressure->publish(this->msgEbsTankPressure);
 }
 
 void CanHandler::publish_aux_rear_rpm()
@@ -466,6 +480,20 @@ void CanHandler::publish_dash_buttons()
     this->pubDashButtons->publish(this->msgDashButtons);
 }
 
+void CanHandler::publish_ebs_service_brake()
+{
+    can_as_dash_aux_ebs_service_brake_t msg;
+    if (can_as_dash_aux_ebs_service_brake_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of EBS_SERVICE_BRAKE");
+        return;
+    }
+
+    this->createHeader(&this->msgEbsServiceBrake.header); 
+    this->msgEbsServiceBrake.servo_commanded_percentage = msg.servo_commanded_percentage;
+
+    this->pubEbsServiceBrake->publish(this->msgEbsServiceBrake);
+}
+
 void CanHandler::publish_ebs_supervisor()
 {
     can_as_dash_aux_ebs_supervisor_t msg;
@@ -501,8 +529,22 @@ void CanHandler::publish_swa_actual()
     this->createHeader(&this->msgSwaActual.header);
     this->msgSwaActual.steering = convertSteeringActual(msg.steering_actual);
 
-    if (msg.analog1_error || msg.analog2_error || msg.stall_occurred) {
-        RCLCPP_WARN(this->get_logger(), "AN1 %u | AN2 %u | Stall %u", msg.analog1_error, msg.analog2_error, msg.stall_occurred);
+    //errors check
+    this->msgCanStatus.sensor_errors = msg.analog1_error == CAN_AS_DASH_AUX_SWA_STATUS_ANALOG1_ERROR_ERROR_CHOICE ?
+                                       this->msgCanStatus.sensor_errors | this->msgCanStatus.SWA_STATUS_ANALOG1_ERROR :
+                                       this->msgCanStatus.sensor_errors & !this->msgCanStatus.SWA_STATUS_ANALOG1_ERROR;
+    this->msgCanStatus.sensor_errors = msg.analog2_error == CAN_AS_DASH_AUX_SWA_STATUS_ANALOG2_ERROR_ERROR_CHOICE ?
+                                       this->msgCanStatus.sensor_errors | this->msgCanStatus.SWA_STATUS_ANALOG2_ERROR :
+                                       this->msgCanStatus.sensor_errors & !this->msgCanStatus.SWA_STATUS_ANALOG2_ERROR;
+    this->msgCanStatus.sensor_errors = msg.stall_occurred == CAN_AS_DASH_AUX_SWA_STATUS_STALL_OCCURRED_STALL_CHOICE ?
+                                       this->msgCanStatus.sensor_errors | this->msgCanStatus.SWA_STATUS_STALL_OCCURED :
+                                       this->msgCanStatus.sensor_errors & !this->msgCanStatus.SWA_STATUS_STALL_OCCURED;                            
+
+    if (msg.analog1_error == CAN_AS_DASH_AUX_SWA_STATUS_ANALOG1_ERROR_ERROR_CHOICE || 
+        msg.analog2_error == CAN_AS_DASH_AUX_SWA_STATUS_ANALOG2_ERROR_ERROR_CHOICE || 
+        msg.stall_occurred == CAN_AS_DASH_AUX_SWA_STATUS_STALL_OCCURRED_STALL_CHOICE)
+    {
+        this->pubCanStatus->publish(this->msgCanStatus);
     }
 
     this->pubSwaActual->publish(this->msgSwaActual);
@@ -553,6 +595,100 @@ void CanHandler::publish_res_status()
     this->msgResStatus.signal_strength = msg.signal_strength;
 
     this->pubResStatus->publish(this->msgResStatus);
+}
+
+//Fucntions for CAN staus
+void CanHandler::handleReceiveTimeout()
+{
+    bool timeoutOccured = false;
+    rclcpp::Time timeNow = this->now();
+    
+    if (timeNow - this->msgDashApps.header.stamp > rclcpp::Duration(1s)) {
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_APPS_TIMEOUT;
+        timeoutOccured = true;
+    }
+    else
+        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.DASH_APPS_TIMEOUT;
+    
+    if (timeNow - this->msgDashBrake.header.stamp > rclcpp::Duration(1s)) {
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_BRAKE_TIMEOUT;
+        timeoutOccured = true;
+    }
+    else
+        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.DASH_BRAKE_TIMEOUT;
+
+    if (timeNow - this->msgDashButtons.header.stamp > rclcpp::Duration(1s)) {
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_BUTTONS_TIMEOUT;
+        timeoutOccured = true;
+    }
+    else
+        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.DASH_BUTTONS_TIMEOUT;
+
+    if (timeNow - this->msgDashFrontRPM.header.stamp > rclcpp::Duration(1s)) {
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_FRONT_HALL_TIMEOUT;
+        timeoutOccured = true;
+    }
+    else
+        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.DASH_FRONT_HALL_TIMEOUT;
+
+    if (timeNow - this->msgAuxPumpsFans.header.stamp > rclcpp::Duration(1s)) {
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT;
+        timeoutOccured = true;
+    }
+    else
+        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT;
+
+    if (timeNow - this->msgDashLEDs.header.stamp > rclcpp::Duration(1s)) {
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_LEDS_TIMEOUT;
+        timeoutOccured = true;
+    }
+    else
+        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.DASH_LEDS_TIMEOUT;
+
+    if (timeNow - this->msgEbsTankPressure.header.stamp > rclcpp::Duration(1s)) {
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.EBS_TANK_PRESSURE_TIMEOUT;
+        timeoutOccured = true;
+    }
+    else
+        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.EBS_TANK_PRESSURE_TIMEOUT;
+
+    if (timeNow - this->msgAmiSelectedMission.header.stamp > rclcpp::Duration(1s)) {
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.AMI_SELECTED_MISSION_TIMEOUT;
+        timeoutOccured = true;
+    }
+    else
+        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.AMI_SELECTED_MISSION_TIMEOUT;
+
+    if (timeNow - this->msgSwaActual.header.stamp > rclcpp::Duration(1s)) {
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.SWA_STATUS_TIMEOUT;
+        timeoutOccured = true;
+    }
+    else
+        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.SWA_STATUS_TIMEOUT;
+
+    if (timeNow - this->msgEbsSupervisor.header.stamp > rclcpp::Duration(1s)) {
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.EBS_SUPERVISOR_TIMEOUT;
+        timeoutOccured = true;
+    }
+    else
+        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.EBS_SUPERVISOR_TIMEOUT;
+
+    if (timeNow - this->msgEbsServiceBrake.header.stamp > rclcpp::Duration(1s)) {
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.EBS_SERVICE_BRAKE_TIMEOUT;
+        timeoutOccured = true;
+    }
+    else
+        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.EBS_SERVICE_BRAKE_TIMEOUT;
+
+    if (timeNow - this->msgInvCmds.header.stamp > rclcpp::Duration(1s)) {
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.INV_RESOLVERS_TIMEOUT;
+        timeoutOccured = true;
+    }
+    else
+        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.INV_RESOLVERS_TIMEOUT;
+
+    if (timeoutOccured)
+        this->pubCanStatus->publish(this->msgCanStatus);
 }
 
 //Functions for CAN transmit

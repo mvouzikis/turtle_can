@@ -17,6 +17,7 @@
 #include "turtle_interfaces/msg/brake.hpp"
 #include "turtle_interfaces/msg/dash_leds.hpp"
 #include "turtle_interfaces/msg/dash_buttons.hpp"
+#include "turtle_interfaces/msg/ebs_service_brake.hpp"
 #include "turtle_interfaces/msg/ebs_supervisor_info.hpp"
 #include "turtle_interfaces/msg/res_status.hpp"
 #include "turtle_interfaces/msg/steering.hpp"
@@ -24,6 +25,7 @@
 #include "turtle_interfaces/msg/actuator_cmd.hpp"
 #include "turtle_interfaces/msg/inverter_commands.hpp"
 #include "turtle_interfaces/msg/ecu_params.hpp"
+#include "turtle_interfaces/msg/can_status.hpp"
 
 #include "can_as_dash_aux.h"
 #include "can_apu_res_dlogger.h"
@@ -49,13 +51,15 @@ typedef struct {
     bool publishAuxPumpsFans;
     bool publishAuxBrakelight;
     bool publishDashLEDs;
-    bool publishAuxTankPressure;
+    bool publishEbsTankPressure;
     bool publishAmiSelectedMission;
-    bool publishSwaActual;
+    bool publishSwaStatus;
+    bool publishEbsServiceBrake;
     bool publishEbsSupervisor;
     bool publishMotorRPM;
     bool publishInvererCommands;
     bool publishResStatus;
+    bool publishCanStatus;
 
     //CAN messages to transmit
     uint8_t transmitApuStateMission;
@@ -133,9 +137,9 @@ class CanHandler : public rclcpp::Node
         turtle_interfaces::msg::DashLeds msgDashLEDs;
         void publish_dash_leds();
 
-        rclcpp::Publisher<turtle_interfaces::msg::EbsTankPressure>::SharedPtr pubAuxTankPressure;
-        turtle_interfaces::msg::EbsTankPressure msgAuxTankPressure;
-        void publish_aux_tank_pressure();
+        rclcpp::Publisher<turtle_interfaces::msg::EbsTankPressure>::SharedPtr pubEbsTankPressure;
+        turtle_interfaces::msg::EbsTankPressure msgEbsTankPressure;
+        void publish_ebs_tank_pressure();
 
         rclcpp::Publisher<turtle_interfaces::msg::Mission>::SharedPtr pubAmiSelectedMission;
         turtle_interfaces::msg::Mission msgAmiSelectedMission;
@@ -145,6 +149,10 @@ class CanHandler : public rclcpp::Node
         turtle_interfaces::msg::Steering msgSwaActual;
         void publish_swa_actual();
 
+        rclcpp::Publisher<turtle_interfaces::msg::EbsServiceBrake>::SharedPtr pubEbsServiceBrake;
+        turtle_interfaces::msg::EbsServiceBrake msgEbsServiceBrake;
+        void publish_ebs_service_brake();
+
         rclcpp::Publisher<turtle_interfaces::msg::EbsSupervisorInfo>::SharedPtr pubEbsSupervisor;
         turtle_interfaces::msg::EbsSupervisorInfo msgEbsSupervisor;
         void publish_ebs_supervisor();     
@@ -152,6 +160,13 @@ class CanHandler : public rclcpp::Node
         rclcpp::Publisher<turtle_interfaces::msg::ResStatus>::SharedPtr pubResStatus;
         turtle_interfaces::msg::ResStatus msgResStatus;
         void publish_res_status();
+
+        //Variables and functions for CAN errors
+        rclcpp::TimerBase::SharedPtr canRecvTimeout;
+        void handleReceiveTimeout();
+        
+        rclcpp::Publisher<turtle_interfaces::msg::CanStatus>::SharedPtr pubCanStatus;
+        turtle_interfaces::msg::CanStatus msgCanStatus;
 
         //Variables and functions for CAN transmit
         uint16_t canTimerCounter;

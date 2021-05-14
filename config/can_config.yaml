@@ -15,13 +15,15 @@ CanInterface:
     publishAuxPumpsFans: true       # /cooling_info
     publishAuxBrakelight: true      # /brake_light
     publishDashLEDs: true           # /dash_leds
-    publishAuxTankPressure: true    # /ebs_tank_pressure
+    publishEbsTankPressure: true    # /ebs_tank_pressure
     publishAmiSelectedMission: true # /ami_selected_mission
-    publishSwaActual: true          # /steering_actual
+    publishSwaStatus: true          # /steering_actual
+    publishEbsServiceBrake: true    # /ebs_service_brake
     publishEbsSupervisor: true      # /ebs_supervisor_info
     publishMotorRPM: true           # /rpm_motor
     publishInvererCommands: true    # /inverter_commands
     publishResStatus: true          # /res_status
+    publishCanStatus: true          # /can_status
     # CAN messages to transmit
     #(0: do not send, 1: use ros publisher callback, 2: use dbc cyclic time)
     transmitApuStateMission: 1  # /state_machine_state /current_mission
