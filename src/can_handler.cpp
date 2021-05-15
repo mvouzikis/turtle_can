@@ -717,10 +717,10 @@ void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::Shar
     this->frameSwaCommanded.steering_rate_is_zero = (msgActuatorCmd->steering < 0.01) && (msgActuatorCmd->steering > -0.01) ? 
                                                     CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_IS_ZERO_TRUE_CHOICE :
                                                     CAN_AS_DASH_AUX_SWA_COMMANDED_STEERING_RATE_IS_ZERO_FALSE_CHOICE;
+                                                    
     if (this->rosConf.transmitSwaCommanded == 1) {
         this->transmit_swa_commanded();
     }
-
 
     this->frameApuCommand.throttle_brake_commanded = msgActuatorCmd->throttle;
     if (this->rosConf.transmitApuCommand == 1) {
@@ -733,6 +733,8 @@ void CanHandler::ecu_params_callback(turtle_interfaces::msg::ECUParams::SharedPt
     this->frameECUParams.inverter_rpm_max = msgECUParams->inverter_rpm_max;
     this->frameECUParams.inverter_i_max = msgECUParams->inverter_i_rms_max;
     this->frameECUParams.power_target_kw = can_as_dash_aux_ecu_parameters_power_target_kw_encode(msgECUParams->power_target_kw);
+    this->frameECUParams.ed2_gain = msgECUParams->ed2_gain;
+    this->frameECUParams.i_rms_max_charging_factor = uint8_t(msgECUParams->inverter_i_rms_max_charging_factor*255);
 
     if (this->rosConf.transmitECUParams == 1) {
         this->transmit_ecu_params();
