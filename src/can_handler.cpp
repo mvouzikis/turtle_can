@@ -532,18 +532,19 @@ void CanHandler::publish_swa_actual()
     //errors check
     this->msgCanStatus.sensor_errors = msg.analog1_error == CAN_AS_DASH_AUX_SWA_STATUS_ANALOG1_ERROR_ERROR_CHOICE ?
                                        this->msgCanStatus.sensor_errors | this->msgCanStatus.SWA_STATUS_ANALOG1_ERROR :
-                                       this->msgCanStatus.sensor_errors & !this->msgCanStatus.SWA_STATUS_ANALOG1_ERROR;
+                                       this->msgCanStatus.sensor_errors & ~this->msgCanStatus.SWA_STATUS_ANALOG1_ERROR;
     this->msgCanStatus.sensor_errors = msg.analog2_error == CAN_AS_DASH_AUX_SWA_STATUS_ANALOG2_ERROR_ERROR_CHOICE ?
                                        this->msgCanStatus.sensor_errors | this->msgCanStatus.SWA_STATUS_ANALOG2_ERROR :
-                                       this->msgCanStatus.sensor_errors & !this->msgCanStatus.SWA_STATUS_ANALOG2_ERROR;
+                                       this->msgCanStatus.sensor_errors & ~this->msgCanStatus.SWA_STATUS_ANALOG2_ERROR;
     this->msgCanStatus.sensor_errors = msg.stall_occurred == CAN_AS_DASH_AUX_SWA_STATUS_STALL_OCCURRED_STALL_CHOICE ?
                                        this->msgCanStatus.sensor_errors | this->msgCanStatus.SWA_STATUS_STALL_OCCURED :
-                                       this->msgCanStatus.sensor_errors & !this->msgCanStatus.SWA_STATUS_STALL_OCCURED;                            
+                                       this->msgCanStatus.sensor_errors & ~this->msgCanStatus.SWA_STATUS_STALL_OCCURED;                            
 
     if (msg.analog1_error == CAN_AS_DASH_AUX_SWA_STATUS_ANALOG1_ERROR_ERROR_CHOICE || 
         msg.analog2_error == CAN_AS_DASH_AUX_SWA_STATUS_ANALOG2_ERROR_ERROR_CHOICE || 
         msg.stall_occurred == CAN_AS_DASH_AUX_SWA_STATUS_STALL_OCCURRED_STALL_CHOICE)
     {
+        this->createHeader(&this->msgCanStatus.header);
         this->pubCanStatus->publish(this->msgCanStatus);
     }
 
@@ -608,87 +609,91 @@ void CanHandler::handleReceiveTimeout()
         timeoutOccured = true;
     }
     else
-        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.DASH_APPS_TIMEOUT;
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_APPS_TIMEOUT;
     
     if (timeNow - this->msgDashBrake.header.stamp > rclcpp::Duration(1s)) {
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_BRAKE_TIMEOUT;
         timeoutOccured = true;
     }
     else
-        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.DASH_BRAKE_TIMEOUT;
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_BRAKE_TIMEOUT;
 
     if (timeNow - this->msgDashButtons.header.stamp > rclcpp::Duration(1s)) {
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_BUTTONS_TIMEOUT;
         timeoutOccured = true;
     }
     else
-        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.DASH_BUTTONS_TIMEOUT;
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_BUTTONS_TIMEOUT;
 
     if (timeNow - this->msgDashFrontRPM.header.stamp > rclcpp::Duration(1s)) {
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_FRONT_HALL_TIMEOUT;
         timeoutOccured = true;
     }
     else
-        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.DASH_FRONT_HALL_TIMEOUT;
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_FRONT_HALL_TIMEOUT;
 
     if (timeNow - this->msgAuxPumpsFans.header.stamp > rclcpp::Duration(1s)) {
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT;
         timeoutOccured = true;
     }
     else
-        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT;
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT;
 
     if (timeNow - this->msgDashLEDs.header.stamp > rclcpp::Duration(1s)) {
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_LEDS_TIMEOUT;
         timeoutOccured = true;
     }
     else
-        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.DASH_LEDS_TIMEOUT;
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_LEDS_TIMEOUT;
 
     if (timeNow - this->msgEbsTankPressure.header.stamp > rclcpp::Duration(1s)) {
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.EBS_TANK_PRESSURE_TIMEOUT;
         timeoutOccured = true;
     }
     else
-        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.EBS_TANK_PRESSURE_TIMEOUT;
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.EBS_TANK_PRESSURE_TIMEOUT;
 
     if (timeNow - this->msgAmiSelectedMission.header.stamp > rclcpp::Duration(1s)) {
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.AMI_SELECTED_MISSION_TIMEOUT;
         timeoutOccured = true;
     }
     else
-        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.AMI_SELECTED_MISSION_TIMEOUT;
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.AMI_SELECTED_MISSION_TIMEOUT;
 
     if (timeNow - this->msgSwaActual.header.stamp > rclcpp::Duration(1s)) {
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.SWA_STATUS_TIMEOUT;
         timeoutOccured = true;
     }
     else
-        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.SWA_STATUS_TIMEOUT;
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.SWA_STATUS_TIMEOUT;
 
     if (timeNow - this->msgEbsSupervisor.header.stamp > rclcpp::Duration(1s)) {
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.EBS_SUPERVISOR_TIMEOUT;
         timeoutOccured = true;
     }
     else
-        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.EBS_SUPERVISOR_TIMEOUT;
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.EBS_SUPERVISOR_TIMEOUT;
 
     if (timeNow - this->msgEbsServiceBrake.header.stamp > rclcpp::Duration(1s)) {
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.EBS_SERVICE_BRAKE_TIMEOUT;
         timeoutOccured = true;
     }
     else
-        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.EBS_SERVICE_BRAKE_TIMEOUT;
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.EBS_SERVICE_BRAKE_TIMEOUT;
 
     if (timeNow - this->msgInvCmds.header.stamp > rclcpp::Duration(1s)) {
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.INV_RESOLVERS_TIMEOUT;
         timeoutOccured = true;
     }
     else
-        this->msgCanStatus.message_timeouts &= !this->msgCanStatus.INV_RESOLVERS_TIMEOUT;
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.INV_RESOLVERS_TIMEOUT;
 
+    
     if (timeoutOccured)
+    {
+        this->createHeader(&this->msgCanStatus.header);
         this->pubCanStatus->publish(this->msgCanStatus);
+    }
 }
 
 //Functions for CAN transmit
@@ -732,7 +737,7 @@ void CanHandler::ecu_params_callback(turtle_interfaces::msg::ECUParams::SharedPt
 {
     this->frameECUParams.inverter_rpm_max = msgECUParams->inverter_rpm_max;
     this->frameECUParams.inverter_i_max = msgECUParams->inverter_i_rms_max;
-    this->frameECUParams.power_target_kw = can_as_dash_aux_ecu_parameters_power_target_kw_encode(msgECUParams->power_target_kw);
+    this->frameECUParams.power_target_kw = (uint8_t)(msgECUParams->power_target_kw*255.0/80.0);
     this->frameECUParams.ed2_gain = msgECUParams->ed2_gain;
     this->frameECUParams.i_rms_max_charging_factor = uint8_t(msgECUParams->inverter_i_rms_max_charging_factor*255);
 
