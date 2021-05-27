@@ -713,6 +713,13 @@ void CanHandler::handleReceiveTimeout()
     }
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.INV_RESOLVERS_TIMEOUT;
+    
+    if (timeNow - this->msgEcuParams.header.stamp > rclcpp::Duration(1s)) {
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
+        timeoutOccured = true;
+    }
+    else
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
 
     
     if (timeoutOccured)
