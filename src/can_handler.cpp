@@ -109,6 +109,7 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<bool>("publishMotorRPM",             this->rosConf.publishMotorRPM,              true);
     this->get_parameter_or<bool>("publishResStatus",            this->rosConf.publishResStatus,             true);
     this->get_parameter_or<bool>("publishCanStatus",            this->rosConf.publishCanStatus,             true);
+    this->get_parameter_or<bool>("publishECUParamsActaul",      this->rosConf.publishECUParamsActaul,       true);
     //CAN messages to transmit
     this->get_parameter_or<uint8_t>("transmitApuStateMission", this->rosConf.transmitApuStateMission,   1);
     this->get_parameter_or<uint8_t>("transmitSwaCommanded",    this->rosConf.transmitSwaCommanded,      1);
@@ -194,6 +195,10 @@ void CanHandler::variablesInit()
     if (this->rosConf.publishCanStatus) {
         this->pubCanStatus = this->create_publisher<turtle_interfaces::msg::CanStatus>("can_status", serviceQos);
         this->msgCanStatus = turtle_interfaces::msg::CanStatus();
+    }
+    if (this->rosConf.publishECUParamsActaul) {
+        this->pubEcuParams = this->create_publisher<turtle_interfaces::msg::ECUParams>("ecu_params_actual", serviceQos);
+        this->msgEcuParams = turtle_interfaces::msg::ECUParams();
     }
 
     //Initialize CAN Tx messages
@@ -285,6 +290,9 @@ void CanHandler::handleCanReceive()
                 this->publish_motor_rpm();
             if (this->rosConf.publishInvererCommands)
                 this->publish_inverter_commands();
+        }
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_ECU_PARAMS_ACTUAL_FRAME_ID && this->rosConf.publishECUParamsActaul) {
+            this->publish_ecu_params_actual();
         }
     }
 
@@ -579,6 +587,24 @@ void CanHandler::publish_inverter_commands()
     this->msgInvCmds.torqueright = msg.commanded_torque_right;
 
     this->pubInvCmds->publish(this->msgInvCmds);
+}
+
+void CanHandler::publish_ecu_params_actual()
+{
+    can_as_dash_aux_ecu_params_actual_t msg;
+    if (can_as_dash_aux_ecu_params_actual_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of ECU_PARAMS_ACTUAL");
+        return;
+    }
+
+    this->createHeader(&this->msgEcuParams.header);
+    this->msgEcuParams.inverter_rpm_max = msg.inverter_rpm_max_mean;
+    this->msgEcuParams.inverter_i_rms_max = msg.inverter_i_max_mean;
+    this->msgEcuParams.power_target_kw = msg.power_target_k_w_actual;
+    this->msgEcuParams.ed2_gain = msg.ed2_gain_actual;
+    this->msgEcuParams.inverter_i_rms_max_charging_factor = msg.i_rms_max_charging_factor_actual;
+
+    this->pubEcuParams->publish(this->msgEcuParams);
 }
 
 void CanHandler::publish_res_status()

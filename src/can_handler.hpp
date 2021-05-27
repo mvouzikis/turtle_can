@@ -60,6 +60,7 @@ typedef struct {
     bool publishInvererCommands;
     bool publishResStatus;
     bool publishCanStatus;
+    bool publishECUParamsActaul;
 
     //CAN messages to transmit
     uint8_t transmitApuStateMission;
@@ -93,6 +94,7 @@ class CanHandler : public rclcpp::Node
         rclcpp::TimerBase::SharedPtr canRecvTimer;
         void handleCanReceive();
 
+        //channel 0
         rclcpp::Publisher<turtle_interfaces::msg::Apps>::SharedPtr pubDashApps;
         turtle_interfaces::msg::Apps msgDashApps;
         void publish_dash_apps();
@@ -155,8 +157,13 @@ class CanHandler : public rclcpp::Node
 
         rclcpp::Publisher<turtle_interfaces::msg::EbsSupervisorInfo>::SharedPtr pubEbsSupervisor;
         turtle_interfaces::msg::EbsSupervisorInfo msgEbsSupervisor;
-        void publish_ebs_supervisor();     
+        void publish_ebs_supervisor();
 
+        rclcpp::Publisher<turtle_interfaces::msg::ECUParams>::SharedPtr pubEcuParams;
+        turtle_interfaces::msg::ECUParams msgEcuParams;
+        void publish_ecu_params_actual();   
+
+        //channel 1
         rclcpp::Publisher<turtle_interfaces::msg::ResStatus>::SharedPtr pubResStatus;
         turtle_interfaces::msg::ResStatus msgResStatus;
         void publish_res_status();
