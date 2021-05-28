@@ -599,10 +599,10 @@ void CanHandler::publish_ecu_params_actual()
 
     this->createHeader(&this->msgEcuParams.header);
     this->msgEcuParams.inverter_rpm_max = msg.inverter_rpm_max_mean;
-    this->msgEcuParams.inverter_i_rms_max = msg.inverter_i_max_mean;
-    this->msgEcuParams.power_target_kw = msg.power_target_k_w_actual;
+    this->msgEcuParams.inverter_i_rms_max = msg.inverter_i_max_mean*400.0/1070.0;
+    this->msgEcuParams.power_target_kw = (float)msg.power_target_k_w_actual/255.0*80.0;
     this->msgEcuParams.ed2_gain = msg.ed2_gain_actual;
-    this->msgEcuParams.inverter_i_rms_max_charging_factor = msg.i_rms_max_charging_factor_actual;
+    this->msgEcuParams.inverter_i_rms_max_charging_factor = (float)msg.i_rms_max_charging_factor_actual/255.0;
 
     this->pubEcuParams->publish(this->msgEcuParams);
 }
