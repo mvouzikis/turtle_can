@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <linux/sockios.h>
+#include <linux/if_link.h>
 #include <unistd.h>
 #include <chrono>
 #include "libsocketcan.h"
@@ -627,106 +628,96 @@ void CanHandler::publish_res_status()
 //Fucntions for CAN staus
 void CanHandler::handleReceiveTimeout()
 {
-    bool timeoutOccured = false;
     rclcpp::Time timeNow = this->now();
     
-    if (timeNow - this->msgDashApps.header.stamp > rclcpp::Duration(1s)) {
+    if (timeNow - this->msgDashApps.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_APPS_TIMEOUT;
-        timeoutOccured = true;
-    }
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_APPS_TIMEOUT;
     
-    if (timeNow - this->msgDashBrake.header.stamp > rclcpp::Duration(1s)) {
+    if (timeNow - this->msgDashBrake.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_BRAKE_TIMEOUT;
-        timeoutOccured = true;
-    }
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_BRAKE_TIMEOUT;
 
-    if (timeNow - this->msgDashButtons.header.stamp > rclcpp::Duration(1s)) {
+    if (timeNow - this->msgDashButtons.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_BUTTONS_TIMEOUT;
-        timeoutOccured = true;
-    }
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_BUTTONS_TIMEOUT;
 
-    if (timeNow - this->msgDashFrontRPM.header.stamp > rclcpp::Duration(1s)) {
+    if (timeNow - this->msgDashFrontRPM.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_FRONT_HALL_TIMEOUT;
-        timeoutOccured = true;
-    }
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_FRONT_HALL_TIMEOUT;
 
-    if (timeNow - this->msgAuxPumpsFans.header.stamp > rclcpp::Duration(1s)) {
+    if (timeNow - this->msgAuxPumpsFans.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT;
-        timeoutOccured = true;
-    }
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT;
 
-    if (timeNow - this->msgDashLEDs.header.stamp > rclcpp::Duration(1s)) {
+    if (timeNow - this->msgDashLEDs.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_LEDS_TIMEOUT;
-        timeoutOccured = true;
-    }
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_LEDS_TIMEOUT;
 
-    if (timeNow - this->msgEbsTankPressure.header.stamp > rclcpp::Duration(1s)) {
+    if (timeNow - this->msgEbsTankPressure.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.EBS_TANK_PRESSURE_TIMEOUT;
-        timeoutOccured = true;
-    }
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.EBS_TANK_PRESSURE_TIMEOUT;
 
-    if (timeNow - this->msgAmiSelectedMission.header.stamp > rclcpp::Duration(1s)) {
+    if (timeNow - this->msgAmiSelectedMission.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.AMI_SELECTED_MISSION_TIMEOUT;
-        timeoutOccured = true;
-    }
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.AMI_SELECTED_MISSION_TIMEOUT;
 
-    if (timeNow - this->msgSwaActual.header.stamp > rclcpp::Duration(1s)) {
+    if (timeNow - this->msgSwaActual.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.SWA_STATUS_TIMEOUT;
-        timeoutOccured = true;
-    }
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.SWA_STATUS_TIMEOUT;
 
-    if (timeNow - this->msgEbsSupervisor.header.stamp > rclcpp::Duration(1s)) {
+    if (timeNow - this->msgEbsSupervisor.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.EBS_SUPERVISOR_TIMEOUT;
-        timeoutOccured = true;
-    }
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.EBS_SUPERVISOR_TIMEOUT;
 
-    if (timeNow - this->msgEbsServiceBrake.header.stamp > rclcpp::Duration(1s)) {
+    if (timeNow - this->msgEbsServiceBrake.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.EBS_SERVICE_BRAKE_TIMEOUT;
-        timeoutOccured = true;
-    }
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.EBS_SERVICE_BRAKE_TIMEOUT;
 
-    if (timeNow - this->msgInvCmds.header.stamp > rclcpp::Duration(1s)) {
+    if (timeNow - this->msgInvCmds.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.INV_RESOLVERS_TIMEOUT;
-        timeoutOccured = true;
-    }
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.INV_RESOLVERS_TIMEOUT;
     
-    if (timeNow - this->msgEcuParams.header.stamp > rclcpp::Duration(1s)) {
+    if (timeNow - this->msgEcuParams.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
-        timeoutOccured = true;
-    }
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
 
-    
-    if (timeoutOccured)
-    {
-        this->createHeader(&this->msgCanStatus.header);
-        this->pubCanStatus->publish(this->msgCanStatus);
-    }
+    can_berr_counter bc;
+    if (can_get_berr_counter(this->rosConf.channel0.c_str(), &bc) != 0)
+        RCLCPP_INFO(this->get_logger(), "Failed to get current tx and rx errors");
+    this->msgCanStatus.tx_berrors = bc.txerr;
+    this->msgCanStatus.rx_berrors = bc.rxerr;
+
+    struct rtnl_link_stats64 rls;
+    if (can_get_link_stats(this->rosConf.channel0.c_str(), &rls) != 0)
+        RCLCPP_INFO(this->get_logger(), "Failed to get total tx and rx errors");
+    this->msgCanStatus.tx_terrors = rls.tx_errors;
+    this->msgCanStatus.rx_terrors = rls.rx_errors;
+
+    can_device_stats cds;
+    if (can_get_device_stats(this->rosConf.channel0.c_str(), &cds) != 0)
+        RCLCPP_INFO(this->get_logger(), "Failed to get CAN statistics");
+    this->msgCanStatus.bus_errors = cds.bus_error;
+    this->msgCanStatus.restarts = cds.restarts;
+
+    if (can_get_state(this->rosConf.channel0.c_str(), &this->msgCanStatus.can_state) != 0)
+        RCLCPP_INFO(this->get_logger(), "Failed to get CAN state");
+
+    this->createHeader(&this->msgCanStatus.header);
+    this->pubCanStatus->publish(this->msgCanStatus);
 }
 
 //Functions for CAN transmit
