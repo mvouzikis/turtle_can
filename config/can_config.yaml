@@ -27,8 +27,9 @@ CanInterface:
     publishECUParamsActaul: true    # /ecu_params_actual
     # CAN messages to transmit
     #(0: do not send, 1: use ros publisher callback, 2: use dbc cyclic time)
-    transmitApuStateMission: 1  # /state_machine_state /current_mission
-    transmitSwaCommanded: 1     # /cmd
-    transmitApuCommand: 1       # /cmd
-    transmitECUParams: 1        # /ecu_params
-    transmitApuResInit: true    #does not have publisher
+    transmitApuStateMission: 1    # /state_machine_state /current_mission
+    transmitSwaCommanded: 1       # /cmd
+    transmitApuCommand: 1         # /cmd
+    transmitECUParams: 1          # /ecu_params
+    transmitDvSystemStatus: true  #100ms cyclic time from the competitions
+    transmitApuResInit: true      #does not have publisher

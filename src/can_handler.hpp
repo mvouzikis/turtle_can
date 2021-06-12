@@ -26,6 +26,8 @@
 #include "turtle_interfaces/msg/inverter_commands.hpp"
 #include "turtle_interfaces/msg/ecu_params.hpp"
 #include "turtle_interfaces/msg/can_status.hpp"
+#include "turtle_interfaces/msg/control_info.hpp"
+#include "turtle_interfaces/msg/slam_info.hpp"
 
 #include "can_as_dash_aux.h"
 #include "can_apu_res_dlogger.h"
@@ -67,6 +69,7 @@ typedef struct {
     uint8_t transmitSwaCommanded;
     uint8_t transmitApuCommand;
     uint8_t transmitECUParams;
+    bool transmitDvSystemStatus;
     bool transmitApuResInit;
 } RosConfig;
 
@@ -180,6 +183,7 @@ class CanHandler : public rclcpp::Node
         rclcpp::TimerBase::SharedPtr canSendTimer;        
         void handleCanTransmit();
 
+        //channel 0
         rclcpp::Subscription<turtle_interfaces::msg::StateMachineState>::SharedPtr subApuState;
         void apu_state_callback(turtle_interfaces::msg::StateMachineState::SharedPtr msgApuState);
 
@@ -203,6 +207,16 @@ class CanHandler : public rclcpp::Node
 
         struct can_as_dash_aux_ecu_parameters_t frameECUParams;
         void transmit_ecu_params();
+
+        //channel 1
+        rclcpp::Subscription<turtle_interfaces::msg::ControlInfo>::SharedPtr subControlInfo;
+        void control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo);
+
+        rclcpp::Subscription<turtle_interfaces::msg::SlamInfo>::SharedPtr subSlamInfo;
+        void slam_info_callback(turtle_interfaces::msg::SlamInfo::SharedPtr msgSlamInfo);
+
+        struct can_apu_res_dlogger_dv_system_status_t frameDvSystemStatus;
+        void transmit_dv_system_status();
 
         // Send RES initialize message unitl it starts sending CAN messages
         struct can_apu_res_dlogger_apu_res_init_t frameApuResInit;
