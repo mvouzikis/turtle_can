@@ -69,6 +69,7 @@ typedef struct {
     uint8_t transmitSwaCommanded;
     uint8_t transmitApuCommand;
     uint8_t transmitECUParams;
+    uint8_t transmitECUParams2;
     bool transmitDvSystemStatus;
     bool transmitApuResInit;
 } RosConfig;
@@ -207,6 +208,9 @@ class CanHandler : public rclcpp::Node
 
         struct can_as_dash_aux_ecu_parameters_t frameECUParams;
         void transmit_ecu_params();
+
+        struct can_as_dash_aux_ecu_parameters2_t frameECUParams2;
+        void transmit_ecu_params2();
 
         //channel 1
         rclcpp::Subscription<turtle_interfaces::msg::ControlInfo>::SharedPtr subControlInfo;

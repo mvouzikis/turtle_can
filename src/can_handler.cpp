@@ -116,6 +116,7 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<uint8_t>("transmitSwaCommanded",    this->rosConf.transmitSwaCommanded,      1);
     this->get_parameter_or<uint8_t>("transmitApuCommand",      this->rosConf.transmitApuCommand,        1);
     this->get_parameter_or<uint8_t>("transmitECUParams",       this->rosConf.transmitECUParams,         1);
+    this->get_parameter_or<uint8_t>("transmitECUParams2",      this->rosConf.transmitECUParams2,        1);
     this->get_parameter_or<bool>("transmitDvSystemStatus",     this->rosConf.transmitDvSystemStatus,    true);
     this->get_parameter_or<bool>("transmitApuResInit",         this->rosConf.transmitApuResInit,        true);
 }
@@ -779,8 +780,14 @@ void CanHandler::ecu_params_callback(turtle_interfaces::msg::ECUParams::SharedPt
     this->frameECUParams.ed2_gain = msgECUParams->ed2_gain;
     this->frameECUParams.i_rms_max_charging_factor = uint8_t(msgECUParams->inverter_i_rms_max_charging_factor*255);
 
+    this->frameECUParams2.servo_min_speed = msgECUParams->servo_min_speed;
+    this->frameECUParams2.regen_min_speed = msgECUParams->regen_min_speed;
+
     if (this->rosConf.transmitECUParams == 1) {
         this->transmit_ecu_params();
+    }
+    if (this->rosConf.transmitECUParams2 == 1) {
+        this->transmit_ecu_params2();
     }
 }
 
@@ -812,6 +819,9 @@ void CanHandler::handleCanTransmit()
     }
     if ((this->rosConf.transmitECUParams == 2) && !(this->canTimerCounter % CAN_AS_DASH_AUX_ECU_PARAMETERS_CYCLE_TIME_MS)) {
         this->transmit_ecu_params();
+    }
+    if ((this->rosConf.transmitECUParams2 == 2) && !(this->canTimerCounter % CAN_AS_DASH_AUX_ECU_PARAMETERS2_CYCLE_TIME_MS)) {
+        this->transmit_ecu_params2();
     }
     if (this->rosConf.transmitDvSystemStatus && !(this->canTimerCounter % CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_CYCLE_TIME_MS)) {
         this->transmit_dv_system_status();
@@ -874,6 +884,20 @@ void CanHandler::transmit_ecu_params()
 
     if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_ECU_PARAMETERS_LENGTH) {
         RCLCPP_ERROR(this->get_logger(), "Error during transmit of ECU_PARAMETERS");
+    }
+}
+
+void CanHandler::transmit_ecu_params2()
+{
+    this->sendFrame.can_id = CAN_AS_DASH_AUX_ECU_PARAMETERS2_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_AS_DASH_AUX_ECU_PARAMETERS2_LENGTH;
+    if (can_as_dash_aux_ecu_parameters2_pack(this->sendFrame.data, &this->frameECUParams2, sizeof(sendFrame.data)) != CAN_AS_DASH_AUX_ECU_PARAMETERS2_LENGTH) {
+         RCLCPP_ERROR(this->get_logger(), "Error during pack of ECU_PARAMETERS2");
+        return;
+    }
+
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_ECU_PARAMETERS2_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of ECU_PARAMETERS2");
     }
 }
 

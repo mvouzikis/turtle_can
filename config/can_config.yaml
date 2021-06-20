@@ -31,5 +31,6 @@ CanInterface:
     transmitSwaCommanded: 1       # /cmd
     transmitApuCommand: 1         # /cmd
     transmitECUParams: 1          # /ecu_params
+    transmitECUParams2: 1         # /ecu_params
     transmitDvSystemStatus: true  #100ms cyclic time from the competitions
     transmitApuResInit: true      #does not have publisher
