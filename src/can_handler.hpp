@@ -165,7 +165,8 @@ class CanHandler : public rclcpp::Node
 
         rclcpp::Publisher<turtle_interfaces::msg::ECUParams>::SharedPtr pubEcuParams;
         turtle_interfaces::msg::ECUParams msgEcuParams;
-        void publish_ecu_params_actual();   
+        void publish_ecu_params_actual();
+        void publish_ecu_params_actual2();   
 
         //channel 1
         rclcpp::Publisher<turtle_interfaces::msg::ResStatus>::SharedPtr pubResStatus;

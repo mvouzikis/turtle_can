@@ -310,6 +310,10 @@ void CanHandler::handleCanReceive()
         else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_ECU_PARAMS_ACTUAL_FRAME_ID && this->rosConf.publishECUParamsActaul) {
             this->publish_ecu_params_actual();
         }
+        
+        else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_ECU_PARAMS_ACTUAL2_FRAME_ID && this->rosConf.publishECUParamsActaul) {
+            this->publish_ecu_params_actual2();
+        }
     }
 
     //For channel1
@@ -619,6 +623,21 @@ void CanHandler::publish_ecu_params_actual()
     this->msgEcuParams.power_target_kw = (float)msg.power_target_k_w_actual/255.0*80.0;
     this->msgEcuParams.ed2_gain = msg.ed2_gain_actual;
     this->msgEcuParams.inverter_i_rms_max_charging_factor = (float)msg.i_rms_max_charging_factor_actual/255.0;
+
+    this->pubEcuParams->publish(this->msgEcuParams);
+}
+
+void CanHandler::publish_ecu_params_actual2()
+{
+    can_as_dash_aux_ecu_params_actual2_t msg;
+    if (can_as_dash_aux_ecu_params_actual2_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of ECU_PARAMS_ACTUAL2");
+        return;
+    }
+
+    this->createHeader(&this->msgEcuParams.header);
+    this->msgEcuParams.servo_min_speed = msg.servo_min_speed_actual;
+    this->msgEcuParams.regen_min_speed = msg.regen_min_speed_actual;
 
     this->pubEcuParams->publish(this->msgEcuParams);
 }
