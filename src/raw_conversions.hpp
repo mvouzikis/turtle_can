@@ -60,7 +60,7 @@ uint16_t convertRearRPM(uint16_t hall)
 
 float convertSteeringActual(uint16_t steeringRaw)
 {
-    float steeringActual = (float)((-1.0*(float)steeringRaw/1095.0)+(2015.0/1095.0));
+    float steeringActual = (float)((-1.0*(float)steeringRaw/1073.0)+(2014.0/1073.0));
     steeringActual =    (steeringActual < -1)  ? -1 :
                         ((steeringActual >  1)  ? 1  : 
                         steeringActual);
@@ -71,7 +71,7 @@ float convertSteeringActual(uint16_t steeringRaw)
 
 uint16_t convertSteeringAngleTarget(float targetSteeringAngle)
 {
-    return (uint16_t)((-1095.0*targetSteeringAngle)+(2015.0));
+    return (uint16_t)((-1073.0*targetSteeringAngle)+(2014.0));
 }
 
 uint32_t convertSteeringRateTarget(float targetSteeringRate)
