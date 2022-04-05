@@ -765,8 +765,8 @@ void CanHandler::apu_state_callback(turtle_interfaces::msg::StateMachineState::S
 void CanHandler::apu_mission_callback(turtle_interfaces::msg::Mission::SharedPtr msgApuMission)
 {
     this->frameApuStateMission.as_mission = msgApuMission->mission;
-    // if (this->rosConf.transmitApuStateMission == 1)
-    //     this->transmit_apu_state_mission();
+    //if (this->rosConf.transmitApuStateMission == 1)
+    //	 this->transmit_apu_state_mission();
 }
 
 void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::SharedPtr msgActuatorCmd)
