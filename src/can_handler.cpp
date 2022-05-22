@@ -331,8 +331,14 @@ void CanHandler::handleCanReceive()
                 this->publish_motor_rpm();
             if (this->rosConf.publishInverterCommands)
                 this->publish_inverter_commands();
-
         }
+        else if ((this->recvFrame.can_id == CAN_MCU_INVERTER_LEFT_INFO_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ADU_INVERTER_LEFT_FRAME_ID) && this->rosConf.publishInverterLeftInfo) {
+            this->publish_inverter_left_info();
+        }
+        else if ((this->recvFrame.can_id == CAN_MCU_INVERTER_RIGHT_INFO_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ADU_INVERTER_RIGHT_FRAME_ID) && this->rosConf.publishInverterRightInfo) {
+            this->publish_inverter_right_info();
+        }
+        
         //  else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_ECU_PARAMS_ACTUAL_FRAME_ID && this->rosConf.publishECUParamsActaul) { //TODO
         // //     this->publish_ecu_params_actual();
         // }
@@ -413,7 +419,7 @@ void CanHandler::publish_aux_tsal_safe_state()
     }
 
     this->createHeader(&this->msgAuxTsalSafeState.header);
-    this->msgAuxTsalSafeState.safestate = (msg.safe_state == CAN_MCU_AUX_STATES_SAFE_STATE_ENABLE_CHOICE);
+    this->msgAuxTsalSafeState.safestate = (msg.safe_state == 1);
 
     this->pubAuxTsalSafeState->publish(this->msgAuxTsalSafeState);
 }
@@ -501,11 +507,12 @@ void CanHandler::publish_dash_bools()
         return;
     }
 
-    this->createHeader(&this->msgDashBools);
+    this->createHeader(&this->msgDashBools.header);
     this->msgDashBools.buzzer=msg.buzzer;
     this->msgDashBools.safestate=msg1.safe_state;
     this->msgDashBools.enableout=msg.enable;
     this->msgDashBools.asbled=msg2.asb_led;
+
 
     this->pubDashBools->publish(this->msgDashBools);
 
@@ -522,7 +529,7 @@ void CanHandler::publish_dash_bools()
 //     this->pubDashLEDs->publish(this->msgDashLEDs);
 // }
 
-/*void CanHandler::publish_dash_buttons()
+void CanHandler::publish_dash_buttons()
 {
     can_mcu_dash_bools_t msg;
     if (can_mcu_dash_bools_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
@@ -534,11 +541,10 @@ void CanHandler::publish_dash_bools()
     this->msgDashButtons.enabletoggle = (bool)msg.enable_request;
     this->msgDashButtons.start = (bool)msg.start;
     this->msgDashButtons.adact = (bool)msg.ad_act;
-    this->msgDashButtons.greentsal = (bool)msg.green_tsal;
-    this->msgDashButtons.scstate = (bool)msg.sc_state;
+    this->msgDashButtons.cooling_button = (bool)msg.cooling_button;
 
     this->pubDashButtons->publish(this->msgDashButtons);
-}*/
+}
 
 void CanHandler::publish_ebs_service_brake()
 {
@@ -693,6 +699,11 @@ void CanHandler::publish_inverter_right_info()
     can_mcu_inverter_right_info_t msg1;
 
     if (can_mcu_adu_inverter_right_unpack(&msg,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of adu_inverter right");
+        return;
+    }
+
+    if (can_mcu_inverter_right_info_unpack(&msg1,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
         RCLCPP_ERROR(this->get_logger(), "Error during unpack of inverter_right_info");
         return;
     }
@@ -713,6 +724,11 @@ void CanHandler::publish_inverter_left_info()
     can_mcu_inverter_left_info_t msg1;
 
     if (can_mcu_adu_inverter_left_unpack(&msg,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of adu_left");
+        return;
+    }
+
+    if (can_mcu_inverter_left_info_unpack(&msg1,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
         RCLCPP_ERROR(this->get_logger(), "Error during unpack of inverter_left_info");
         return;
     }
@@ -737,6 +753,18 @@ void CanHandler::publish_isabellen()
     can_mcu_isabellen_pdc_t pdc;
 
     if (can_mcu_isabellen_energy_unpack(&energy,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
+        RCLCPP_ERROR(this->get_logger(),"Error during unpack of isabellen_energy");
+    }
+
+    if (can_mcu_isabellen_idc_unpack(&idc,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
+        RCLCPP_ERROR(this->get_logger(),"Error during unpack of isabellen_idc");
+    }
+
+        if (can_mcu_isabellen_vdc_unpack(&vdc,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
+        RCLCPP_ERROR(this->get_logger(),"Error during unpack of isabellen_vdc");
+    }
+
+    if (can_mcu_isabellen_pdc_unpack(&pdc,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
         RCLCPP_ERROR(this->get_logger(),"Error during unpack of isabellen_pdc");
     }
 
@@ -748,6 +776,24 @@ void CanHandler::publish_isabellen()
 
     this->pubIsabellen->publish(this->msgIsabellen);
 }
+
+void CanHandler::publish_ecu_control_systems()
+{
+    can_mcu_ecu_adu_t msg;
+
+    if (can_mcu_ecu_adu_unpack(&msg,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
+        RCLCPP_ERROR(this->get_logger(),"Error during unpack of ecu_adu");
+    }
+
+    this->createHeader(&this->msgEcuControlSystems.header);
+    this->msgEcuControlSystems.ed_active=msg.differential_active;
+    this->msgEcuControlSystems.pl_active=msg.pl_active;
+    this->msgEcuControlSystems.regen_active=msg.regen_active;
+    this->msgEcuControlSystems.tc_active=msg.tc_active;
+
+    this->pubEcuControlSystem->publish(this->msgEcuControlSystems);
+}
+
 
 /*void CanHandler::publish_res_status()
 {
@@ -796,10 +842,10 @@ void CanHandler::handleReceiveTimeout()
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT;
 
-    if (timeNow - this->msgDashBools.header.stamp > rclcpp::Duration(1s))
-        this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_BOOLS_TIMEOUT;
-    else
-        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_BOOLS_TIMEOUT;
+    // if (timeNow - this->msgDashBools.header.stamp > rclcpp::Duration(1s))
+    //     this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_BOOLS_TIMEOUT;
+    // else
+    //     this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_BOOLS_TIMEOUT;
 
     if (timeNow - this->msgEbsTankPressure.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.EBS_TANK_PRESSURE_TIMEOUT;

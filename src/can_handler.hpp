@@ -30,6 +30,8 @@
 #include "turtle_interfaces/msg/slam_info.hpp"
 #include "turtle_interfaces/msg/inverter_info.hpp"
 #include "turtle_interfaces/msg/isabellen.hpp"
+#include "turtle_interfaces/msg/ecu_control_systems.hpp"
+
 
 
 #include "can_mcu.h"
@@ -69,7 +71,7 @@ typedef struct {
     bool publishInverterRightInfo;
     bool publishInverterLeftInfo;
     bool publishIsabellen;
-
+    bool publishEcuControlSystems;
 
 
     //CAN messages to transmit
@@ -188,6 +190,9 @@ class CanHandler : public rclcpp::Node
         turtle_interfaces::msg::Isabellen msgIsabellen;
         void publish_isabellen();
 
+        rclcpp::Publisher<turtle_interfaces::msg::ECUControlSystems>::SharedPtr pubEcuControlSystem;
+        turtle_interfaces::msg::ECUControlSystems msgEcuControlSystems;
+        void publish_ecu_control_systems();
 
         //channel 1
         rclcpp::Publisher<turtle_interfaces::msg::ResStatus>::SharedPtr pubResStatus;
@@ -200,6 +205,7 @@ class CanHandler : public rclcpp::Node
         
         rclcpp::Publisher<turtle_interfaces::msg::CanStatus>::SharedPtr pubCanStatus;
         turtle_interfaces::msg::CanStatus msgCanStatus;
+        
 
         //Variables and functions for CAN transmit
         uint16_t canTimerCounter;
