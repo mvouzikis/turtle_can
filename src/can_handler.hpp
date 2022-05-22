@@ -15,7 +15,7 @@
 #include "turtle_interfaces/msg/apps.hpp"
 #include "turtle_interfaces/msg/rpm.hpp"
 #include "turtle_interfaces/msg/brake.hpp"
-#include "turtle_interfaces/msg/dash_leds.hpp"
+#include "turtle_interfaces/msg/dash_bools.hpp"
 #include "turtle_interfaces/msg/dash_buttons.hpp"
 #include "turtle_interfaces/msg/ebs_service_brake.hpp"
 #include "turtle_interfaces/msg/ebs_supervisor_info.hpp"
@@ -28,9 +28,12 @@
 #include "turtle_interfaces/msg/can_status.hpp"
 #include "turtle_interfaces/msg/control_info.hpp"
 #include "turtle_interfaces/msg/slam_info.hpp"
+#include "turtle_interfaces/msg/inverter_info.hpp"
+#include "turtle_interfaces/msg/isabellen.hpp"
 
-#include "can_as_dash_aux.h"
-#include "can_apu_res_dlogger.h"
+
+#include "can_mcu.h"
+
 
 #define CAN_ERROR      -1
 #define CAN_OK          0
@@ -50,19 +53,24 @@ typedef struct {
     bool pubishDashFrontRPM;
     bool publishAuxRearRPM;
     bool publishAuxTsalSafeState;
-    bool publishAuxPumpsFans;
+    bool publishPumpsFans;
     bool publishAuxBrakelight;
-    bool publishDashLEDs;
+    bool publishDashBools;
     bool publishEbsTankPressure;
     bool publishAmiSelectedMission;
     bool publishSwaStatus;
     bool publishEbsServiceBrake;
     bool publishEbsSupervisor;
     bool publishMotorRPM;
-    bool publishInvererCommands;
+    bool publishInverterCommands;
     bool publishResStatus;
     bool publishCanStatus;
     bool publishECUParamsActaul;
+    bool publishInverterRightInfo;
+    bool publishInverterLeftInfo;
+    bool publishIsabellen;
+
+
 
     //CAN messages to transmit
     uint8_t transmitApuStateMission;
@@ -112,7 +120,7 @@ class CanHandler : public rclcpp::Node
         void publish_dash_buttons();
 
         rclcpp::Publisher<turtle_interfaces::msg::RPM>::SharedPtr pubDashFrontRPM;
-        turtle_interfaces::msg::RPM msgDashFrontRPM;
+        turtle_interfaces::msg::RPM msgDashFrontRPM  ;
         void publish_dash_front_rpm();
 
         rclcpp::Publisher<turtle_interfaces::msg::RPM>::SharedPtr pubAuxRearRPM;
@@ -127,21 +135,29 @@ class CanHandler : public rclcpp::Node
         turtle_interfaces::msg::InverterCommands msgInvCmds;
         void publish_inverter_commands();
 
+        rclcpp::Publisher<turtle_interfaces::msg::InverterInfo>::SharedPtr pubInvRightInfo;
+        turtle_interfaces::msg::InverterInfo msgInvRightInfo;
+        void publish_inverter_right_info();
+
+        rclcpp::Publisher<turtle_interfaces::msg::InverterInfo>::SharedPtr pubInvLeftInfo;
+        turtle_interfaces::msg::InverterInfo msgInvLeftInfo;
+        void publish_inverter_left_info();
+
         rclcpp::Publisher<turtle_interfaces::msg::TsalSafeState>::SharedPtr pubAuxTsalSafeState;
         turtle_interfaces::msg::TsalSafeState msgAuxTsalSafeState;
         void publish_aux_tsal_safe_state();
 
-        rclcpp::Publisher<turtle_interfaces::msg::CoolingInfo>::SharedPtr pubAuxPumpsFans;
-        turtle_interfaces::msg::CoolingInfo msgAuxPumpsFans;
-        void publish_aux_pumps_fans();
+        rclcpp::Publisher<turtle_interfaces::msg::CoolingInfo>::SharedPtr pubPumpsFans;
+        turtle_interfaces::msg::CoolingInfo msgPumpsFans;
+        void publish_pumps_fans();
 
         rclcpp::Publisher<turtle_interfaces::msg::BrakeLight>::SharedPtr pubAuxBrakelight;
         turtle_interfaces::msg::BrakeLight msgAuxBrakelight;
         void publish_aux_brakelight();
 
-        rclcpp::Publisher<turtle_interfaces::msg::DashLeds>::SharedPtr pubDashLEDs;
-        turtle_interfaces::msg::DashLeds msgDashLEDs;
-        void publish_dash_leds();
+        rclcpp::Publisher<turtle_interfaces::msg::DashBools>::SharedPtr pubDashBools;
+        turtle_interfaces::msg::DashBools msgDashBools;
+        void publish_dash_bools();
 
         rclcpp::Publisher<turtle_interfaces::msg::EbsTankPressure>::SharedPtr pubEbsTankPressure;
         turtle_interfaces::msg::EbsTankPressure msgEbsTankPressure;
@@ -167,6 +183,11 @@ class CanHandler : public rclcpp::Node
         turtle_interfaces::msg::ECUParams msgEcuParams;
         void publish_ecu_params_actual();
         void publish_ecu_params_actual2();   
+    
+        rclcpp::Publisher<turtle_interfaces::msg::Isabellen>::SharedPtr pubIsabellen;
+        turtle_interfaces::msg::Isabellen msgIsabellen;
+        void publish_isabellen();
+
 
         //channel 1
         rclcpp::Publisher<turtle_interfaces::msg::ResStatus>::SharedPtr pubResStatus;
@@ -198,35 +219,35 @@ class CanHandler : public rclcpp::Node
         rclcpp::Subscription<turtle_interfaces::msg::ECUParams>::SharedPtr subECUParams;        
         void ecu_params_callback(turtle_interfaces::msg::ECUParams::SharedPtr msgECUParams);
 
-        struct can_as_dash_aux_apu_state_mission_t frameApuStateMission;
+        struct can_mcu_apu_state_mission_t frameApuStateMission;
         void transmit_apu_state_mission();
 
-        struct can_as_dash_aux_swa_commanded_t frameSwaCommanded;
-        void transmit_swa_commanded();
+        struct can_mcu_steering_command_t frameSwaCommanded;
+        void transmit_steering_commanded();
 
-        struct can_as_dash_aux_apu_command_t frameApuCommand;
+        struct can_mcu_apu_command_t frameApuCommand;
         void transmit_apu_command();
 
-        struct can_as_dash_aux_ecu_parameters_t frameECUParams;
-        void transmit_ecu_params();
+        // struct can_as_dash_aux_ecu_parameters_t frameECUParams; //TODO
+        // void transmit_ecu_params();
 
-        struct can_as_dash_aux_ecu_parameters2_t frameECUParams2;
-        void transmit_ecu_params2();
+        // struct can_as_dash_aux_ecu_parameters2_t frameECUParams2; //TODO
+        // void transmit_ecu_params2();
 
-        //channel 1
-        rclcpp::Subscription<turtle_interfaces::msg::ControlInfo>::SharedPtr subControlInfo;
-        void control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo);
+        // //channel 1
+        // rclcpp::Subscription<turtle_interfaces::msg::ControlInfo>::SharedPtr subControlInfo;
+        // void control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo);
 
-        rclcpp::Subscription<turtle_interfaces::msg::SlamInfo>::SharedPtr subSlamInfo;
-        void slam_info_callback(turtle_interfaces::msg::SlamInfo::SharedPtr msgSlamInfo);
+        // rclcpp::Subscription<turtle_interfaces::msg::SlamInfo>::SharedPtr subSlamInfo;
+        // void slam_info_callback(turtle_interfaces::msg::SlamInfo::SharedPtr msgSlamInfo);
 
-        struct can_apu_res_dlogger_dv_system_status_t frameDvSystemStatus;
-        void transmit_dv_system_status();
+        // struct can_apu_res_dlogger_dv_system_status_t frameDvSystemStatus;
+        // void transmit_dv_system_status();
 
-        // Send RES initialize message unitl it starts sending CAN messages
-        struct can_apu_res_dlogger_apu_res_init_t frameApuResInit;
-        bool res_initialized;
-        void transmit_apu_res_init();
+        // // Send RES initialize message unitl it starts sending CAN messages
+        // struct can_apu_res_dlogger_apu_res_init_t frameApuResInit;
+        // bool res_initialized;
+        // void transmit_apu_res_init();
 
     public:
         CanHandler(rclcpp::NodeOptions nOpt);
