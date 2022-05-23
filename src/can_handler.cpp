@@ -100,7 +100,6 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<bool>("pubishDashFrontRPM",          this->rosConf.pubishDashFrontRPM,           true);
     this->get_parameter_or<bool>("publishAuxRearRPM",           this->rosConf.publishAuxRearRPM,            true);
     this->get_parameter_or<bool>("publishAuxTsalSafeState",     this->rosConf.publishAuxTsalSafeState,      true);
-    this->get_parameter_or<bool>("publishPumpsFans",            this->rosConf.publishPumpsFans,             true);
     this->get_parameter_or<bool>("publishAuxBrakelight",        this->rosConf.publishAuxBrakelight,         true);
     this->get_parameter_or<bool>("publishDashBools",            this->rosConf.publishDashBools,             true);
     this->get_parameter_or<bool>("publishEbsTankPressure",      this->rosConf.publishEbsTankPressure,       true);
@@ -115,6 +114,10 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<bool>("publishInverterRightInfo",    this->rosConf.publishInverterRightInfo,     true);
     this->get_parameter_or<bool>("publishInverterLeftInfo",     this->rosConf.publishInverterLeftInfo,      true);
     this->get_parameter_or<bool>("publishIsabellen",            this->rosConf.publishIsabellen,             true);
+    this->get_parameter_or<bool>("publishECUControSystems",     this->rosConf.publishEcuControlSystems,     true);
+    this->get_parameter_or<bool>("publishpublishCoolingInfo",   this->rosConf.publishCoolingInfo,     true);
+    
+    
 
 
     //CAN messages to transmit
@@ -157,10 +160,6 @@ void CanHandler::variablesInit()
          this->pubAuxTsalSafeState = this->create_publisher<turtle_interfaces::msg::TsalSafeState>("tsal_safe_state", sensorQos);
          this->msgAuxTsalSafeState = turtle_interfaces::msg::TsalSafeState();
      }
-    if (this->rosConf.publishPumpsFans) {
-        this->pubPumpsFans = this->create_publisher<turtle_interfaces::msg::CoolingInfo>("cooling_info", sensorQos);
-        this->msgPumpsFans = turtle_interfaces::msg::CoolingInfo();
-    }
     if (this->rosConf.publishDashApps) {
         this->pubDashApps = this->create_publisher<turtle_interfaces::msg::Apps>("apps", sensorQos);
         this->msgDashApps = turtle_interfaces::msg::Apps(); 
@@ -222,6 +221,16 @@ void CanHandler::variablesInit()
     if (this->rosConf.publishIsabellen) {  
         this->pubIsabellen = this->create_publisher<turtle_interfaces::msg::Isabellen>("isabellen", sensorQos);
         this->msgIsabellen= turtle_interfaces::msg::Isabellen();
+    }
+
+    if (this->rosConf.publishECUControSystems) {  
+        this->pubEcuControlSystem = this->create_publisher<turtle_interfaces::msg::ECUControlSystems>("ecu_control_systems", sensorQos);
+        this->msgEcuControlSystems= turtle_interfaces::msg::ECUControlSystems();
+    }
+
+    if (this->rosConf.publishpublishCoolingInfo) {  
+        this->pubCoolingInfo = this->create_publisher<turtle_interfaces::msg::CoolingInfo>("cooling_info", sensorQos);
+        this->msgCoolingInfo= turtle_interfaces::msg::CoolingInfo();
     }
 
     //Initialize CAN Tx messages
@@ -295,8 +304,8 @@ void CanHandler::handleCanReceive()
             if (this->rosConf.publishEbsTankPressure)
                 this->publish_ebs_tank_pressure();
         }
-         else if (this->recvFrame.can_id == CAN_MCU_COOLING_FRAME_ID && this->rosConf.publishPumpsFans) {
-            this->publish_pumps_fans();
+         else if (this->recvFrame.can_id == CAN_MCU_COOLING_FRAME_ID && this->rosConf.publishCoolingInfo) {
+            this->publish_cooling_info();
         }
         else if (this->recvFrame.can_id == CAN_MCU_DASH_HALL_F_FRAME_ID && this->rosConf.pubishDashFrontRPM) {
             this->publish_dash_front_rpm();
@@ -430,17 +439,17 @@ void CanHandler::publish_pumps_fans()
 {
     can_mcu_cooling_t msg;
     if (can_mcu_cooling_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of PUMPS_FANS");
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of COOLING INFO");
         return;
     }
 
-    this->createHeader(&this->msgPumpsFans.header);
-    this->msgPumpsFans.pumpsignal = msg.pump_signal;
-    this->msgPumpsFans.accufanspwm = msg.tsac_fans;
-    this->msgPumpsFans.hallfanpwm = msg.hall_fans;
-    this->msgPumpsFans.chassisfans = msg.chassis_fans;
+    this->createHeader(&this->msgCoolingInfo.header);
+    this->msgCoolingInfo.pumpsignal = msg.pump_signal;
+    this->msgCoolingInfo.accufanspwm = msg.tsac_fans;
+    this->msgCoolingInfo.hallfanpwm = msg.hall_fans;
+    this->msgCoolingInfo.chassisfans = msg.chassis_fans;
 
-    this->pubPumpsFans->publish(this->msgPumpsFans);
+    this->pubCoolingInfo->publish(this->msgControlInfo);
 }
 
 void CanHandler::publish_dash_apps()
@@ -838,9 +847,9 @@ void CanHandler::handleReceiveTimeout()
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_FRONT_HALL_TIMEOUT;
 
     if (timeNow - this->msgPumpsFans.header.stamp > rclcpp::Duration(1s))
-        this->msgCanStatus.message_timeouts |= this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT;
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT; //TODO
     else
-        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT;
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT; //TODO
 
     // if (timeNow - this->msgDashBools.header.stamp > rclcpp::Duration(1s))
     //     this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_BOOLS_TIMEOUT;
