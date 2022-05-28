@@ -114,7 +114,7 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<bool>("publishInverterRightInfo",    this->rosConf.publishInverterRightInfo,     true);
     this->get_parameter_or<bool>("publishInverterLeftInfo",     this->rosConf.publishInverterLeftInfo,      true);
     this->get_parameter_or<bool>("publishIsabellen",            this->rosConf.publishIsabellen,             true);
-    this->get_parameter_or<bool>("publishECUControSystems",     this->rosConf.publishEcuControlSystems,     true);
+    this->get_parameter_or<bool>("publishECUControlSystems",     this->rosConf.publishEcuControlSystems,     true);
     this->get_parameter_or<bool>("publishpublishCoolingInfo",   this->rosConf.publishCoolingInfo,     true);
     
     
@@ -223,12 +223,12 @@ void CanHandler::variablesInit()
         this->msgIsabellen= turtle_interfaces::msg::Isabellen();
     }
 
-    if (this->rosConf.publishECUControSystems) {  
+    if (this->rosConf.publishEcuControlSystems) {  
         this->pubEcuControlSystem = this->create_publisher<turtle_interfaces::msg::ECUControlSystems>("ecu_control_systems", sensorQos);
         this->msgEcuControlSystems= turtle_interfaces::msg::ECUControlSystems();
     }
 
-    if (this->rosConf.publishpublishCoolingInfo) {  
+    if (this->rosConf.publishCoolingInfo) {  
         this->pubCoolingInfo = this->create_publisher<turtle_interfaces::msg::CoolingInfo>("cooling_info", sensorQos);
         this->msgCoolingInfo= turtle_interfaces::msg::CoolingInfo();
     }
@@ -435,7 +435,7 @@ void CanHandler::publish_aux_tsal_safe_state()
 
 //--------------den to exoume sto neo dbc, theloume na to exoyme?-----------------
 
-void CanHandler::publish_pumps_fans()  
+void CanHandler::publish_cooling_info()  
 {
     can_mcu_cooling_t msg;
     if (can_mcu_cooling_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
@@ -449,7 +449,7 @@ void CanHandler::publish_pumps_fans()
     this->msgCoolingInfo.hallfanpwm = msg.hall_fans;
     this->msgCoolingInfo.chassisfans = msg.chassis_fans;
 
-    this->pubCoolingInfo->publish(this->msgControlInfo);
+    this->pubCoolingInfo->publish(this->msgCoolingInfo);
 }
 
 void CanHandler::publish_dash_apps()
