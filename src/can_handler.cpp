@@ -321,7 +321,7 @@ void CanHandler::handleCanReceive()
             if (this->rosConf.publishDashBools)  
                 this->publish_dash_bools();
         }
-         else if (this->recvFrame.can_id == CAN_MCU_ECU_BOOLS_FRAME_ID) {
+         else if (this->recvFrame.can_id == CAN_MCU_DASH_BOOLS_FRAME_ID) {
             if (this->rosConf.publishDashButtons)  
                 this->publish_dash_buttons();
         }
