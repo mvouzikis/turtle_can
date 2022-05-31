@@ -68,7 +68,7 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
 
     //initialize timers
     this->canRecvTimer =    this->create_wall_timer(500us,  std::bind(&CanHandler::handleCanReceive,        this));
-    this->canRecvTimeout =  this->create_wall_timer(10ms,   std::bind(&CanHandler::handleReceiveTimeout,    this));
+    //this->canRecvTimeout =  this->create_wall_timer(10ms,   std::bind(&CanHandler::handleReceiveTimeout,    this));
     this->canSendTimer =    this->create_wall_timer(1ms,    std::bind(&CanHandler::handleCanTransmit,       this));
 
     //res_initialized = false;
@@ -89,16 +89,15 @@ CanHandler::~CanHandler()
 void CanHandler::loadRosParams()
 {
     //Channels configuration
-    this->get_parameter_or<std::string>("channel0", this->rosConf.channel0, "vcan0");
+    this->get_parameter_or<std::string>("channel0", this->rosConf.channel0, "can0");
     this->get_parameter_or<uint32_t>("bitrate0",    this->rosConf.bitrate0, 1000000);
-    this->get_parameter_or<std::string>("channel1", this->rosConf.channel1, "vcan1");
+    this->get_parameter_or<std::string>("channel1", this->rosConf.channel1, "can1");
     this->get_parameter_or<uint32_t>("bitrate1",    this->rosConf.bitrate1, 500000);
     //CAN messages to publish in ROS
     this->get_parameter_or<bool>("publishDashApps",             this->rosConf.publishDashApps,              true);
     this->get_parameter_or<bool>("publishDashBrake",            this->rosConf.publishDashBrake,             true);
     this->get_parameter_or<bool>("publishDashButtons",          this->rosConf.publishDashButtons,           true);
     this->get_parameter_or<bool>("pubishDashFrontRPM",          this->rosConf.pubishDashFrontRPM,           true);
-    this->get_parameter_or<bool>("publishAuxRearRPM",           this->rosConf.publishAuxRearRPM,            true);
     this->get_parameter_or<bool>("publishAuxTsalSafeState",     this->rosConf.publishAuxTsalSafeState,      true);
     this->get_parameter_or<bool>("publishAuxBrakelight",        this->rosConf.publishAuxBrakelight,         true);
     this->get_parameter_or<bool>("publishDashBools",            this->rosConf.publishDashBools,             true);
@@ -147,10 +146,6 @@ void CanHandler::variablesInit()
     if (this->rosConf.publishEbsTankPressure) {
         this->pubEbsTankPressure = this->create_publisher<turtle_interfaces::msg::EbsTankPressure>("ebs_tank_pressure", sensorQos);
         this->msgEbsTankPressure = turtle_interfaces::msg::EbsTankPressure();
-    }
-    if (this->rosConf.publishAuxRearRPM) {
-        this->pubAuxRearRPM = this->create_publisher<turtle_interfaces::msg::RPM>("rpm_rear", sensorQos);
-        this->msgAuxRearRPM = turtle_interfaces::msg::RPM();
     }
     if (this->rosConf.publishMotorRPM) {
         this->pubMotorRPM = this->create_publisher<turtle_interfaces::msg::RPM>("rpm_motor", sensorQos);
@@ -290,6 +285,8 @@ void CanHandler::handleCanReceive()
     //For channel 0
     while (recvfrom(this->can0Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, &this->len) >= 8) {
         ioctl(this->can0Socket, SIOCGSTAMP, &this->recvTime);  //get message timestamp
+
+        //RCLCPP_INFO(this->get_logger(), "%u",this->recvFrame.can_id);
 
         if (this->recvFrame.can_id == CAN_MCU_APU_STATE_MISSION_FRAME_ID && this->rosConf.publishAmiSelectedMission) {
             this->publish_ami_selected_mission();
@@ -1027,7 +1024,7 @@ void CanHandler::transmit_steering_commanded()
         RCLCPP_ERROR(this->get_logger(), "Error during pack of STEERING_COMMAND");
         return;
     }
-
+    
     if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_MCU_STEERING_COMMAND_LENGTH) {
         RCLCPP_ERROR(this->get_logger(), "Error during transmit of STEERING_COMMAND");
     }

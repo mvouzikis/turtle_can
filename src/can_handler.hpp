@@ -9,7 +9,6 @@
 #include "turtle_interfaces/msg/mission.hpp"
 #include "turtle_interfaces/msg/brake_light.hpp"
 #include "turtle_interfaces/msg/ebs_tank_pressure.hpp"
-#include "turtle_interfaces/msg/rpm.hpp"
 #include "turtle_interfaces/msg/tsal_safe_state.hpp"
 #include "turtle_interfaces/msg/cooling_info.hpp"
 #include "turtle_interfaces/msg/apps.hpp"
@@ -53,7 +52,6 @@ typedef struct {
     bool publishDashBrake;
     bool publishDashButtons;
     bool pubishDashFrontRPM;
-    bool publishAuxRearRPM;
     bool publishAuxTsalSafeState;
     bool publishPumpsFans;
     bool publishAuxBrakelight;
@@ -125,10 +123,6 @@ class CanHandler : public rclcpp::Node
         rclcpp::Publisher<turtle_interfaces::msg::RPM>::SharedPtr pubDashFrontRPM;
         turtle_interfaces::msg::RPM msgDashFrontRPM  ;
         void publish_dash_front_rpm();
-
-        rclcpp::Publisher<turtle_interfaces::msg::RPM>::SharedPtr pubAuxRearRPM;
-        turtle_interfaces::msg::RPM msgAuxRearRPM;
-        void publish_aux_rear_rpm();
 
         rclcpp::Publisher<turtle_interfaces::msg::RPM>::SharedPtr pubMotorRPM;
         turtle_interfaces::msg::RPM msgMotorRPM;
