@@ -99,6 +99,12 @@ void CanHandler::variablesInit()
         this->msgCoolingInfo= turtle_interfaces::msg::CoolingInfo();
     }
 
+        if (this->rosConf.publishCanStatus) {
+        this->pubCanStatus = this->create_publisher<turtle_interfaces::msg::CanStatus>("can_status", serviceQos);
+        this->msgCanStatus = turtle_interfaces::msg::CanStatus();
+    }
+
+
     //Initialize CAN Tx messages
     //-------------------------
     if (this->rosConf.transmitApuStateMission || this->rosConf.transmitDvSystemStatus) {

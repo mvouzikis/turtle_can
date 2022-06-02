@@ -17,7 +17,6 @@
 
 
 using namespace std::chrono_literals;
-using std::placeholders::_1;
 
 CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
 {
@@ -120,6 +119,7 @@ void CanHandler::handleCanReceive()
                 this->publish_ebs_supervisor();
 
         }
+        
          else if (this->recvFrame.can_id == CAN_MCU_COOLING_FRAME_ID && this->rosConf.publishCoolingInfo) {
             this->publish_cooling_info();
         }
@@ -133,6 +133,7 @@ void CanHandler::handleCanReceive()
             if (this->rosConf.publishDashBrake)
                 this->publish_dash_brake();
         }
+
         else if (this->recvFrame.can_id == CAN_MCU_ECU_BOOLS_FRAME_ID) {
             if (this->rosConf.publishDashBools)  
                 this->publish_dash_bools();
