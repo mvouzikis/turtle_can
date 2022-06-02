@@ -103,7 +103,7 @@ void CanHandler::handleCanReceive()
 
         //RCLCPP_INFO(this->get_logger(), "%u",this->recvFrame.can_id);
 
-        if (this->recvFrame.can_id == CAN_MCU_APU_STATE_MISSION_FRAME_ID && this->rosConf.publishAmiSelectedMission) {
+        if (this->recvFrame.can_id == CAN_MCU_AMI_FRAME_ID && this->rosConf.publishAmiSelectedMission) {
             this->publish_ami_selected_mission();
         }
         else if (this->recvFrame.can_id == CAN_MCU_AUX_STATES_FRAME_ID) {
