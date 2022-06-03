@@ -25,7 +25,7 @@ void CanHandler::publish_aux_brakelight()
     }
 
     this->createHeader(&this->msgAuxBrakelight.header);
-    //this->msgAuxBrakelight.brakelight = msg.brakelight;//CAN_AS_DASH_AUX_AUX_BRAKELIGHT_BRAKELIGHT_ON_CHOICE);// TO ADD IT ON DBC
+    this->msgAuxBrakelight.brakelight = msg.brakelight;//CAN_AS_DASH_AUX_AUX_BRAKELIGHT_BRAKELIGHT_ON_CHOICE);// TO ADD IT ON DBC
 
     this->pubAuxBrakelight->publish(this->msgAuxBrakelight);
 }
@@ -128,15 +128,7 @@ void CanHandler::publish_dash_bools()
     can_mcu_aux_states_t msg1;
     can_mcu_asb_t msg2;
 
-    
-    if (recvFrame.can_id == CAN_MCU_ECU_BOOLS_FRAME_ID){
-
-
-        if (can_mcu_ecu_bools_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-            RCLCPP_ERROR(this->get_logger(), "Error during unpack of ECU_BOOLS");
-        return;
-        }
-    }
+   
 
     if (recvFrame.can_id == CAN_MCU_AUX_STATES_FRAME_ID){
 
@@ -144,25 +136,38 @@ void CanHandler::publish_dash_bools()
             RCLCPP_ERROR(this->get_logger(), "Error during unpack of AUX_STATES");
         return;
         }
+
+        this->msgDashBools.safestate=msg1.safe_state;
+        this->msgDashBools.greentsal=msg1.green_tsal;
+
     }
 
+     
     if (recvFrame.can_id == CAN_MCU_ECU_BOOLS_FRAME_ID){
+
+
+        if (can_mcu_ecu_bools_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+            RCLCPP_ERROR(this->get_logger(), "Error during unpack of ECU_BOOLS");
+        return;
+        }
+        this->msgDashBools.buzzer=msg.buzzer;
+        this->msgDashBools.enableout=msg.enable;
+
+
+    }
+
+    if (recvFrame.can_id == CAN_MCU_ASB_FRAME_ID){
     
         if (can_mcu_asb_unpack(&msg2, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
             RCLCPP_ERROR(this->get_logger(), "Error during unpack of ASB");
         return;
         }
+        this->msgDashBools.asbled=msg2.asb_led;
+
+        
     }
-
-    this->createHeader(&this->msgDashBools.header);
-    this->msgDashBools.buzzer=msg.buzzer;
-    this->msgDashBools.safestate=msg1.safe_state;
-    this->msgDashBools.enableout=msg.enable;
-    this->msgDashBools.asbled=msg2.asb_led;
-    this->msgDashBools.greentsal=msg1.green_tsal;
     
-
-
+    this->createHeader(&this->msgDashBools.header);
     this->pubDashBools->publish(this->msgDashBools);
 
 }
@@ -418,36 +423,41 @@ void CanHandler::publish_isabellen()
     can_mcu_isabellen_vdc_t vdc;
     can_mcu_isabellen_pdc_t pdc;
 
-    if (recvFrame.can_id == CAN_MCU_ISABELLEN_ENERGY_LENGTH){
+    this->createHeader(&this->msgIsabellen.header);
+
+    if (recvFrame.can_id == CAN_MCU_ISABELLEN_ENERGY_FRAME_ID){
         if (can_mcu_isabellen_energy_unpack(&energy,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
             RCLCPP_ERROR(this->get_logger(),"Error during unpack of isabellen_energy");
         }
+        this->msgIsabellen.energy=energy.energy;
+
     }
     
-    if (recvFrame.can_id == CAN_MCU_ISABELLEN_IDC_LENGTH){
+    if (recvFrame.can_id == CAN_MCU_ISABELLEN_IDC_FRAME_ID){
         if (can_mcu_isabellen_idc_unpack(&idc,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
             RCLCPP_ERROR(this->get_logger(),"Error during unpack of isabellen_idc");
         }
+        this->msgIsabellen.idc=idc.idc;
+
     }
 
-    if (recvFrame.can_id == CAN_MCU_ISABELLEN_VDC_LENGTH){
+    if (recvFrame.can_id == CAN_MCU_ISABELLEN_VDC_FRAME_ID){
         if (can_mcu_isabellen_vdc_unpack(&vdc,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
             RCLCPP_ERROR(this->get_logger(),"Error during unpack of isabellen_vdc");
         }
+        this->msgIsabellen.vdc=vdc.vdc;
+
     }
 
-    if (recvFrame.can_id == CAN_MCU_ISABELLEN_PDC_LENGTH){
+    if (recvFrame.can_id == CAN_MCU_ISABELLEN_PDC_FRAME_ID){
         if (can_mcu_isabellen_pdc_unpack(&pdc,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
             RCLCPP_ERROR(this->get_logger(),"Error during unpack of isabellen_pdc");
         }
+    this->msgIsabellen.pdc=pdc.pdc;
+    
     }
 
 
-    this->createHeader(&this->msgIsabellen.header);
-    this->msgIsabellen.energy=energy.energy;
-    this->msgIsabellen.idc=idc.idc;
-    this->msgIsabellen.vdc=vdc.vdc;
-    this->msgIsabellen.pdc=pdc.pdc;
 
     this->pubIsabellen->publish(this->msgIsabellen);
 }

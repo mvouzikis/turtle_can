@@ -111,12 +111,16 @@ void CanHandler::handleCanReceive()
                 this->publish_aux_brakelight();
             if (this->rosConf.publishAuxTsalSafeState)
                 this->publish_aux_tsal_safe_state();
+            if (this->rosConf.publishDashBools)
+                this->publish_dash_bools();
         }    
         else if (this->recvFrame.can_id == CAN_MCU_ASB_FRAME_ID) {
             if (this->rosConf.publishEbsTankPressure)
             this->publish_ebs_tank_pressure();
             if (this->rosConf.publishEbsSupervisor)
                 this->publish_ebs_supervisor();
+            if (this->rosConf.publishDashBools)
+                this->publish_dash_bools();
 
         }
         
@@ -161,7 +165,11 @@ void CanHandler::handleCanReceive()
         else if ((this->recvFrame.can_id == CAN_MCU_INVERTER_RIGHT_INFO_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ADU_INVERTER_RIGHT_FRAME_ID) && this->rosConf.publishInverterRightInfo) {
             this->publish_inverter_right_info();
         }
+         else if (this->recvFrame.can_id == CAN_MCU_ISABELLEN_ENERGY_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_IDC_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_VDC_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_PDC_FRAME_ID) {
+            this->publish_isabellen();
+        }
         
+
         
         //  else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_ECU_PARAMS_ACTUAL_FRAME_ID && this->rosConf.publishECUParamsActaul) { //TODO
         // //     this->publish_ecu_params_actual();
