@@ -120,8 +120,8 @@ void CanHandler::variablesInit()
     }
     
     if (this->rosConf.transmitSwaCommanded) {
-        this->frameSwaCommanded.position_target = convertSteeringAngleTarget(0.0); //TOCHECK
-        this->frameSwaCommanded.velocity_target = convertSteeringRateTarget(0.01); //TOCHECK
+        this->frameSwaCommanded.position_target = 0;//convertSteeringAngleTarget(0.0); //TOCHECK
+        this->frameSwaCommanded.velocity_target = 0;//convertSteeringRateTarget(0.01); //TOCHECK
         this->frameSwaCommanded.steering_mode = 1; //CAN_MCU_STEERING_COMMAND ;
     }
     
