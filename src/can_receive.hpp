@@ -282,17 +282,19 @@ void CanHandler::publish_motor_rpm()
             RCLCPP_ERROR(this->get_logger(), "Error during unpack of INV_RESOLVERS(inverter_left)");
             return;
         }
+    this->msgMotorRPM.left = (float)msg.rpm_l;
+
     }
     if (recvFrame.can_id == CAN_MCU_ADU_INVERTER_RIGHT_FRAME_ID){
         if (can_mcu_adu_inverter_right_unpack(&msg1, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
             RCLCPP_ERROR(this->get_logger(), "Error during unpack of INV_RESOLVERS(inverter_right)");
         return;
         }
+    this->msgMotorRPM.right = (float)msg1.rpm_r;
+  
     }
     
     this->createHeader(&this->msgMotorRPM.header);
-    this->msgMotorRPM.left = (float)msg.rpm_l;
-    this->msgMotorRPM.right = (float)msg1.rpm_r;
 
     this->pubMotorRPM->publish(this->msgMotorRPM);
 }
