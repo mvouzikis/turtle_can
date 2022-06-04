@@ -209,7 +209,7 @@ void CanHandler::publish_ebs_service_brake()
     }
 
     this->createHeader(&this->msgEbsServiceBrake.header);  //prepei na bazo kathe fora createheader
-    this->msgEbsServiceBrake.servo_commanded_percentage = msg.servo_commanded;
+    this->msgEbsServiceBrake.servo_commanded_enable= msg.servo_commanded;
 
     this->pubEbsServiceBrake->publish(this->msgEbsServiceBrake);
 }
@@ -307,6 +307,8 @@ void CanHandler::publish_inverter_commands()
             RCLCPP_ERROR(this->get_logger(), "Error during unpack of INV_RESOLVERS(inverter_left)");
             return;
         }
+    this->msgInvCmds.torqueleft = msg.torque_l;
+
     }
 
     if (recvFrame.can_id == CAN_MCU_ADU_INVERTER_RIGHT_FRAME_ID){
@@ -314,11 +316,11 @@ void CanHandler::publish_inverter_commands()
             RCLCPP_ERROR(this->get_logger(), "Error during unpack of INV_RESOLVERS(inverter_right)");
             return;
         }
+    this->msgInvCmds.torqueright = msg1.torque_r;
+
     }
 
     this->createHeader(&this->msgInvCmds.header);
-    this->msgInvCmds.torqueleft = msg.torque_l;
-    this->msgInvCmds.torqueright = msg1.torque_r;
 
     this->pubInvCmds->publish(this->msgInvCmds);
 }
