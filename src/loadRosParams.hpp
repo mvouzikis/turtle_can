@@ -28,8 +28,8 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<bool>("publishInverterRightInfo",    this->rosConf.publishInverterRightInfo,     true);
     this->get_parameter_or<bool>("publishInverterLeftInfo",     this->rosConf.publishInverterLeftInfo,      true);
     this->get_parameter_or<bool>("publishIsabellen",            this->rosConf.publishIsabellen,             true);
-    this->get_parameter_or<bool>("publishECUControlSystems",     this->rosConf.publishEcuControlSystems,     true);
-    this->get_parameter_or<bool>("publishpublishCoolingInfo",   this->rosConf.publishCoolingInfo,     true);
+    this->get_parameter_or<bool>("publishECUControlSystems",    this->rosConf.publishEcuControlSystems,     true);
+    this->get_parameter_or<bool>("publishpublishCoolingInfo",   this->rosConf.publishCoolingInfo,           true);
     
     
 

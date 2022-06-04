@@ -117,7 +117,7 @@ void CanHandler::publish_dash_brake()
     }
 
     this->createHeader(&this->msgDashBrake.header);
-    this->msgDashBrake.brake = convertBrakePressure(msg.brake_pressure);
+    this->msgDashBrake.brake = msg.brake_pressure;//convertBrakePressure(msg.brake_pressure);
 
     this->pubDashBrake->publish(this->msgDashBrake);
 }
@@ -247,7 +247,7 @@ void CanHandler::publish_swa_actual() //TODO
     }
 
     this->createHeader(&this->msgSwaActual.header);
-    this->msgSwaActual.steering = convertSteeringActual(msg.steering);
+    this->msgSwaActual.steering = msg.steering;
 
     //errors check
     // this->msgCanStatus.sensor_errors = msg.analog1_error == CAN_AS_DASH_AUX_SWA_STATUS_ANALOG1_ERROR_ERROR_CHOICE ?
@@ -370,7 +370,6 @@ void CanHandler::publish_inverter_right_info()
             RCLCPP_ERROR(this->get_logger(), "Error during unpack of adu_inverter right");
             return;
         }
-    RCLCPP_ERROR(this->get_logger(), "adu right");
 
     this->msgInvRightInfo.igbts_temp= msg.igbt_r;
     this->msgInvRightInfo.motor_temp=msg.motor_r;

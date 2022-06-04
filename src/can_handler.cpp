@@ -113,7 +113,6 @@ void CanHandler::handleCanReceive()
                 this->publish_aux_tsal_safe_state();
             if (this->rosConf.publishDashBools)
                 this->publish_dash_bools();
-        RCLCPP_INFO(this->get_logger(), "aux states,%u",this->recvFrame.can_id); 
         }    
         else if (this->recvFrame.can_id == CAN_MCU_ASB_FRAME_ID) {
             if (this->rosConf.publishEbsTankPressure)
@@ -130,7 +129,6 @@ void CanHandler::handleCanReceive()
         }
         else if (this->recvFrame.can_id == CAN_MCU_DASH_HALL_F_FRAME_ID && this->rosConf.pubishDashFrontRPM) {
             this->publish_dash_front_rpm();
-            RCLCPP_INFO(this->get_logger(), "dash front rpm,%u",this->recvFrame.can_id); 
         }
         else if (this->recvFrame.can_id == CAN_MCU_DASH_APPS_BRAKE_FRAME_ID) {
             if (this->rosConf.publishDashApps)           
@@ -145,17 +143,15 @@ void CanHandler::handleCanReceive()
                 this->publish_dash_bools();
             if (this->rosConf.publishEbsServiceBrake)
                 this->publish_ebs_service_brake();
-            RCLCPP_INFO(this->get_logger(), "dash bools,%u",this->recvFrame.can_id);      
         }
 
          else if (this->recvFrame.can_id == CAN_MCU_DASH_BOOLS_FRAME_ID) {
             if (this->rosConf.publishDashButtons)  
                 this->publish_dash_buttons();
-                RCLCPP_INFO(this->get_logger(), "dash buttons,%u",this->recvFrame.can_id);    
 
         }
 
-        else if (this->recvFrame.can_id == CAN_MCU_STEERING_COMMAND_FRAME_ID&& this->rosConf.publishSwaStatus) {
+        else if (this->recvFrame.can_id == CAN_MCU_DASH_STEERING_FRAME_ID && this->rosConf.publishSwaStatus) {
             this->publish_swa_actual();
         }
         else if (this->recvFrame.can_id == CAN_MCU_ADU_INVERTER_LEFT_FRAME_ID) {
@@ -165,7 +161,6 @@ void CanHandler::handleCanReceive()
                 this->publish_inverter_commands();
             if (this->rosConf.publishInverterLeftInfo) 
                 this->publish_inverter_left_info();
-            RCLCPP_INFO(this->get_logger(), "adu left, %u",this->recvFrame.can_id);
 
         }
         else if (this->recvFrame.can_id == CAN_MCU_ADU_INVERTER_RIGHT_FRAME_ID){
@@ -175,7 +170,6 @@ void CanHandler::handleCanReceive()
                 this->publish_inverter_commands();
             if (this->rosConf.publishInverterLeftInfo) 
                 this->publish_inverter_right_info();
-            RCLCPP_INFO(this->get_logger(), "adu right, %u",this->recvFrame.can_id);
 
            
         }
@@ -189,7 +183,6 @@ void CanHandler::handleCanReceive()
         }
          else if (this->recvFrame.can_id == CAN_MCU_ISABELLEN_ENERGY_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_IDC_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_VDC_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_PDC_FRAME_ID) {
             this->publish_isabellen();
-            RCLCPP_INFO(this->get_logger(), "isabellen, %u",this->recvFrame.can_id);
         }
         
 
