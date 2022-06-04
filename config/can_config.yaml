@@ -25,7 +25,11 @@ CanInterface:
     publishResStatus: true          # /res_status
     publishCanStatus: true          # /can_status
     publishECUParamsActaul: true    # /ecu_params_actual
-    publishECUControlsSystems: true   # /ecu_control_systems
+    publishECUControlsSystems: true # /ecu_control_systems
+    publishInverterRightInfo: true  # /inverter_right_info
+    publishInverterLeftInfo: true   # /inverter_left_info
+
+
     # CAN messages to transmit
     #(0: do not send, 1: use ros publisher callback, 2: use dbc cyclic time)
     transmitApuStateMission: 1    # /state_machine_state /current_mission

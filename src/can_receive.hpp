@@ -166,7 +166,7 @@ void CanHandler::publish_dash_bools()
 
         
     }
-    
+
     this->createHeader(&this->msgDashBools.header);
     this->pubDashBools->publish(this->msgDashBools);
 
@@ -361,29 +361,33 @@ void CanHandler::publish_inverter_right_info()
     can_mcu_adu_inverter_right_t msg;
     can_mcu_inverter_right_info_t msg1;
 
-    if (recvFrame.can_id == CAN_MCU_ADU_INVERTER_LEFT_FRAME_ID){
+    if (recvFrame.can_id == CAN_MCU_ADU_INVERTER_RIGHT_FRAME_ID){ //TODO TO ELOYSA
         if (can_mcu_adu_inverter_right_unpack(&msg,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
             RCLCPP_ERROR(this->get_logger(), "Error during unpack of adu_inverter right");
             return;
         }
+    RCLCPP_ERROR(this->get_logger(), "adu right");
+
+    this->msgInvRightInfo.igbts_temp= msg.igbt_r;
+    this->msgInvRightInfo.motor_temp=msg.motor_r;
     }
 
-    if (recvFrame.can_id == CAN_MCU_ADU_INVERTER_RIGHT_FRAME_ID){
+    if (recvFrame.can_id == CAN_MCU_INVERTER_RIGHT_INFO_FRAME_ID){
         if (can_mcu_inverter_right_info_unpack(&msg1,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
             RCLCPP_ERROR(this->get_logger(), "Error during unpack of inverter_right_info");
             return;
         }
+    this->msgInvRightInfo.irms=msg1.irms_max_right;
+    this->msgInvRightInfo.irms=msg1.i_lim_in_use_right;
+    this->msgInvRightInfo.irms=msg1.irm_right;
+    this->msgInvRightInfo.max_rpm=msg1.max_rpm_right;
+
     }
     
     this->createHeader(&this->msgInvLeftInfo.header);
-    this->msgInvLeftInfo.igbts_temp= msg.igbt_r;
-    this->msgInvLeftInfo.irms=msg1.irms_max_right;
-    this->msgInvLeftInfo.irms=msg1.i_lim_in_use_right;
-    this->msgInvLeftInfo.motor_temp=msg.motor_r;
-    this->msgInvLeftInfo.irms=msg1.irm_right;
-    this->msgInvLeftInfo.max_rpm=msg1.max_rpm_right;
+   
 
-    this->pubInvLeftInfo->publish(this->msgInvLeftInfo);
+    this->pubInvRightInfo->publish(this->msgInvRightInfo);
 }
 
 void CanHandler::publish_inverter_left_info() 
@@ -395,22 +399,24 @@ void CanHandler::publish_inverter_left_info()
             RCLCPP_ERROR(this->get_logger(), "Error during unpack of adu_left");
             return;
         } 
+    this->msgInvLeftInfo.igbts_temp= msg.igbt_l;
+    this->msgInvLeftInfo.motor_temp=msg.motor_l; 
     }
 
-    if (recvFrame.can_id == CAN_MCU_ADU_INVERTER_RIGHT_FRAME_ID){
+    if (recvFrame.can_id == CAN_MCU_INVERTER_LEFT_INFO_FRAME_ID){
       if (can_mcu_inverter_left_info_unpack(&msg1,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
             RCLCPP_ERROR(this->get_logger(), "Error during unpack of inverter_left_info");
             return;
         }
+    this->msgInvLeftInfo.irms=msg1.irms_max_left;
+    this->msgInvLeftInfo.irms=msg1.i_lim_in_use_left;
+    this->msgInvLeftInfo.irms=msg1.irm_left;
+    this->msgInvLeftInfo.max_rpm=msg1.max_rpm_left;
+
     }
 
     this->createHeader(&this->msgInvLeftInfo.header);
-    this->msgInvLeftInfo.igbts_temp= msg.igbt_l;
-    this->msgInvLeftInfo.irms=msg1.irms_max_left;
-    this->msgInvLeftInfo.irms=msg1.i_lim_in_use_left;
-    this->msgInvLeftInfo.motor_temp=msg.motor_l;
-    this->msgInvLeftInfo.irms=msg1.irm_left;
-    this->msgInvLeftInfo.max_rpm=msg1.max_rpm_left;
+
 
     this->pubInvLeftInfo->publish(this->msgInvLeftInfo);
  
