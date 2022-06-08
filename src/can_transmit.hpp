@@ -42,19 +42,19 @@ void CanHandler::transmit_apu_command()
     }
 }
 
-// void CanHandler::transmit_ecu_params() //TODO
-// {
-//     // this->sendFrame.can_id = CAN_AS_DASH_AUX_ECU_PARAMETERS_FRAME_ID;
-//     // this->sendFrame.can_dlc = CAN_AS_DASH_AUX_ECU_PARAMETERS_LENGTH;
-//     // if (can_as_dash_aux_ecu_parameters_pack(this->sendFrame.data, &this->frameECUParams, sizeof(sendFrame.data)) != CAN_AS_DASH_AUX_ECU_PARAMETERS_LENGTH) {
-//     //      RCLCPP_ERROR(this->get_logger(), "Error during pack of ECU_PARAMETERS");
-//     //     return;
-//     // }
+void CanHandler::transmit_ecu_params() //TODO
+{
+    // this->sendFrame.can_id = CAN_AS_DASH_AUX_ECU_PARAMETERS_FRAME_ID;
+    // this->sendFrame.can_dlc = CAN_AS_DASH_AUX_ECU_PARAMETERS_LENGTH;
+    // if (can_as_dash_aux_ecu_parameters_pack(this->sendFrame.data, &this->frameECUParams, sizeof(sendFrame.data)) != CAN_AS_DASH_AUX_ECU_PARAMETERS_LENGTH) {
+    //      RCLCPP_ERROR(this->get_logger(), "Error during pack of ECU_PARAMETERS");
+    //     return;
+    // }
 
-//     // if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_ECU_PARAMETERS_LENGTH) {
-//     //     RCLCPP_ERROR(this->get_logger(), "Error during transmit of ECU_PARAMETERS");
-//     // }
-// }
+    // if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_ECU_PARAMETERS_LENGTH) {
+    //     RCLCPP_ERROR(this->get_logger(), "Error during transmit of ECU_PARAMETERS");
+    // }
+}
 
 // void CanHandler::transmit_ecu_params2() //TODO
 // {

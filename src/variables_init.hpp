@@ -128,13 +128,13 @@ void CanHandler::variablesInit()
     if (this->rosConf.transmitApuCommand) {
         this->frameApuCommand.throttle_brake_commanded = 0.0;
     }
-    /*if (this->rosConf.transmitECUParams) { //TODO
+    if (this->rosConf.transmitECUParams) {
         this->subECUParams = this->create_subscription<turtle_interfaces::msg::ECUParams>("ecu_params", serviceQos, std::bind(&CanHandler::ecu_params_callback, this, _1));
 
-        this->frameECUParams.inverter_rpm_max = 0;
+        this->frameECUParams.inverter_rpm_percentage = 0;
         this->frameECUParams.inverter_i_max = 0;
-        this->frameECUParams.power_target_kw = can_as_dash_aux_ecu_parameters_power_target_kw_encode(0.0);
-    }*/
+        this->frameECUParams.power_target = 0.0;
+    }
 
     //--------- FOR FSEAST DATA LOGGER-----
     // if (this->rosConf.transmitDvSystemStatus) {

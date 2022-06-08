@@ -172,17 +172,6 @@ void CanHandler::publish_dash_bools()
 
 }
 
-//     this->createHeader(&this->msgDashLEDs.header);
-//     this->msgDashLEDs.fanpwm = msg.fan_pwm;
-//     this->msgDashLEDs.buzzer = (msg.buzzer == CAN_AS_DASH_AUX_DASH_LEDS_BUZZER_ON_CHOICE); //TOOD
-//     this->msgDashLEDs.safestate1 = (msg.safe_state_1 == CAN_MCU_AUX_STATES_SAFE_STATE_DISABLE_CHOICE);
-//     this->msgDashLEDs.enableout = (msg.enable == CAN_AS_DASH_AUX_DASH_LEDS_ENABLE_OUT_ON_CHOICE);//TOOD
-//    // is on the ebs mesage this->msgDashLEDs.ebsled = (msg.asb_led == CAN_MCU_ASB_ASB_LED_ASB_LED_ON_CHOICE);
-//     this->msgDashLEDs.plactive = (msg.pl_active == CAN_AS_DASH_AUX_DASH_LEDS_PL_ACTIVE_ON_CHOICE); //TOOD
-
-//     this->pubDashLEDs->publish(this->msgDashLEDs);
-// }
-
 void CanHandler::publish_dash_buttons()
 {
     can_mcu_dash_bools_t msg;
@@ -208,7 +197,7 @@ void CanHandler::publish_ebs_service_brake()
         return;
     }
 
-    this->createHeader(&this->msgEbsServiceBrake.header);  //prepei na bazo kathe fora createheader
+    this->createHeader(&this->msgEbsServiceBrake.header); 
     this->msgEbsServiceBrake.servo_commanded_enable= msg.servo_commanded;
 
     this->pubEbsServiceBrake->publish(this->msgEbsServiceBrake);
@@ -327,23 +316,25 @@ void CanHandler::publish_inverter_commands()
     this->pubInvCmds->publish(this->msgInvCmds);
 }
 
-// void CanHandler::publish_ecu_params_actual() //TODO
-// {
-//     can_as_dash_aux_ecu_params_actual_t msg;
-//     if (can_as_dash_aux_ecu_params_actual_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-//         RCLCPP_ERROR(this->get_logger(), "Error during unpack of ECU_PARAMS_ACTUAL");
-//         return;
-//     }
+void CanHandler::publish_ecu_params_actual() 
+{
+    can_mcu_ecu_parameters_t msg;
+    if (can_mcu_ecu_parameters_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of ECU_PARAMS_ACTUAL");
+        return;
+    }
 
-//     this->createHeader(&this->msgEcuParams.header);
-//     this->msgEcuParams.inverter_rpm_max = msg.inverter_rpm_max_mean;
-//     this->msgEcuParams.inverter_i_rms_max = msg.inverter_i_max_mean*400.0/1070.0;
-//     this->msgEcuParams.power_target_kw = (float)msg.power_target_k_w_actual/255.0*80.0;
-//     this->msgEcuParams.ed2_gain = msg.ed2_gain_actual;
-//     this->msgEcuParams.inverter_i_rms_max_charging_factor = (float)msg.i_rms_max_charging_factor_actual/255.0;
+    this->createHeader(&this->msgEcuParams.header);
+    this->msgEcuParams.inverter_rpm_percentage = msg.inverter_rpm_percentage;
+    this->msgEcuParams.inverter_i_rms_max = msg.inverte_i_max;//400.0/1070.0;
+    this->msgEcuParams.power_target_kw = msg.power_target;///255.0*80.0;
+    this->msgEcuParams.ed_enable = msg.ed_enable;
+    this->msgEcuParams.tc_enable = msg.tc_enable;
+    this->msgEcuParams.servo_start_speed = msg.servo_start_speed;
+    this->msgEcuParams.regen_min_speed = msg.regen_min_speed;
 
-//     this->pubEcuParams->publish(this->msgEcuParams);
-// }
+    this->pubEcuParams->publish(this->msgEcuParams);
+}
 
 // void CanHandler::publish_ecu_params_actual2() //TODO
 // {

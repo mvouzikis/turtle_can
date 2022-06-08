@@ -233,8 +233,8 @@ class CanHandler : public rclcpp::Node
         struct can_mcu_apu_command_t frameApuCommand;
         void transmit_apu_command();
 
-        // struct can_as_dash_aux_ecu_parameters_t frameECUParams; //TODO
-        // void transmit_ecu_params();
+        struct can_mcu_ecu_parameters_t frameECUParams; 
+        void transmit_ecu_params();
 
         // struct can_as_dash_aux_ecu_parameters2_t frameECUParams2; //TODO
         // void transmit_ecu_params2();

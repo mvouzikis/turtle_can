@@ -348,9 +348,9 @@ void CanHandler::handleCanTransmit()
     if ((this->rosConf.transmitApuCommand == 2) && !(this->canTimerCounter % CAN_MCU_APU_COMMAND_CYCLE_TIME_MS)) {
         this->transmit_apu_command();
     }
-    // if ((this->rosConf.transmitECUParams == 2) && !(this->canTimerCounter % CAN_AS_DASH_AUX_ECU_PARAMETERS_CYCLE_TIME_MS)) {
-    //     this->transmit_ecu_params();
-    // }
+    if ((this->rosConf.transmitECUParams == 2) && !(this->canTimerCounter % CAN_MCU_ECU_PARAMETERS_CYCLE_TIME_MS)) {
+        this->transmit_ecu_params();
+    }
     // if ((this->rosConf.transmitECUParams2 == 2) && !(this->canTimerCounter % CAN_AS_DASH_AUX_ECU_PARAMETERS2_CYCLE_TIME_MS)) {
     //     this->transmit_ecu_params2();
     // }
