@@ -326,7 +326,7 @@ void CanHandler::publish_ecu_params_actual()
 
     this->createHeader(&this->msgEcuParams.header);
     this->msgEcuParams.inverter_rpm_percentage = msg.inverter_rpm_percentage;
-    this->msgEcuParams.inverter_i_rms_max = msg.inverte_i_max;//400.0/1070.0;
+    this->msgEcuParams.inverter_i_rms_max = msg.inverter_i_max;//400.0/1070.0;
     this->msgEcuParams.power_target_kw = msg.power_target;///255.0*80.0;
     this->msgEcuParams.ed_enable = msg.ed_enable;
     this->msgEcuParams.tc_enable = msg.tc_enable;

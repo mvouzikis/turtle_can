@@ -33,24 +33,22 @@ void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::Shar
     }
 }
 
-// void CanHandler::ecu_params_callback(turtle_interfaces::msg::ECUParams::SharedPtr msgECUParams)
-// {
-//     this->frameECUParams.inverter_rpm_max = msgECUParams->inverter_rpm_max;
-//     this->frameECUParams.inverter_i_max = msgECUParams->inverter_i_rms_max;
-//     this->frameECUParams.power_target_kw = (uint8_t)(msgECUParams->power_target_kw*255.0/80.0);
-//     this->frameECUParams.ed2_gain = msgECUParams->ed2_gain;
-//     this->frameECUParams.i_rms_max_charging_factor = uint8_t(msgECUParams->inverter_i_rms_max_charging_factor*255);
+void CanHandler::ecu_params_callback(turtle_interfaces::msg::ECUParams::SharedPtr msgECUParams)
+{
+    this->frameECUParams.inverter_rpm_percentage = msgECUParams->inverter_rpm_percentage;
+    this->frameECUParams.inverter_i_max = msgECUParams->inverter_i_rms_max;
+    this->frameECUParams.power_target = msgECUParams->power_target_kw;
+    this->frameECUParams.ed_enable = msgECUParams->ed_enable;
+    this->frameECUParams.tc_enable = msgECUParams->tc_enable;
 
-//     this->frameECUParams2.servo_min_speed = msgECUParams->servo_min_speed;
-//     this->frameECUParams2.regen_min_speed = msgECUParams->regen_min_speed;
+    this->frameECUParams.servo_start_speed = msgECUParams->servo_start_speed;
+    this->frameECUParams.regen_min_speed = msgECUParams->regen_min_speed;
 
-//     if (this->rosConf.transmitECUParams == 1) {
-//         this->transmit_ecu_params();
-//     }
-//     if (this->rosConf.transmitECUParams2 == 1) {
-//         this->transmit_ecu_params2();
-//     }
-// }
+    if (this->rosConf.transmitECUParams == 1) {
+        this->transmit_ecu_params();
+    }
+ 
+}
 
 // void CanHandler::control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo)
 // {
