@@ -231,7 +231,7 @@ void CanHandler::publish_swa_actual() //TODO
 {
     can_mcu_dash_steering_t msg;
     if (can_mcu_dash_steering_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of SWA_STATUS");
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of SWA_ACTUAL");
         return;
     }
 
@@ -477,4 +477,10 @@ void CanHandler::publish_ecu_control_systems()
     this->msgEcuControlSystems.tc_active=msg.tc_active;
 
     this->pubEcuControlSystem->publish(this->msgEcuControlSystems);
+}
+
+void CanHandler::publish_can_status(){
+
+
+
 }

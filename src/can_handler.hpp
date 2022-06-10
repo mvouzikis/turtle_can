@@ -236,6 +236,8 @@ class CanHandler : public rclcpp::Node
         struct can_mcu_ecu_parameters_t frameECUParams; 
         void transmit_ecu_params();
 
+        void publish_can_status();
+
         // struct can_as_dash_aux_ecu_parameters2_t frameECUParams2; //TODO
         // void transmit_ecu_params2();
 

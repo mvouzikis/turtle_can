@@ -266,10 +266,10 @@ void CanHandler::handleReceiveTimeout()
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT; //TODO
 
-    // if (timeNow - this->msgDashBools.header.stamp > rclcpp::Duration(1s))
-    //     this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_BOOLS_TIMEOUT;
-    // else
-    //     this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_BOOLS_TIMEOUT;
+    if (timeNow - this->msgDashBools.header.stamp > rclcpp::Duration(1s))
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_BOOLS_TIMEOUT;
+    else
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_BOOLS_TIMEOUT;
 
     if (timeNow - this->msgEbsTankPressure.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.EBS_TANK_PRESSURE_TIMEOUT;
@@ -297,14 +297,39 @@ void CanHandler::handleReceiveTimeout()
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.EBS_SERVICE_BRAKE_TIMEOUT;
 
     if (timeNow - this->msgInvCmds.header.stamp > rclcpp::Duration(1s))
-        this->msgCanStatus.message_timeouts |= this->msgCanStatus.INV_RESOLVERS_TIMEOUT;
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.INVERTER_ADU_TIMEOUT;
     else
-        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.INV_RESOLVERS_TIMEOUT;
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.INVERTER_ADU_TIMEOUT;
     
-    // if (timeNow - this->msgEcuParams.header.stamp > rclcpp::Duration(2s))
-    //     this->msgCanStatus.message_timeouts |= this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
-    // else
-    //     this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
+    if (timeNow - this->msgEcuParams.header.stamp > rclcpp::Duration(2s))
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
+    else
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
+
+    if (timeNow - this->msgCoolingInfo.header.stamp > rclcpp::Duration(1s))
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.COOLING_INFO_TIMEOUT;
+    else
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.COOLING_INFO_TIMEOUT;
+    
+    if (timeNow - this->msgEcuControlSystems.header.stamp > rclcpp::Duration(1s))
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.ECU_CONTROL_SYSTEMS_TIMEOUT;
+    else
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.ECU_CONTROL_SYSTEMS_TIMEOUT;
+
+    if (timeNow - this->msgIsabellen.header.stamp > rclcpp::Duration(1s))
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.ISABELLEN_TIMEOUT;
+    else
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.ISABELLEN_TIMEOUT;
+
+    if (timeNow - this->msgInvLeftInfo.header.stamp > rclcpp::Duration(1s)) 
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.INV_LEFT_INFO_TIMEOUT;
+    else
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.INV_LEFT_INFO_TIMEOUT;
+
+    if (timeNow - this->msgInvRightInfo.header.stamp > rclcpp::Duration(1s)) 
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.INV_RIGHT_INFO_TIMEOUT;
+    else
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.INV_RIGHT_INFO_TIMEOUT;
 
     can_berr_counter bc;
     if (can_get_berr_counter(this->rosConf.channel0.c_str(), &bc) != 0)
