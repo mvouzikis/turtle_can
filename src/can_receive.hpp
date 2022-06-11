@@ -212,17 +212,17 @@ void CanHandler::publish_ebs_supervisor()
     }
 
     this->createHeader(&this->msgEbsSupervisor.header);
-    this->msgEbsSupervisor.asmsstate = (msg.asms_state == CAN_MCU_ASB_ASMS_STATE_ASMS_OPENED_CHOICE);
-    this->msgEbsSupervisor.tsmsout = (msg.tsms_out == CAN_MCU_ASB_TSMS_OUT_TSMS_OPENED_CHOICE);
+    this->msgEbsSupervisor.asmsstate = (!msg.asms_state == CAN_MCU_ASB_ASMS_STATE_ASMS_OPENED_CHOICE);
+    this->msgEbsSupervisor.tsmsout = (!msg.tsms_out == CAN_MCU_ASB_TSMS_OUT_TSMS_OPENED_CHOICE);
     this->msgEbsSupervisor.ebsstatus = msg.asb_status;
-    this->msgEbsSupervisor.ebsled = (msg.asb_led == CAN_MCU_ASB_ASB_LED_ASB_LED_ON_CHOICE);
+    this->msgEbsSupervisor.ebsled = (!msg.asb_led == CAN_MCU_ASB_ASB_LED_ASB_LED_OFF_CHOICE);
     this->msgEbsSupervisor.servicebrakestatus = msg.service_brake_status;
     this->msgEbsSupervisor.initialchecked = (msg.initial_checked == CAN_MCU_ASB_INITIAL_CHECKED_INITIAL_CHECK_SUCCESSFUL_CHOICE);
     this->msgEbsSupervisor.initialcheckstage = msg.initial_check_step;
-    this->msgEbsSupervisor.monitortankpressure = (msg.monitor_tank_pressure == CAN_MCU_ASB_MONITOR_TANK_PRESSURE_OK_CHOICE);
-    this->msgEbsSupervisor.monitorbrakepressure = (msg.monitor_brake_pressure == CAN_MCU_ASB_MONITOR_BRAKE_PRESSURE_OK_CHOICE);
-    this->msgEbsSupervisor.monitorservocheck = (msg.monitor_servo_check == CAN_MCU_ASB_MONITOR_SERVO_CHECK_OK_CHOICE);
-    this->msgEbsSupervisor.monitorapu = (msg.monitor_apu == CAN_MCU_ASB_MONITOR_APU_OK_CHOICE);    
+    this->msgEbsSupervisor.monitortankpressure = (!msg.monitor_tank_pressure == CAN_MCU_ASB_MONITOR_TANK_PRESSURE_ERROR_CHOICE);
+    this->msgEbsSupervisor.monitorbrakepressure = (!msg.monitor_brake_pressure == CAN_MCU_ASB_MONITOR_BRAKE_PRESSURE_ERROR_CHOICE);
+    this->msgEbsSupervisor.monitorservocheck = (!msg.monitor_servo_check == CAN_MCU_ASB_MONITOR_SERVO_CHECK_ERROR_CHOICE);
+    this->msgEbsSupervisor.monitorapu = (!msg.monitor_apu == CAN_MCU_ASB_MONITOR_APU_ERROR_CHOICE);    
 
     this->pubEbsSupervisor->publish(this->msgEbsSupervisor);
 }
@@ -356,7 +356,7 @@ void CanHandler::publish_inverter_right_info()
     can_mcu_adu_inverter_right_t msg;
     can_mcu_inverter_right_info_t msg1;
 
-    if (recvFrame.can_id == CAN_MCU_ADU_INVERTER_RIGHT_FRAME_ID){ //TODO TO ELOYSA
+    if (recvFrame.can_id == CAN_MCU_ADU_INVERTER_RIGHT_FRAME_ID){ 
         if (can_mcu_adu_inverter_right_unpack(&msg,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
             RCLCPP_ERROR(this->get_logger(), "Error during unpack of adu_inverter right");
             return;

@@ -170,8 +170,7 @@ void CanHandler::handleCanReceive()
                 this->publish_inverter_commands();
             if (this->rosConf.publishInverterLeftInfo) 
                 this->publish_inverter_right_info();
-
-           
+         
         }
         else if (this->recvFrame.can_id == CAN_MCU_INVERTER_RIGHT_INFO_FRAME_ID){
             if (this->rosConf.publishInverterRightInfo) 
@@ -184,19 +183,13 @@ void CanHandler::handleCanReceive()
          else if (this->recvFrame.can_id == CAN_MCU_ISABELLEN_ENERGY_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_IDC_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_VDC_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_PDC_FRAME_ID) {
             this->publish_isabellen();
         }
+                
+         else if (this->recvFrame.can_id == CAN_MCU_ECU_PARAMETERS_ACTUAL_FRAME_ID && this->rosConf.publishECUParamsActaul) {
+            this->publish_ecu_params_actual();
+        }
         
-
+    
         
-        //  else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_ECU_PARAMS_ACTUAL_FRAME_ID && this->rosConf.publishECUParamsActaul) { //TODO
-        // //     this->publish_ecu_params_actual();
-        // }
-        
-         //else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_ECU_PARAMS_ACTUAL2_FRAME_ID && this->rosConf.publishECUParamsActaul) { //TODO
-        //     this->publish_ecu_params_actual2();
-        ///να μπει μήνυμα για δεδομένα inverter
-        // else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_ECU_PARAMS_ACTUAL2_FRAME_ID && this->rosConf.publishECUParamsActaul) { //TODO
-        
-        // }
     }
 
     //For channel1
