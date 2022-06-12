@@ -324,8 +324,6 @@ void CanHandler::publish_ecu_params_actual()
         return;
     }
 
-    RCLCPP_INFO(this->get_logger(),"MPIKE");
-
     this->createHeader(&this->msgECUParamsActual.header);
     this->msgECUParamsActual.inverter_rpm_percentage = msg.inverter_rpm_percentage;
     this->msgECUParamsActual.inverter_i_rms_max = msg.inverter_i_max;//400.0/1070.0;
