@@ -177,9 +177,8 @@ class CanHandler : public rclcpp::Node
         void publish_ebs_supervisor();
 
         rclcpp::Publisher<turtle_interfaces::msg::ECUParams>::SharedPtr pubEcuParams;
-        turtle_interfaces::msg::ECUParams msgEcuParams;
+        turtle_interfaces::msg::ECUParams msgECUParamsActual;
         void publish_ecu_params_actual();
-        void publish_ecu_params_actual2();   
     
         rclcpp::Publisher<turtle_interfaces::msg::Isabellen>::SharedPtr pubIsabellen;
         turtle_interfaces::msg::Isabellen msgIsabellen;

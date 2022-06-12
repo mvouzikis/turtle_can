@@ -324,16 +324,18 @@ void CanHandler::publish_ecu_params_actual()
         return;
     }
 
-    this->createHeader(&this->msgEcuParams.header);
-    this->msgEcuParams.inverter_rpm_percentage = msg.inverter_rpm_percentage;
-    this->msgEcuParams.inverter_i_rms_max = msg.inverter_i_max;//400.0/1070.0;
-    this->msgEcuParams.power_target_kw = msg.power_target;///255.0*80.0;
-    this->msgEcuParams.ed_enable = msg.ed_enable;
-    this->msgEcuParams.tc_enable = msg.tc_enable;
-    this->msgEcuParams.servo_start_speed = msg.servo_start_speed;
-    this->msgEcuParams.regen_min_speed = msg.regen_min_speed;
+    RCLCPP_INFO(this->get_logger(),"MPIKE");
 
-    this->pubEcuParams->publish(this->msgEcuParams);
+    this->createHeader(&this->msgECUParamsActual.header);
+    this->msgECUParamsActual.inverter_rpm_percentage = msg.inverter_rpm_percentage;
+    this->msgECUParamsActual.inverter_i_rms_max = msg.inverter_i_max;//400.0/1070.0;
+    this->msgECUParamsActual.power_target_kw = msg.power_target;///255.0*80.0;
+    this->msgECUParamsActual.ed_enable = msg.ed_enable;
+    this->msgECUParamsActual.tc_enable = msg.tc_enable;
+    this->msgECUParamsActual.servo_start_speed = msg.servo_start_speed;
+    this->msgECUParamsActual.regen_min_speed = msg.regen_min_speed;
+
+    this->pubEcuParams->publish(this->msgECUParamsActual);
 }
 
 // void CanHandler::publish_ecu_params_actual2() //TODO

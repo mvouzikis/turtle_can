@@ -294,7 +294,7 @@ void CanHandler::handleReceiveTimeout()
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.INVERTER_ADU_TIMEOUT;
     
-    if (timeNow - this->msgEcuParams.header.stamp > rclcpp::Duration(2s))
+    if (timeNow - this->msgECUParamsActual.header.stamp > rclcpp::Duration(2s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
