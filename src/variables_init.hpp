@@ -81,7 +81,7 @@ void CanHandler::variablesInit()
 
     if (this->rosConf.publishECUParamsActaul) {   //TODO
         this->pubEcuParams = this->create_publisher<turtle_interfaces::msg::ECUParams>("ecu_params_actual", serviceQos);
-        this->msgEcuParams = turtle_interfaces::msg::ECUParams();
+        this->msgECUParamsActual = turtle_interfaces::msg::ECUParams();
     }
 
     if (this->rosConf.publishIsabellen) {  
