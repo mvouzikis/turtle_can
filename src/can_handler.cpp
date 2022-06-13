@@ -74,7 +74,7 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
 
     //initialize timers
     this->canRecvTimer =    this->create_wall_timer(500us,  std::bind(&CanHandler::handleCanReceive,        this));
-    //this->canRecvTimeout =  this->create_wall_timer(10ms,   std::bind(&CanHandler::handleReceiveTimeout,    this));
+    this->canRecvTimeout =  this->create_wall_timer(10ms,   std::bind(&CanHandler::handleReceiveTimeout,    this));
     this->canSendTimer =    this->create_wall_timer(1ms,    std::bind(&CanHandler::handleCanTransmit,       this));
 
     //res_initialized = false;
@@ -170,8 +170,7 @@ void CanHandler::handleCanReceive()
                 this->publish_inverter_commands();
             if (this->rosConf.publishInverterLeftInfo) 
                 this->publish_inverter_right_info();
-
-           
+         
         }
         else if (this->recvFrame.can_id == CAN_MCU_INVERTER_RIGHT_INFO_FRAME_ID){
             if (this->rosConf.publishInverterRightInfo) 
@@ -184,19 +183,13 @@ void CanHandler::handleCanReceive()
          else if (this->recvFrame.can_id == CAN_MCU_ISABELLEN_ENERGY_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_IDC_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_VDC_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_PDC_FRAME_ID) {
             this->publish_isabellen();
         }
+                
+         else if (this->recvFrame.can_id == CAN_MCU_ECU_PARAMETERS_ACTUAL_FRAME_ID && this->rosConf.publishECUParamsActaul) {
+            this->publish_ecu_params_actual();
+        }
         
-
+    
         
-        //  else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_ECU_PARAMS_ACTUAL_FRAME_ID && this->rosConf.publishECUParamsActaul) { //TODO
-        // //     this->publish_ecu_params_actual();
-        // }
-        
-         //else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_ECU_PARAMS_ACTUAL2_FRAME_ID && this->rosConf.publishECUParamsActaul) { //TODO
-        //     this->publish_ecu_params_actual2();
-        ///να μπει μήνυμα για δεδομένα inverter
-        // else if (this->recvFrame.can_id == CAN_AS_DASH_AUX_ECU_PARAMS_ACTUAL2_FRAME_ID && this->rosConf.publishECUParamsActaul) { //TODO
-        
-        // }
     }
 
     //For channel1
@@ -240,6 +233,9 @@ void CanHandler::createHeader(std_msgs::msg::Header *header)
 void CanHandler::handleReceiveTimeout()
 {
     rclcpp::Time timeNow = this->now();
+
+    this->createHeader(&this->msgCanStatus.header);
+
     
     if (timeNow - this->msgDashApps.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_APPS_TIMEOUT;
@@ -266,10 +262,10 @@ void CanHandler::handleReceiveTimeout()
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT; //TODO
 
-    // if (timeNow - this->msgDashBools.header.stamp > rclcpp::Duration(1s))
-    //     this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_BOOLS_TIMEOUT;
-    // else
-    //     this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_BOOLS_TIMEOUT;
+    if (timeNow - this->msgDashBools.header.stamp > rclcpp::Duration(1s))
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_BOOLS_TIMEOUT;
+    else
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_BOOLS_TIMEOUT;
 
     if (timeNow - this->msgEbsTankPressure.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.EBS_TANK_PRESSURE_TIMEOUT;
@@ -297,14 +293,39 @@ void CanHandler::handleReceiveTimeout()
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.EBS_SERVICE_BRAKE_TIMEOUT;
 
     if (timeNow - this->msgInvCmds.header.stamp > rclcpp::Duration(1s))
-        this->msgCanStatus.message_timeouts |= this->msgCanStatus.INV_RESOLVERS_TIMEOUT;
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.INVERTER_ADU_TIMEOUT;
     else
-        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.INV_RESOLVERS_TIMEOUT;
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.INVERTER_ADU_TIMEOUT;
     
-    // if (timeNow - this->msgEcuParams.header.stamp > rclcpp::Duration(2s))
-    //     this->msgCanStatus.message_timeouts |= this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
-    // else
-    //     this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
+    if (timeNow - this->msgECUParamsActual.header.stamp > rclcpp::Duration(2s))
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
+    else
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
+
+    if (timeNow - this->msgCoolingInfo.header.stamp > rclcpp::Duration(1s))
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.COOLING_INFO_TIMEOUT;
+    else
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.COOLING_INFO_TIMEOUT;
+    
+    if (timeNow - this->msgEcuControlSystems.header.stamp > rclcpp::Duration(1s))
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.ECU_CONTROL_SYSTEMS_TIMEOUT;
+    else
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.ECU_CONTROL_SYSTEMS_TIMEOUT;
+
+    if (timeNow - this->msgIsabellen.header.stamp > rclcpp::Duration(1s))
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.ISABELLEN_TIMEOUT;
+    else
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.ISABELLEN_TIMEOUT;
+
+    if (timeNow - this->msgInvLeftInfo.header.stamp > rclcpp::Duration(1s)) 
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.INV_LEFT_INFO_TIMEOUT;
+    else
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.INV_LEFT_INFO_TIMEOUT;
+
+    if (timeNow - this->msgInvRightInfo.header.stamp > rclcpp::Duration(1s)) 
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.INV_RIGHT_INFO_TIMEOUT;
+    else
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.INV_RIGHT_INFO_TIMEOUT;
 
     can_berr_counter bc;
     if (can_get_berr_counter(this->rosConf.channel0.c_str(), &bc) != 0)
@@ -327,7 +348,6 @@ void CanHandler::handleReceiveTimeout()
     if (can_get_state(this->rosConf.channel0.c_str(), &this->msgCanStatus.can_state) != 0)
         RCLCPP_INFO(this->get_logger(), "Failed to get CAN state");
 
-    this->createHeader(&this->msgCanStatus.header);
     this->pubCanStatus->publish(this->msgCanStatus);
 }
 

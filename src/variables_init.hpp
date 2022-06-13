@@ -81,7 +81,7 @@ void CanHandler::variablesInit()
 
     if (this->rosConf.publishECUParamsActaul) {   //TODO
         this->pubEcuParams = this->create_publisher<turtle_interfaces::msg::ECUParams>("ecu_params_actual", serviceQos);
-        this->msgEcuParams = turtle_interfaces::msg::ECUParams();
+        this->msgECUParamsActual = turtle_interfaces::msg::ECUParams();
     }
 
     if (this->rosConf.publishIsabellen) {  
@@ -99,7 +99,7 @@ void CanHandler::variablesInit()
         this->msgCoolingInfo= turtle_interfaces::msg::CoolingInfo();
     }
 
-        if (this->rosConf.publishCanStatus) {
+    if (this->rosConf.publishCanStatus) {
         this->pubCanStatus = this->create_publisher<turtle_interfaces::msg::CanStatus>("can_status", serviceQos);
         this->msgCanStatus = turtle_interfaces::msg::CanStatus();
     }
@@ -108,7 +108,7 @@ void CanHandler::variablesInit()
     //Initialize CAN Tx messages
     //-------------------------
     if (this->rosConf.transmitApuStateMission || this->rosConf.transmitDvSystemStatus) {
-        this->subApuState = this->create_subscription<turtle_interfaces::msg::StateMachineState>("state_machine_state", serviceQos, std::bind(&CanHandler::apu_state_callback, this, _1));
+        this->subApuState = this->create_subscription<turtle_interfaces::msg::StateMachineState>("state_flowchart_state", serviceQos, std::bind(&CanHandler::apu_state_callback, this, _1));
         this->subApuMission = this->create_subscription<turtle_interfaces::msg::Mission>("current_mission", serviceQos, std::bind(&CanHandler::apu_mission_callback, this, _1));
 
         this->frameApuStateMission.as_mission = CAN_MCU_APU_STATE_MISSION_AS_MISSION_ERROR_MISSION_CHOICE;
@@ -131,9 +131,13 @@ void CanHandler::variablesInit()
     if (this->rosConf.transmitECUParams) {
         this->subECUParams = this->create_subscription<turtle_interfaces::msg::ECUParams>("ecu_params", serviceQos, std::bind(&CanHandler::ecu_params_callback, this, _1));
 
-        this->frameECUParams.inverter_rpm_percentage = 0;
-        this->frameECUParams.inverter_i_max = 0;
-        this->frameECUParams.power_target = 0.0;
+        this->frameECUParams.inverter_rpm_percentage = 100;
+        this->frameECUParams.inverter_i_max = 100;
+        this->frameECUParams.power_target = 40.0;
+        this->frameECUParams.servo_start_speed = 5;
+        this->frameECUParams.regen_min_speed = 5;
+        this->frameECUParams.ed_enable = 0;
+        this->frameECUParams.tc_enable= 1;
     }
 
     //--------- FOR FSEAST DATA LOGGER-----

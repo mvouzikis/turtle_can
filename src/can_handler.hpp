@@ -177,9 +177,8 @@ class CanHandler : public rclcpp::Node
         void publish_ebs_supervisor();
 
         rclcpp::Publisher<turtle_interfaces::msg::ECUParams>::SharedPtr pubEcuParams;
-        turtle_interfaces::msg::ECUParams msgEcuParams;
+        turtle_interfaces::msg::ECUParams msgECUParamsActual;
         void publish_ecu_params_actual();
-        void publish_ecu_params_actual2();   
     
         rclcpp::Publisher<turtle_interfaces::msg::Isabellen>::SharedPtr pubIsabellen;
         turtle_interfaces::msg::Isabellen msgIsabellen;
@@ -235,6 +234,8 @@ class CanHandler : public rclcpp::Node
 
         struct can_mcu_ecu_parameters_t frameECUParams; 
         void transmit_ecu_params();
+
+        void publish_can_status();
 
         // struct can_as_dash_aux_ecu_parameters2_t frameECUParams2; //TODO
         // void transmit_ecu_params2();
