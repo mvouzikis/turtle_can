@@ -74,7 +74,7 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
 
     //initialize timers
     this->canRecvTimer =    this->create_wall_timer(500us,  std::bind(&CanHandler::handleCanReceive,        this));
-    //this->canRecvTimeout =  this->create_wall_timer(10ms,   std::bind(&CanHandler::handleReceiveTimeout,    this));
+    this->canRecvTimeout =  this->create_wall_timer(10ms,   std::bind(&CanHandler::handleReceiveTimeout,    this));
     this->canSendTimer =    this->create_wall_timer(1ms,    std::bind(&CanHandler::handleCanTransmit,       this));
 
     //res_initialized = false;
@@ -233,6 +233,9 @@ void CanHandler::createHeader(std_msgs::msg::Header *header)
 void CanHandler::handleReceiveTimeout()
 {
     rclcpp::Time timeNow = this->now();
+
+    this->createHeader(&this->msgCanStatus.header);
+
     
     if (timeNow - this->msgDashApps.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_APPS_TIMEOUT;
@@ -345,7 +348,6 @@ void CanHandler::handleReceiveTimeout()
     if (can_get_state(this->rosConf.channel0.c_str(), &this->msgCanStatus.can_state) != 0)
         RCLCPP_INFO(this->get_logger(), "Failed to get CAN state");
 
-    this->createHeader(&this->msgCanStatus.header);
     this->pubCanStatus->publish(this->msgCanStatus);
 }
 

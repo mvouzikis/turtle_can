@@ -479,8 +479,3 @@ void CanHandler::publish_ecu_control_systems()
     this->pubEcuControlSystem->publish(this->msgEcuControlSystems);
 }
 
-void CanHandler::publish_can_status(){
-
-
-
-}
