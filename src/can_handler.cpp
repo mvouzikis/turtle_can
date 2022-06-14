@@ -77,7 +77,7 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
     this->canRecvTimeout =  this->create_wall_timer(10ms,   std::bind(&CanHandler::handleReceiveTimeout,    this));
     this->canSendTimer =    this->create_wall_timer(1ms,    std::bind(&CanHandler::handleCanTransmit,       this));
 
-    //res_initialized = false;
+    ///res_initialized = false;
 
     RCLCPP_INFO(this->get_logger(), "Communication started");
 }
@@ -371,8 +371,10 @@ void CanHandler::handleCanTransmit()
     if ((this->rosConf.transmitECUParams == 2) && !(this->canTimerCounter % CAN_MCU_ECU_PARAMETERS_CYCLE_TIME_MS)) {
         this->transmit_ecu_params();
     }
-    // if ((this->rosConf.transmitECUParams2 == 2) && !(this->canTimerCounter % CAN_AS_DASH_AUX_ECU_PARAMETERS2_CYCLE_TIME_MS)) {
-    //     this->transmit_ecu_params2();
+
+    //if ((this->rosConf.transmitAPUTemp ==2) && !(this->canTimerCounter % CAN_MCU_)) TODO
+    // if ((this->rosConf.transmitAPUTemp == 2) && !(this->canTimerCounter % CAN_AS_DASH_AUX_ECU_PARAMETERS2_CYCLE_TIME_MS)) {
+    //     this->transmit_apu_temps();
     // }
     // if (this->rosConf.transmitDvSystemStatus && !(this->canTimerCounter % CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_CYCLE_TIME_MS)) {
     //     this->transmit_dv_system_status();
@@ -491,7 +493,7 @@ void CanHandler::handleCanTransmit()
 
 // void CanHandler::transmit_apu_res_init() 
 // {
-//     // send CAN initialization thing
+//     send CAN initialization thing
 //     this->sendFrame.can_id = CAN_APU_RES_DLOGGER_APU_RES_INIT_FRAME_ID;
 //     this->sendFrame.can_dlc = CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH;
 //     if (can_apu_res_dlogger_apu_res_init_pack(this->sendFrame.data, &this->frameApuResInit, sizeof(sendFrame.data)) != CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH){
