@@ -141,8 +141,8 @@ void CanHandler::variablesInit()
     }
 
     if (this->rosConf.transmitApuTemp ) {
-        this->subCPUTemps = this->create_subscription<turtle_interfaces::msg::CpuStatus>("cpu_status", serviceQos, std::bind(&CanHandler::cpu_temps_callback, this, _1));
         this->subGPUTemp = this->create_subscription<turtle_interfaces::msg::GpuStatus>("gpu_status", serviceQos, std::bind(&CanHandler::gpu_temp_callback, this, _1));
+        this->subCPUTemps = this->create_subscription<turtle_interfaces::msg::CpuStatus>("cpu_status", serviceQos, std::bind(&CanHandler::cpu_temps_callback, this, _1));
 
         this->frameAPUTemps.cpu_temp=0;
         this->frameAPUTemps.gpu_temp=0;
