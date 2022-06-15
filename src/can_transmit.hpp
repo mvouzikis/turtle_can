@@ -44,7 +44,7 @@ void CanHandler::transmit_apu_command()
 
 void CanHandler ::transmit_apu_temps()
 {
-    RCLCPP_INFO(this->get_logger(), "MPIKE");
+    RCLCPP_INFO(this->get_logger(), "MPIKE_TRANSMIT");
 
 
     this->sendFrame.can_id = CAN_MCU_APU_TEMPS_FRAME_ID;
