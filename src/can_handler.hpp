@@ -269,7 +269,7 @@ class CanHandler : public rclcpp::Node
         // Send RES initialize message unitl it starts sending CAN messages
         struct can_apu_res_dlogger_apu_res_init_t frameApuResInit;
         bool res_initialized;
-         void transmit_apu_res_init();
+        void transmit_apu_res_init();
 
     public:
         CanHandler(rclcpp::NodeOptions nOpt);
