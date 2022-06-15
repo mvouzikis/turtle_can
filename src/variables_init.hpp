@@ -74,10 +74,10 @@ void CanHandler::variablesInit()
         this->msgInvLeftInfo = turtle_interfaces::msg::InverterInfo();
     }
 
-    /*if (this->rosConf.publishResStatus) {
+    if (this->rosConf.publishResStatus) {
         this->pubResStatus = this->create_publisher<turtle_interfaces::msg::ResStatus>("res_status", serviceQos);
         this->msgResStatus = turtle_interfaces::msg::ResStatus(); 
-    }TOCHECK*/
+    }
 
     if (this->rosConf.publishECUParamsActaul) {   //TODO
         this->pubEcuParams = this->create_publisher<turtle_interfaces::msg::ECUParams>("ecu_params_actual", serviceQos);
