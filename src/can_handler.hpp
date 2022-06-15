@@ -85,7 +85,7 @@ typedef struct {
     uint8_t transmitECUParams2;
     bool transmitDvSystemStatus;
     bool transmitApuResInit;
-    bool transmitApuTemp;
+    uint8_t transmitApuTemp;
 
 } RosConfig;
 

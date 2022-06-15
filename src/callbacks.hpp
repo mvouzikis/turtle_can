@@ -49,25 +49,27 @@ void CanHandler::ecu_params_callback(turtle_interfaces::msg::ECUParams::SharedPt
     }
  
 }
+void CanHandler::cpu_temps_callback(turtle_interfaces::msg::CpuStatus::SharedPtr msgCPUTemps)
+ {
 
-// void CanHandler::cpu_temps_callback(turtle_interfaces::msg::CpuStatus::SharedPtr msgCPUTemps)
-// {
-
-//     this->frameAPUTemps.cpu_temp = convertCPUTemp(&(msgCPUTemps->core_temperatures[0]),msgCPUTemps->number_of_temperatures);
-   
+     this->frameAPUTemps.cpu_temp = convertCPUTemp(&(msgCPUTemps->core_temperatures[0]),msgCPUTemps->number_of_temperatures);
+  
 //     if (this->rosConf.transmitApuTemp == 1)
+//	RCLCPP_INFO(this->get_logger(),"cpu");
 //         this->transmit_apu_temps();
 
-// }
+ }
 
 void CanHandler::gpu_temp_callback(turtle_interfaces::msg::GpuStatus::SharedPtr msgGPUTemp)
 {
-    RCLCPP_INFO(this->get_logger(), "MPIKE_CALLBACK");
 
     this->frameAPUTemps.gpu_temp = (uint16_t)(msgGPUTemp->temp_c);   
-    if (this->rosConf.transmitApuTemp == 1) {
+    RCLCPP_INFO(this->get_logger(), "MPIKE_CALLBACK");
+
+   // if (this->rosConf.transmitApuTemp == 1) {
+	RCLCPP_INFO(this->get_logger(), "MPIKE _CALLBACK_IF");
         this->transmit_apu_temps();
-    }
+ // }
 
 }
 
