@@ -39,9 +39,8 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<uint8_t>("transmitSwaCommanded",    this->rosConf.transmitSwaCommanded,      1);
     this->get_parameter_or<uint8_t>("transmitApuCommand",      this->rosConf.transmitApuCommand,        1);
     this->get_parameter_or<uint8_t>("transmitECUParams",       this->rosConf.transmitECUParams,         1);
-    this->get_parameter_or<uint8_t>("transmitECUParams2",      this->rosConf.transmitECUParams2,        1);
     this->get_parameter_or<bool>("transmitDvSystemStatus",     this->rosConf.transmitDvSystemStatus,    true);
     this->get_parameter_or<bool>("transmitApuResInit",         this->rosConf.transmitApuResInit,        true);
-    this->get_parameter_or<uint8_t>("transmitApuTemp",            this->rosConf.transmitApuTemp,           1);
+    this->get_parameter_or<uint8_t>("transmitApuTemp",         this->rosConf.transmitApuTemp,           1);
 
 }

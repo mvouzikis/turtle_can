@@ -64,12 +64,9 @@ void CanHandler::gpu_temp_callback(turtle_interfaces::msg::GpuStatus::SharedPtr 
 {
 
     this->frameAPUTemps.gpu_temp = (uint16_t)(msgGPUTemp->temp_c);   
-    RCLCPP_INFO(this->get_logger(), "MPIKE_CALLBACK");
 
-   if (this->rosConf.transmitApuTemp == 1) {
-	    RCLCPP_INFO(this->get_logger(), "MPIKE _CALLBACK_IF");
+   if (this->rosConf.transmitApuTemp == 1) 
         this->transmit_apu_temps();
-    }
 
 }
 
