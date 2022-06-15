@@ -257,14 +257,14 @@ class CanHandler : public rclcpp::Node
         void transmit_apu_temps();
 
         // //channel 1
-        // rclcpp::Subscription<turtle_interfaces::msg::ControlInfo>::SharedPtr subControlInfo;
-        // void control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo);
+        rclcpp::Subscription<turtle_interfaces::msg::ControlInfo>::SharedPtr subControlInfo;
+        void control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo);
 
-        // rclcpp::Subscription<turtle_interfaces::msg::SlamInfo>::SharedPtr subSlamInfo;
-        // void slam_info_callback(turtle_interfaces::msg::SlamInfo::SharedPtr msgSlamInfo);
+        rclcpp::Subscription<turtle_interfaces::msg::SlamInfo>::SharedPtr subSlamInfo;
+        void slam_info_callback(turtle_interfaces::msg::SlamInfo::SharedPtr msgSlamInfo);
 
-        // struct can_apu_res_dlogger_dv_system_status_t frameDvSystemStatus;
-        // void transmit_dv_system_status();
+        struct can_apu_res_dlogger_dv_system_status_t frameDvSystemStatus;
+        void transmit_dv_system_status();
 
         // Send RES initialize message unitl it starts sending CAN messages
         struct can_apu_res_dlogger_apu_res_init_t frameApuResInit;

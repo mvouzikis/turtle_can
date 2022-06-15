@@ -59,31 +59,35 @@ void CanHandler ::transmit_apu_temps()
     }
 }
 
-void CanHandler::transmit_ecu_params() //TODO
+void CanHandler::transmit_ecu_params() 
 {
-    // this->sendFrame.can_id = CAN_AS_DASH_AUX_ECU_PARAMETERS_FRAME_ID;
-    // this->sendFrame.can_dlc = CAN_AS_DASH_AUX_ECU_PARAMETERS_LENGTH;
-    // if (can_as_dash_aux_ecu_parameters_pack(this->sendFrame.data, &this->frameECUParams, sizeof(sendFrame.data)) != CAN_AS_DASH_AUX_ECU_PARAMETERS_LENGTH) {
-    //      RCLCPP_ERROR(this->get_logger(), "Error during pack of ECU_PARAMETERS");
-    //     return;
-    // }
+    this->sendFrame.can_id = CAN_MCU_ECU_PARAMETERS_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_MCU_ECU_PARAMETERS_LENGTH;
+    if (can_mcu_ecu_parameters_pack(this->sendFrame.data, &this->frameECUParams, sizeof(sendFrame.data)) != CAN_MCU_ECU_PARAMETERS_LENGTH) {
+         RCLCPP_ERROR(this->get_logger(), "Error during pack of ECU_PARAMETERS");
+        return;
+    }
 
-    // if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_ECU_PARAMETERS_LENGTH) {
-    //     RCLCPP_ERROR(this->get_logger(), "Error during transmit of ECU_PARAMETERS");
-    // }
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_MCU_ECU_PARAMETERS_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of ECU_PARAMETERS");
+    }
 }
 
-// void CanHandler::transmit_ecu_params2() //TODO
-// {
-//     // this->sendFrame.can_id = CAN_AS_DASH_AUX_ECU_PARAMETERS2_FRAME_ID;
-//     // this->sendFrame.can_dlc = CAN_AS_DASH_AUX_ECU_PARAMETERS2_LENGTH;
-//     // if (can_as_dash_aux_ecu_parameters2_pack(this->sendFrame.data, &this->frameECUParams2, sizeof(sendFrame.data)) != CAN_AS_DASH_AUX_ECU_PARAMETERS2_LENGTH) {
-//     //      RCLCPP_ERROR(this->get_logger(), "Error during pack of ECU_PARAMETERS2");
-//     //     return;
-//     // }
 
-//     // if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_AS_DASH_AUX_ECU_PARAMETERS2_LENGTH) {
-//     //     RCLCPP_ERROR(this->get_logger(), "Error during transmit of ECU_PARAMETERS2");
-//     // }
-// }
+//CHANNEL1
+void CanHandler::transmit_apu_res_init() 
+{
+    //send CAN initialization thing
+    this->sendFrame.can_id = CAN_APU_RES_DLOGGER_APU_RES_INIT_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH;
+    if (can_apu_res_dlogger_apu_res_init_pack(this->sendFrame.data, &this->frameApuResInit, sizeof(sendFrame.data)) != CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH){
+        RCLCPP_ERROR(this->get_logger(), "Error during pack of APU_RES_INIT");
+        return;
+    }
+
+    if (sendto(this->can1Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr1, this->len) < CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_RES_INIT");
+    }
+}
+
 

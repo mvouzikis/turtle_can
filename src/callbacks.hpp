@@ -54,9 +54,9 @@ void CanHandler::cpu_temps_callback(turtle_interfaces::msg::CpuStatus::SharedPtr
 
      this->frameAPUTemps.cpu_temp = convertCPUTemp(&(msgCPUTemps->core_temperatures[0]),msgCPUTemps->number_of_temperatures);
   
-//     if (this->rosConf.transmitApuTemp == 1)
-//	RCLCPP_INFO(this->get_logger(),"cpu");
-//         this->transmit_apu_temps();
+    // if (this->rosConf.transmitApuTemp == 1)
+	// RCLCPP_INFO(this->get_logger(),"cpu");
+    //     this->transmit_apu_temps();
 
  }
 
@@ -66,21 +66,21 @@ void CanHandler::gpu_temp_callback(turtle_interfaces::msg::GpuStatus::SharedPtr 
     this->frameAPUTemps.gpu_temp = (uint16_t)(msgGPUTemp->temp_c);   
     RCLCPP_INFO(this->get_logger(), "MPIKE_CALLBACK");
 
-   // if (this->rosConf.transmitApuTemp == 1) {
-	RCLCPP_INFO(this->get_logger(), "MPIKE _CALLBACK_IF");
+   if (this->rosConf.transmitApuTemp == 1) {
+	    RCLCPP_INFO(this->get_logger(), "MPIKE _CALLBACK_IF");
         this->transmit_apu_temps();
- // }
+    }
 
 }
 
 
-// void CanHandler::control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo)
-// {
-//     this->frameDvSystemStatus.lap_counter = msgControlInfo->lap;
-// }
+void CanHandler::control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo)
+{
+    this->frameDvSystemStatus.lap_counter = msgControlInfo->lap;
+}
 
-// void CanHandler::slam_info_callback(turtle_interfaces::msg::SlamInfo::SharedPtr msgSlamInfo)
-// {
-//     this->frameDvSystemStatus.cones_count_actual = msgSlamInfo->sensor_cone_count;
-//     this->frameDvSystemStatus.cones_count_all = msgSlamInfo->total_cone_count;
-// }
+void CanHandler::slam_info_callback(turtle_interfaces::msg::SlamInfo::SharedPtr msgSlamInfo)
+{
+    this->frameDvSystemStatus.cones_count_actual = msgSlamInfo->sensor_cone_count;
+    this->frameDvSystemStatus.cones_count_all = msgSlamInfo->total_cone_count;
+}
