@@ -140,6 +140,12 @@ void CanHandler::variablesInit()
         this->frameECUParams.tc_enable= 1;
     }
 
+    if (this->rosConf.transmitApuTemp ) {
+        this->subCPUTemps = this->create_subscription<turtle_interfaces::msg::CpuStatus>("cpu_status", serviceQos, std::bind(&CanHandler::cpu_temps_callback, this, _1));
+        this->subGPUTemp = this->create_subscription<turtle_interfaces::msg::GpuStatus>("gpu_status", serviceQos, std::bind(&CanHandler::gpu_temp_callback, this, _1));
+
+    }
+
     //--------- FOR FSEAST DATA LOGGER-----
     // if (this->rosConf.transmitDvSystemStatus) {
     //     this->subControlInfo = this->create_subscription<turtle_interfaces::msg::ControlInfo>("control_info", serviceQos, std::bind(&CanHandler::control_info_callback, this, _1));
