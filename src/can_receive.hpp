@@ -348,8 +348,8 @@ void CanHandler::publish_inverter_right_info()
             return;
         }
 
-    this->msgInvRightInfo.igbts_temp= msg.igbt_r;
-    this->msgInvRightInfo.motor_temp=msg.motor_r;
+    this->msgInvRightInfo.igbts_temp= msg.igbt_r*0.4;
+    this->msgInvRightInfo.motor_temp=msg.motor_r*0.4;
     }
 
     if (recvFrame.can_id == CAN_MCU_INVERTER_RIGHT_INFO_FRAME_ID){
@@ -379,8 +379,8 @@ void CanHandler::publish_inverter_left_info()
             RCLCPP_ERROR(this->get_logger(), "Error during unpack of adu_left");
             return;
         } 
-    this->msgInvLeftInfo.igbts_temp= msg.igbt_l;
-    this->msgInvLeftInfo.motor_temp=msg.motor_l; 
+    this->msgInvLeftInfo.igbts_temp= msg.igbt_l*0.4;
+    this->msgInvLeftInfo.motor_temp=msg.motor_l*0.4; 
     }
 
     if (recvFrame.can_id == CAN_MCU_INVERTER_LEFT_INFO_FRAME_ID){
