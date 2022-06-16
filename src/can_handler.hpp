@@ -150,9 +150,9 @@ class CanHandler : public rclcpp::Node
         turtle_interfaces::msg::TsalSafeState msgAuxTsalSafeState;
         void publish_aux_tsal_safe_state();
 
-        rclcpp::Publisher<turtle_interfaces::msg::CoolingInfo>::SharedPtr pubPumpsFans;
-        turtle_interfaces::msg::CoolingInfo msgPumpsFans;
-        void publish_pumps_fans();
+        // rclcpp::Publisher<turtle_interfaces::msg::CoolingInfo>::SharedPtr pubPumpsFans;
+        // turtle_interfaces::msg::CoolingInfo msgPumpsFans;
+        // void publish_pumps_fans();
 
         rclcpp::Publisher<turtle_interfaces::msg::BrakeLight>::SharedPtr pubAuxBrakelight;
         turtle_interfaces::msg::BrakeLight msgAuxBrakelight;
