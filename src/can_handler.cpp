@@ -239,10 +239,10 @@ void CanHandler::handleReceiveTimeout()
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_FRONT_HALL_TIMEOUT;
 
-    if (timeNow - this->msgPumpsFans.header.stamp > rclcpp::Duration(1s))
-        this->msgCanStatus.message_timeouts |= this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT; //TODO
-    else
-        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT; //TODO
+//    if (timeNow - this->msgPumpsFans.header.stamp > rclcpp::Duration(1s))
+  //      this->msgCanStatus.message_timeouts |= this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT; //TODO
+  //  else
+    //    this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT; //TODO
 
     if (timeNow - this->msgDashBools.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_BOOLS_TIMEOUT;
