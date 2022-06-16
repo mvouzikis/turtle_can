@@ -364,7 +364,7 @@ void CanHandler::publish_inverter_right_info()
 
     }
     
-    this->createHeader(&this->msgInvLeftInfo.header);
+    this->createHeader(&this->msgInvRightInfo.header);
    
 
     this->pubInvRightInfo->publish(this->msgInvRightInfo);
