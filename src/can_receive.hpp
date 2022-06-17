@@ -336,20 +336,6 @@ void CanHandler::publish_ecu_params_actual()
     this->pubEcuParams->publish(this->msgECUParamsActual);
 }
 
-// void CanHandler::publish_ecu_params_actual2() //TODO
-// {
-//     can_as_dash_aux_ecu_params_actual2_t msg;
-//     if (can_as_dash_aux_ecu_params_actual2_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-//         RCLCPP_ERROR(this->get_logger(), "Error during unpack of ECU_PARAMS_ACTUAL2");
-//         return;
-//     }
-
-//     this->createHeader(&this->msgEcuParams.header);
-//     this->msgEcuParams.servo_min_speed = msg.servo_min_speed_actual;
-//     this->msgEcuParams.regen_min_speed = msg.regen_min_speed_actual;
-
-//     this->pubEcuParams->publish(this->msgEcuParams);
-// }
 
 void CanHandler::publish_inverter_right_info() 
 {
@@ -362,8 +348,8 @@ void CanHandler::publish_inverter_right_info()
             return;
         }
 
-    this->msgInvRightInfo.igbts_temp= msg.igbt_r;
-    this->msgInvRightInfo.motor_temp=msg.motor_r;
+    this->msgInvRightInfo.igbts_temp= msg.igbt_r*0.4;
+    this->msgInvRightInfo.motor_temp=msg.motor_r*0.4;
     }
 
     if (recvFrame.can_id == CAN_MCU_INVERTER_RIGHT_INFO_FRAME_ID){
@@ -378,7 +364,7 @@ void CanHandler::publish_inverter_right_info()
 
     }
     
-    this->createHeader(&this->msgInvLeftInfo.header);
+    this->createHeader(&this->msgInvRightInfo.header);
    
 
     this->pubInvRightInfo->publish(this->msgInvRightInfo);
@@ -393,8 +379,8 @@ void CanHandler::publish_inverter_left_info()
             RCLCPP_ERROR(this->get_logger(), "Error during unpack of adu_left");
             return;
         } 
-    this->msgInvLeftInfo.igbts_temp= msg.igbt_l;
-    this->msgInvLeftInfo.motor_temp=msg.motor_l; 
+    this->msgInvLeftInfo.igbts_temp= msg.igbt_l*0.4;
+    this->msgInvLeftInfo.motor_temp=msg.motor_l*0.4; 
     }
 
     if (recvFrame.can_id == CAN_MCU_INVERTER_LEFT_INFO_FRAME_ID){
@@ -477,5 +463,23 @@ void CanHandler::publish_ecu_control_systems()
     this->msgEcuControlSystems.tc_active=msg.tc_active;
 
     this->pubEcuControlSystem->publish(this->msgEcuControlSystems);
+}
+
+//CHANNEL1
+void CanHandler::publish_res_status()
+{
+    can_apu_res_dlogger_res_status_t msg;
+    if (can_apu_res_dlogger_res_status_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of RES_STATUS");
+        return;
+    }
+
+    this->createHeader(&this->msgResStatus.header);
+    this->msgResStatus.stop = (msg.stop == CAN_APU_RES_DLOGGER_RES_STATUS_STOP_ON_CHOICE);
+    this->msgResStatus.toggle = (msg.toggle == CAN_APU_RES_DLOGGER_RES_STATUS_TOGGLE_ON_CHOICE);
+    this->msgResStatus.button = (msg.button == CAN_APU_RES_DLOGGER_RES_STATUS_BUTTON_ON_CHOICE);
+    this->msgResStatus.signal_strength = msg.signal_strength;
+
+    this->pubResStatus->publish(this->msgResStatus);
 }
 

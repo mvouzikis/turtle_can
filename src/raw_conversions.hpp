@@ -80,4 +80,8 @@ uint32_t convertSteeringRateTarget(float targetSteeringRate)
     return steeringRateRaw;
 }
 
+uint16_t convertCPUTemp(float CPUTemp[], uint16_t CoresNum){
+return (uint16_t)(*std::max_element(CPUTemp, CPUTemp + CoresNum));
+}
+
 #endif

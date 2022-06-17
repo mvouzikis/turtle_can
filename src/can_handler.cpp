@@ -77,7 +77,7 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
     this->canRecvTimeout =  this->create_wall_timer(10ms,   std::bind(&CanHandler::handleReceiveTimeout,    this));
     this->canSendTimer =    this->create_wall_timer(1ms,    std::bind(&CanHandler::handleCanTransmit,       this));
 
-    //res_initialized = false;
+    res_initialized = false;
 
     RCLCPP_INFO(this->get_logger(), "Communication started");
 }
@@ -183,23 +183,28 @@ void CanHandler::handleCanReceive()
          else if (this->recvFrame.can_id == CAN_MCU_ISABELLEN_ENERGY_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_IDC_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_VDC_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_PDC_FRAME_ID) {
             this->publish_isabellen();
         }
-                
-         else if (this->recvFrame.can_id == CAN_MCU_ECU_PARAMETERS_ACTUAL_FRAME_ID && this->rosConf.publishECUParamsActaul) {
+               
+        else if (this->recvFrame.can_id == CAN_MCU_ECU_PARAMETERS_ACTUAL_FRAME_ID && this->rosConf.publishECUParamsActaul) {
             this->publish_ecu_params_actual();
+        }
+         
+        else if (this->recvFrame.can_id == CAN_MCU_ECU_ADU_FRAME_ID){
+            if (this->rosConf.publishEcuControlSystems)
+            this->publish_ecu_control_systems();
         }
         
     
         
     }
 
-    //For channel1
-    // while (recvfrom(this->can1Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr1, &this->len) >= 8) {
-    //     ioctl(this->can1Socket, SIOCGSTAMP, &this->recvTime);  //get message timestamp
-    //     if (this->recvFrame.can_id == CAN_APU_RES_DLOGGER_RES_STATUS_FRAME_ID && this->rosConf.publishResStatus) {
-    //         res_initialized = true;
-    //         this->publish_res_status();
-    //     }
-    // }
+   // For channel1
+    while (recvfrom(this->can1Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr1, &this->len) >= 8) {
+        ioctl(this->can1Socket, SIOCGSTAMP, &this->recvTime);  //get message timestamp
+        if (this->recvFrame.can_id == CAN_APU_RES_DLOGGER_RES_STATUS_FRAME_ID && this->rosConf.publishResStatus) {
+            res_initialized = true;
+            this->publish_res_status();
+        }
+    }
 }
 
 void CanHandler::createHeader(std_msgs::msg::Header *header)
@@ -210,24 +215,6 @@ void CanHandler::createHeader(std_msgs::msg::Header *header)
 }
 
 
-
-
-/*void CanHandler::publish_res_status()
-{
-    can_apu_res_dlogger_res_status_t msg;
-    if (can_apu_res_dlogger_res_status_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of RES_STATUS");
-        return;
-    }
-
-    this->createHeader(&this->msgResStatus.header);
-    this->msgResStatus.stop = (msg.stop == CAN_APU_RES_DLOGGER_RES_STATUS_STOP_ON_CHOICE);
-    this->msgResStatus.toggle = (msg.toggle == CAN_APU_RES_DLOGGER_RES_STATUS_TOGGLE_ON_CHOICE);
-    this->msgResStatus.button = (msg.button == CAN_APU_RES_DLOGGER_RES_STATUS_BUTTON_ON_CHOICE);
-    this->msgResStatus.signal_strength = msg.signal_strength;
-
-    this->pubResStatus->publish(this->msgResStatus);
-}*/
 
 //Fucntions for CAN staus
 void CanHandler::handleReceiveTimeout()
@@ -257,10 +244,10 @@ void CanHandler::handleReceiveTimeout()
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.DASH_FRONT_HALL_TIMEOUT;
 
-    if (timeNow - this->msgPumpsFans.header.stamp > rclcpp::Duration(1s))
-        this->msgCanStatus.message_timeouts |= this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT; //TODO
-    else
-        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT; //TODO
+//    if (timeNow - this->msgPumpsFans.header.stamp > rclcpp::Duration(1s))
+  //      this->msgCanStatus.message_timeouts |= this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT; //TODO
+  //  else
+    //    this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.AUX_PUMPS_FANS_TIMEOUT; //TODO
 
     if (timeNow - this->msgDashBools.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.DASH_BOOLS_TIMEOUT;
@@ -371,41 +358,43 @@ void CanHandler::handleCanTransmit()
     if ((this->rosConf.transmitECUParams == 2) && !(this->canTimerCounter % CAN_MCU_ECU_PARAMETERS_CYCLE_TIME_MS)) {
         this->transmit_ecu_params();
     }
-    // if ((this->rosConf.transmitECUParams2 == 2) && !(this->canTimerCounter % CAN_AS_DASH_AUX_ECU_PARAMETERS2_CYCLE_TIME_MS)) {
-    //     this->transmit_ecu_params2();
+
+    //if ((this->rosConf.transmitAPUTemp ==2) && !(this->canTimerCounter % CAN_MCU_)) TODO
+    // if ((this->rosConf.transmitAPUTemp == 2) && !(this->canTimerCounter % CAN_AS_DASH_AUX_ECU_PARAMETERS2_CYCLE_TIME_MS)) {
+    //     this->transmit_apu_temps();
     // }
-    // if (this->rosConf.transmitDvSystemStatus && !(this->canTimerCounter % CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_CYCLE_TIME_MS)) {
-    //     this->transmit_dv_system_status();
-    // }
-    // if (this->rosConf.transmitApuResInit && !res_initialized && !(this->canTimerCounter % CAN_APU_RES_DLOGGER_APU_RES_INIT_CYCLE_TIME_MS)) {
-    //     this->transmit_apu_res_init();
-    // }
+    if (this->rosConf.transmitDvSystemStatus && !(this->canTimerCounter % CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_CYCLE_TIME_MS)) {
+        this->transmit_dv_system_status();
+    }
+    if (this->rosConf.transmitApuResInit && !res_initialized && !(this->canTimerCounter % CAN_APU_RES_DLOGGER_APU_RES_INIT_CYCLE_TIME_MS)) {
+        this->transmit_apu_res_init();
+    }
 }
 
 
 //--------------------------------FOR DATALOGGER-------------------------------
 
-/*void fill_datalogger_variables(can_apu_res_dlogger_dv_system_status_t *frameDvSystemStatus, can_as_dash_aux_apu_state_mission_t *frameApuStateMission, turtle_interfaces::msg::EbsSupervisorInfo *msgEbsSupervisor)
+void fill_datalogger_variables(can_apu_res_dlogger_dv_system_status_t *frameDvSystemStatus, can_mcu_apu_state_mission_t *frameApuStateMission, turtle_interfaces::msg::EbsSupervisorInfo *msgEbsSupervisor)
 {
     switch (frameApuStateMission->as_state)
     {
-    case CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_STATE_AS_OFF_CHOICE:
+    case CAN_MCU_APU_STATE_MISSION_AS_STATE_AS_OFF_CHOICE:
         frameDvSystemStatus->assi_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_ASSI_STATE_OFF_CHOICE;
         frameDvSystemStatus->steering_state = 0;
         break;
-    case CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_STATE_AS_READY_CHOICE:
+    case CAN_MCU_APU_STATE_MISSION_AS_STATE_AS_READY_CHOICE:
         frameDvSystemStatus->assi_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_ASSI_STATE_READY_CHOICE;
         frameDvSystemStatus->steering_state = 1;
         break;
-    case CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_STATE_AS_DRIVING_CHOICE:
+    case CAN_MCU_APU_STATE_MISSION_AS_STATE_AS_DRIVING_CHOICE:
         frameDvSystemStatus->assi_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_ASSI_STATE_DRIVING_CHOICE;
         frameDvSystemStatus->steering_state = 1;
         break;
-    case CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_STATE_AS_EMERGENCY_CHOICE:
+    case CAN_MCU_APU_STATE_MISSION_AS_STATE_AS_EMERGENCY_CHOICE:
         frameDvSystemStatus->assi_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_ASSI_STATE_EMERGENCY_BRAKE_CHOICE;
         frameDvSystemStatus->steering_state = 1;
         break;
-    case CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_STATE_AS_FINISHED_CHOICE:
+    case CAN_MCU_APU_STATE_MISSION_AS_STATE_AS_FINISHED_CHOICE:
         frameDvSystemStatus->assi_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_ASSI_STATE_FINISH_CHOICE;
         frameDvSystemStatus->steering_state = 0;
         break;
@@ -433,22 +422,22 @@ void CanHandler::handleCanTransmit()
 
     switch (frameApuStateMission->as_mission)
     {
-        case CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_MISSION_ACCELERATION_CHOICE:
+        case CAN_MCU_APU_STATE_MISSION_AS_MISSION_ACCELERATION_CHOICE:
             frameDvSystemStatus->ami_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_AMI_STATE_ACCELERATION_CHOICE;
             break;
-        case CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_MISSION_SKIDPAD_CHOICE:
+        case CAN_MCU_APU_STATE_MISSION_AS_MISSION_SKIDPAD_CHOICE:
             frameDvSystemStatus->ami_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_AMI_STATE_SKIDPAD_CHOICE;
             break;
-        case CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_MISSION_TRACKDRIVE_CHOICE:
+        case CAN_MCU_APU_STATE_MISSION_AS_MISSION_TRACKDRIVE_CHOICE:
             frameDvSystemStatus->ami_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_AMI_STATE_TRACKDRIVE_CHOICE;
             break;
-        case CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_MISSION_EBSTEST_CHOICE:
+        case CAN_MCU_APU_STATE_MISSION_AS_MISSION_EBSTEST_CHOICE:
             frameDvSystemStatus->ami_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_AMI_STATE_BRAKETEST_CHOICE;
             break;
-        case CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_MISSION_INSPECTION_CHOICE:
+        case CAN_MCU_APU_STATE_MISSION_AS_MISSION_INSPECTION_CHOICE:
             frameDvSystemStatus->ami_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_AMI_STATE_INSPECTION_CHOICE;
             break;
-        case CAN_AS_DASH_AUX_APU_STATE_MISSION_AS_MISSION_AUTOCROSS_CHOICE:
+        case CAN_MCU_APU_STATE_MISSION_AS_MISSION_AUTOCROSS_CHOICE:
             frameDvSystemStatus->ami_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_AMI_STATE_AUTOCROSS_CHOICE;
             break;
         default:
@@ -471,35 +460,21 @@ void CanHandler::handleCanTransmit()
     frameDvSystemStatus->service_brake_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_SERVICE_BRAKE_STATE_DISENGAGED_CHOICE;
         break;
     }
-} */
+} 
 
-// void CanHandler::transmit_dv_system_status()
-// {
-//     fill_datalogger_variables(&this->frameDvSystemStatus, &this->frameApuStateMission, &this->msgEbsSupervisor);
+void CanHandler::transmit_dv_system_status()
+{
+    fill_datalogger_variables(&this->frameDvSystemStatus, &this->frameApuStateMission, &this->msgEbsSupervisor);
 
-//     this->sendFrame.can_id = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_FRAME_ID;
-//     this->sendFrame.can_dlc = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_LENGTH;
-//     if (can_apu_res_dlogger_dv_system_status_pack(this->sendFrame.data, &this->frameDvSystemStatus, sizeof(sendFrame.data)) != CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_LENGTH) {
-//          RCLCPP_ERROR(this->get_logger(), "Error during pack of DV_SYSTEM_STATUS");
-//         return;
-//     }
+    this->sendFrame.can_id = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_LENGTH;
+    if (can_apu_res_dlogger_dv_system_status_pack(this->sendFrame.data, &this->frameDvSystemStatus, sizeof(sendFrame.data)) != CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_LENGTH) {
+         RCLCPP_ERROR(this->get_logger(), "Error during pack of DV_SYSTEM_STATUS");
+        return;
+    }
 
-//     if (sendto(this->can1Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr1, this->len) < CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_LENGTH) {
-//         RCLCPP_ERROR(this->get_logger(), "Error during transmit of DV_SYSTEM_STATUS");
-//     }
-// }
+    if (sendto(this->can1Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr1, this->len) < CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of DV_SYSTEM_STATUS");
+    }
+}
 
-// void CanHandler::transmit_apu_res_init() 
-// {
-//     // send CAN initialization thing
-//     this->sendFrame.can_id = CAN_APU_RES_DLOGGER_APU_RES_INIT_FRAME_ID;
-//     this->sendFrame.can_dlc = CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH;
-//     if (can_apu_res_dlogger_apu_res_init_pack(this->sendFrame.data, &this->frameApuResInit, sizeof(sendFrame.data)) != CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH){
-//         RCLCPP_ERROR(this->get_logger(), "Error during pack of APU_RES_INIT");
-//         return;
-//     }
-
-//     if (sendto(this->can1Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr1, this->len) < CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH) {
-//         RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_RES_INIT");
-//     }
-// }

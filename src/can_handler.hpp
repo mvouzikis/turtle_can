@@ -30,10 +30,14 @@
 #include "turtle_interfaces/msg/inverter_info.hpp"
 #include "turtle_interfaces/msg/isabellen.hpp"
 #include "turtle_interfaces/msg/ecu_control_systems.hpp"
+#include "turtle_interfaces/msg/gpu_status.hpp"
+#include "turtle_interfaces/msg/cpu_status.hpp"
+
 
 
 
 #include "can_mcu.h"
+#include "can_apu_res_dlogger.h"
 
 
 #define CAN_ERROR      -1
@@ -81,6 +85,8 @@ typedef struct {
     uint8_t transmitECUParams2;
     bool transmitDvSystemStatus;
     bool transmitApuResInit;
+    uint8_t transmitApuTemp;
+
 } RosConfig;
 
 class CanHandler : public rclcpp::Node
@@ -144,10 +150,6 @@ class CanHandler : public rclcpp::Node
         turtle_interfaces::msg::TsalSafeState msgAuxTsalSafeState;
         void publish_aux_tsal_safe_state();
 
-        rclcpp::Publisher<turtle_interfaces::msg::CoolingInfo>::SharedPtr pubPumpsFans;
-        turtle_interfaces::msg::CoolingInfo msgPumpsFans;
-        void publish_pumps_fans();
-
         rclcpp::Publisher<turtle_interfaces::msg::BrakeLight>::SharedPtr pubAuxBrakelight;
         turtle_interfaces::msg::BrakeLight msgAuxBrakelight;
         void publish_aux_brakelight();
@@ -192,10 +194,14 @@ class CanHandler : public rclcpp::Node
         turtle_interfaces::msg::CoolingInfo msgCoolingInfo;
         void publish_cooling_info();
 
+        
+        
         //channel 1
         rclcpp::Publisher<turtle_interfaces::msg::ResStatus>::SharedPtr pubResStatus;
         turtle_interfaces::msg::ResStatus msgResStatus;
         void publish_res_status();
+
+        
 
         //Variables and functions for CAN errors
         rclcpp::TimerBase::SharedPtr canRecvTimeout;
@@ -203,7 +209,8 @@ class CanHandler : public rclcpp::Node
         
         rclcpp::Publisher<turtle_interfaces::msg::CanStatus>::SharedPtr pubCanStatus;
         turtle_interfaces::msg::CanStatus msgCanStatus;
-        
+        void publish_can_status();
+
 
         //Variables and functions for CAN transmit
         uint16_t canTimerCounter;
@@ -223,6 +230,13 @@ class CanHandler : public rclcpp::Node
         rclcpp::Subscription<turtle_interfaces::msg::ECUParams>::SharedPtr subECUParams;        
         void ecu_params_callback(turtle_interfaces::msg::ECUParams::SharedPtr msgECUParams);
 
+        rclcpp::Subscription<turtle_interfaces::msg::CpuStatus>::SharedPtr subCPUTemps;        
+        void cpu_temps_callback(turtle_interfaces::msg::CpuStatus::SharedPtr msgCPUTemps);
+
+        rclcpp::Subscription<turtle_interfaces::msg::GpuStatus>::SharedPtr subGPUTemp;        
+        void gpu_temp_callback(turtle_interfaces::msg::GpuStatus::SharedPtr msgGPUTemp);
+
+
         struct can_mcu_apu_state_mission_t frameApuStateMission;
         void transmit_apu_state_mission();
 
@@ -235,25 +249,23 @@ class CanHandler : public rclcpp::Node
         struct can_mcu_ecu_parameters_t frameECUParams; 
         void transmit_ecu_params();
 
-        void publish_can_status();
-
-        // struct can_as_dash_aux_ecu_parameters2_t frameECUParams2; //TODO
-        // void transmit_ecu_params2();
+        struct can_mcu_apu_temps_t frameAPUTemps; 
+        void transmit_apu_temps();
 
         // //channel 1
-        // rclcpp::Subscription<turtle_interfaces::msg::ControlInfo>::SharedPtr subControlInfo;
-        // void control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo);
+        rclcpp::Subscription<turtle_interfaces::msg::ControlInfo>::SharedPtr subControlInfo;
+        void control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo);
 
-        // rclcpp::Subscription<turtle_interfaces::msg::SlamInfo>::SharedPtr subSlamInfo;
-        // void slam_info_callback(turtle_interfaces::msg::SlamInfo::SharedPtr msgSlamInfo);
+        rclcpp::Subscription<turtle_interfaces::msg::SlamInfo>::SharedPtr subSlamInfo;
+        void slam_info_callback(turtle_interfaces::msg::SlamInfo::SharedPtr msgSlamInfo);
 
-        // struct can_apu_res_dlogger_dv_system_status_t frameDvSystemStatus;
-        // void transmit_dv_system_status();
+        struct can_apu_res_dlogger_dv_system_status_t frameDvSystemStatus;
+        void transmit_dv_system_status();
 
-        // // Send RES initialize message unitl it starts sending CAN messages
-        // struct can_apu_res_dlogger_apu_res_init_t frameApuResInit;
-        // bool res_initialized;
-        // void transmit_apu_res_init();
+        // Send RES initialize message unitl it starts sending CAN messages
+        struct can_apu_res_dlogger_apu_res_init_t frameApuResInit;
+        bool res_initialized;
+        void transmit_apu_res_init();
 
     public:
         CanHandler(rclcpp::NodeOptions nOpt);
