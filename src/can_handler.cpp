@@ -183,9 +183,14 @@ void CanHandler::handleCanReceive()
          else if (this->recvFrame.can_id == CAN_MCU_ISABELLEN_ENERGY_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_IDC_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_VDC_FRAME_ID || this->recvFrame.can_id== CAN_MCU_ISABELLEN_PDC_FRAME_ID) {
             this->publish_isabellen();
         }
-                
-         else if (this->recvFrame.can_id == CAN_MCU_ECU_PARAMETERS_ACTUAL_FRAME_ID && this->rosConf.publishECUParamsActaul) {
+               
+        else if (this->recvFrame.can_id == CAN_MCU_ECU_PARAMETERS_ACTUAL_FRAME_ID && this->rosConf.publishECUParamsActaul) {
             this->publish_ecu_params_actual();
+        }
+         
+        else if (this->recvFrame.can_id == CAN_MCU_ECU_ADU_FRAME_ID){
+            if (this->rosConf.publishEcuControlSystems)
+            this->publish_ecu_control_systems();
         }
         
     
