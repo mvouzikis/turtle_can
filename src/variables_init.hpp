@@ -129,7 +129,7 @@ void CanHandler::variablesInit()
         this->frameApuCommand.throttle_brake_commanded = 0.0;
     }
     if (this->rosConf.transmitECUParams) {
-        this->subECUParams = this->create_subscription<turtle_interfaces::msg::ECUParams>("ecu_params", serviceQos, std::bind(&CanHandler::ecu_params_callback, this, _1));
+        this->subECUParams = this->create_subscription<turtle_interfaces::msg::ECUParams>("ecu_params_tune", serviceQos, std::bind(&CanHandler::ecu_params_callback, this, _1));
 
         this->frameECUParams.inverter_rpm_percentage = 100;
         this->frameECUParams.inverter_i_max = 100;
