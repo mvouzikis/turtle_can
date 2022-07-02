@@ -81,8 +81,8 @@ void CanHandler::publish_cooling_info()
 
 void CanHandler::publish_dash_apps()
 {
-    can_mcu_dash_apps_brake_t msg;
-    if (can_mcu_dash_apps_brake_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+    can_mcu_dash_apps_t msg;
+    if (can_mcu_dash_apps_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
         RCLCPP_ERROR(this->get_logger(), "Error during unpack of DASH_APPS");
         return;
     }
@@ -110,8 +110,8 @@ void CanHandler::publish_dash_front_rpm()
 
 void CanHandler::publish_dash_brake()
 {
-    can_mcu_dash_apps_brake_t msg;
-    if (can_mcu_dash_apps_brake_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+    can_mcu_dash_brake_t msg;
+    if (can_mcu_dash_brake_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
         RCLCPP_ERROR(this->get_logger(), "Error during unpack of DASH_BRAKE");
         return;
     }
@@ -214,7 +214,7 @@ void CanHandler::publish_ebs_supervisor()
     this->createHeader(&this->msgEbsSupervisor.header);
     this->msgEbsSupervisor.asmsstate = (!msg.asms_state == CAN_MCU_ASB_ASMS_STATE_ASMS_OPENED_CHOICE);
     this->msgEbsSupervisor.tsmsout = (!msg.tsms_out == CAN_MCU_ASB_TSMS_OUT_TSMS_OPENED_CHOICE);
-    this->msgEbsSupervisor.ebsstatus = msg.asb_status;
+    this->msgEbsSupervisor.ebsstatus = msg.ebs_status;
     this->msgEbsSupervisor.ebsled = (!msg.asb_led == CAN_MCU_ASB_ASB_LED_ASB_LED_OFF_CHOICE);
     this->msgEbsSupervisor.servicebrakestatus = msg.service_brake_status;
     this->msgEbsSupervisor.initialchecked = (msg.initial_checked == CAN_MCU_ASB_INITIAL_CHECKED_INITIAL_CHECK_SUCCESSFUL_CHOICE);

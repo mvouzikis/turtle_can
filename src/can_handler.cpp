@@ -130,7 +130,7 @@ void CanHandler::handleCanReceive()
         else if (this->recvFrame.can_id == CAN_MCU_DASH_HALL_F_FRAME_ID && this->rosConf.pubishDashFrontRPM) {
             this->publish_dash_front_rpm();
         }
-        else if (this->recvFrame.can_id == CAN_MCU_DASH_APPS_BRAKE_FRAME_ID) {
+        else if (this->recvFrame.can_id == CAN_MCU_DASH_APPS_FRAME_ID) {
             if (this->rosConf.publishDashApps)           
                 this->publish_dash_apps();
            
