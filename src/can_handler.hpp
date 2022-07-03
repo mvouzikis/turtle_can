@@ -32,6 +32,8 @@
 #include "turtle_interfaces/msg/ecu_control_systems.hpp"
 #include "turtle_interfaces/msg/gpu_status.hpp"
 #include "turtle_interfaces/msg/cpu_status.hpp"
+#include "turtle_interfaces/msg/mission_status.hpp"
+
 
 
 
@@ -86,6 +88,8 @@ typedef struct {
     bool transmitDvSystemStatus;
     bool transmitApuResInit;
     uint8_t transmitApuTemp;
+    uint8_t transmitSetFinished;
+
 
 } RosConfig;
 
@@ -223,6 +227,9 @@ class CanHandler : public rclcpp::Node
 
         rclcpp::Subscription<turtle_interfaces::msg::Mission>::SharedPtr subApuMission;                
         void apu_mission_callback(turtle_interfaces::msg::Mission::SharedPtr msgApuMission);
+
+        rclcpp::Subscription<turtle_interfaces::msg::MissionStatus>::SharedPtr subMissionStatus;                
+        void apu_set_finished_callback(turtle_interfaces::msg::MissionStatus::SharedPtr msgApuMission);
 
         rclcpp::Subscription<turtle_interfaces::msg::ActuatorCmd>::SharedPtr subActuatorCmd;        
         void actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::SharedPtr msgActuatorCmd);

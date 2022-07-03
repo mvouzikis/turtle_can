@@ -17,6 +17,14 @@ void CanHandler::apu_mission_callback(turtle_interfaces::msg::Mission::SharedPtr
     //if (this->rosConf.transmitApuStateMission == 1)
     //	 this->transmit_apu_state_mission();
 }
+
+void CanHandler::apu_set_finished_callback(turtle_interfaces::msg::MissionStatus::SharedPtr msgMissionStatus)
+{
+    this->frameApuStateMission.as_set_finished = (msgMissionStatus->mission_status == 5);
+
+}
+
+
 void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::SharedPtr msgActuatorCmd)
 {
     this->frameSwaCommanded.position_target = (uint16_t)((msgActuatorCmd->steering)*100);//convertSteeringAngleTarget(msgActuatorCmd->steering);

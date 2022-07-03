@@ -73,6 +73,7 @@ void CanHandler::transmit_ecu_params()
 }
 
 
+
 //CHANNEL1
 void CanHandler::transmit_apu_res_init() 
 {
