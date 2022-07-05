@@ -110,7 +110,7 @@ void CanHandler::variablesInit()
     if (this->rosConf.transmitApuStateMission || this->rosConf.transmitDvSystemStatus) {
         this->subApuState = this->create_subscription<turtle_interfaces::msg::StateMachineState>("state_flowchart_state", serviceQos, std::bind(&CanHandler::apu_state_callback, this, _1));
         this->subApuMission = this->create_subscription<turtle_interfaces::msg::Mission>("current_mission", serviceQos, std::bind(&CanHandler::apu_mission_callback, this, _1));
-        this->subMissionStatus = this->create_subscription<turtle_interfaces::msg::MissionStatus>("mission_status", serviceQos, std::bind(&CanHandler::apu_set_finished_callback, this, _1));
+      //  this->subMissionStatus = this->create_subscription<turtle_interfaces::msg::MissionStatus>("mission_status", serviceQos, std::bind(&CanHandler::apu_set_finished_callback, this, _1));
         this->frameApuStateMission.as_mission = CAN_MCU_APU_STATE_MISSION_AS_MISSION_ERROR_MISSION_CHOICE;
         this->frameApuStateMission.as_state = CAN_MCU_APU_STATE_MISSION_AS_STATE_AS_OFF_CHOICE;
         this->frameApuStateMission.as_set_finished = CAN_MCU_APU_STATE_MISSION_AS_SET_FINISHED_SET__FINISHED__FALSE_CHOICE;

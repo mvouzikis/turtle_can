@@ -7,6 +7,7 @@ using std::placeholders::_1;
 void CanHandler::apu_state_callback(turtle_interfaces::msg::StateMachineState::SharedPtr msgApuState)
 {
     this->frameApuStateMission.as_state = msgApuState->state;
+    this->frameApuStateMission.as_set_finished = msgApuState->setfinished;
     if (this->rosConf.transmitApuStateMission == 1)
         this->transmit_apu_state_mission();
 }
@@ -18,11 +19,6 @@ void CanHandler::apu_mission_callback(turtle_interfaces::msg::Mission::SharedPtr
     //	 this->transmit_apu_state_mission();
 }
 
-void CanHandler::apu_set_finished_callback(turtle_interfaces::msg::MissionStatus::SharedPtr msgMissionStatus)
-{
-    this->frameApuStateMission.as_set_finished = (msgMissionStatus->mission_status == 5);
-
-}
 
 
 void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::SharedPtr msgActuatorCmd)
