@@ -465,6 +465,22 @@ void CanHandler::publish_ecu_control_systems()
     this->pubEcuControlSystem->publish(this->msgEcuControlSystems);
 }
 
+void CanHandler::publish_BLDC()
+{
+    can_mcu_bldc_tx_2_t msg;
+
+    if (can_mcu_bldc_tx_2_unpack(&msg,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
+        RCLCPP_ERROR(this->get_logger(),"Error during unpack of BLDC");
+    }
+
+    this->createHeader(&this->msgBLDC.header);
+    this->msgBLDC.steering=msg.position_actual_value;
+
+    this->pubBLDC->publish(this->msgBLDC);
+}
+
+
+
 //CHANNEL1
 void CanHandler::publish_res_status()
 {

@@ -77,6 +77,7 @@ typedef struct {
     bool publishIsabellen;
     bool publishEcuControlSystems;
     bool publishCoolingInfo;
+    bool publishBLDC;
 
 
     //CAN messages to transmit
@@ -197,6 +198,10 @@ class CanHandler : public rclcpp::Node
         rclcpp::Publisher<turtle_interfaces::msg::CoolingInfo>::SharedPtr pubCoolingInfo;
         turtle_interfaces::msg::CoolingInfo msgCoolingInfo;
         void publish_cooling_info();
+    
+        rclcpp::Publisher<turtle_interfaces::msg::Steering>::SharedPtr pubBLDC;
+        turtle_interfaces::msg::Steering msgBLDC;
+        void publish_BLDC();
 
         
         

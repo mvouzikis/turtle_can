@@ -30,7 +30,8 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<bool>("publishIsabellen",            this->rosConf.publishIsabellen,             true);
     this->get_parameter_or<bool>("publishECUControlSystems",    this->rosConf.publishEcuControlSystems,     true);
     this->get_parameter_or<bool>("publishpublishCoolingInfo",   this->rosConf.publishCoolingInfo,           true);
-    
+    this->get_parameter_or<bool>("publishBLDC"              ,   this->rosConf.publishBLDC,                  true);
+
     
 
 

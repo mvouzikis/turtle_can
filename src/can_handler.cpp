@@ -194,6 +194,11 @@ void CanHandler::handleCanReceive()
             if (this->rosConf.publishEcuControlSystems)
             this->publish_ecu_control_systems();
         }
+
+        else if (this->recvFrame.can_id == CAN_MCU_BLDC_TX_2_FRAME_ID){
+            if (this->rosConf.publishBLDC)
+            this->publish_BLDC();
+        }
         
     
         
