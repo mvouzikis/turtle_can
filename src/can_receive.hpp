@@ -360,7 +360,7 @@ void CanHandler::publish_inverter_right_info()
     this->msgInvRightInfo.irms=msg1.irms_max_right;
     this->msgInvRightInfo.irms=msg1.i_lim_in_use_right;
     this->msgInvRightInfo.irms=msg1.irm_right;
-    this->msgInvRightInfo.max_rpm=msg1.max_rpm_right;
+    this->msgInvRightInfo.max_rpm=can_mcu_inverter_right_info_max_rpm_right_decode(msg1.max_rpm_right);
 
     }
     
@@ -391,7 +391,7 @@ void CanHandler::publish_inverter_left_info()
     this->msgInvLeftInfo.irms=msg1.irms_max_left;
     this->msgInvLeftInfo.irms=msg1.i_lim_in_use_left;
     this->msgInvLeftInfo.irms=msg1.irm_left;
-    this->msgInvLeftInfo.max_rpm=msg1.max_rpm_left;
+    this->msgInvLeftInfo.max_rpm=can_mcu_inverter_left_info_max_rpm_left_decode(msg1.max_rpm_left);
 
     }
 
