@@ -1,6 +1,6 @@
 # turtle_can
 
-This packet is for the communication of the APU with the rest of the vehicle via CAN BUS.
+This package is for the communication of the APU with the rest of the vehicle via CAN BUS.
 
 ## Description 
 
