@@ -5,6 +5,7 @@ This package is for the communication of the APU with the rest of the vehicle vi
 ## Description 
 
 In order to connect the APU to the CAN we use the *Kvaser Mini PCI Express 2xHS v2*. This device offers two CAN channels, the one of them refered as 'can0' is used for the 'MCU' channel and the other one, refered as 'can1', for the 'RES' channel. For its use we are using the *SocketCAN* drivers. You can read more about it [here](https://docs.kernel.org/networking/can.html). For the device to start working is necessary to set a bitrate and start it using the 'ip link set canX up' command. For our implementation this is done by the *Zygote* service [https://gitlab.com/aristurtle/dv/zygote/-/blob/master/zygote_start.bash](https://gitlab.com/aristurtle/dv/zygote/-/blob/master/zygote_start.bash) which is running when you boot the APU. 
+
 ![](https://i.imgur.com/ZPAo0p2.png)
 
 ## DBC Files
