@@ -38,10 +38,10 @@ Includes all the callbacks. Each topic that the turtle_can has created a sub is 
 ![](https://i.imgur.com/nzUSpHf.png)
 
 
-##CAN Transmit
+## CAN Transmit
 
 Take the variables that we have create at the callbacks for the CAN (frameXX) and pack with the right format using the cantools function pack(). Also corresponds the right FRAME ID and DLC to each message and checks if the procedure completed succesfully. At the end it sends the message based on the info of the DBC file and checks it transmited succesfully. 
 
-##CAN Receive
+## CAN Receive
 
 Unpacks the CAN messages to variables for the ROS and calls the publish function.
