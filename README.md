@@ -21,7 +21,7 @@ can_handler is responsible for:
 - The handling of the received messages by checking constantly what message is received based on the FRAME_ID in order to then use the right publisher to publish the data (CAN BUS -> ROS)
 - Checking for CAN timeouts, errors, state and statistics of the channel in order to publish them at the /can_status topic
 - Calling the transmit functions if the tranmition is selected to be periodically based on the period which is determined in the dbc file
-- Filling the datalogger variables based on the FSEATS handbook and tranmit the can message on the RES Channel (can1)
+- Filling the datalogger variables based on the FSEATS handbook and transmit the can message on the RES Channel (can1)
 
 ## Variables init
 
@@ -40,7 +40,7 @@ Includes all the callbacks. Each topic that the turtle_can has created a sub is 
 
 ## CAN Transmit
 
-Take the variables that we have create at the callbacks for the CAN (frameXX) and pack with the right format using the cantools function pack(). Also corresponds the right FRAME ID and DLC to each message and checks if the procedure completed succesfully. At the end it sends the message based on the info of the DBC file and checks it transmited succesfully. 
+Take the variables that we have create at the callbacks for the CAN (frameXX) and pack with the right format using the cantools function pack(). Also corresponds the right FRAME ID and DLC to each message and checks if the procedure completed successfully. At the end it sends the message based on the info of the DBC file and checks it transmitted successfully. 
 
 ## CAN Receive
 
