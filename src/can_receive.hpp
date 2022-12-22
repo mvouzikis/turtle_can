@@ -236,7 +236,7 @@ void CanHandler::publish_swa_actual() //TODO
     }
 
     this->createHeader(&this->msgSwaActual.header);
-    this->msgSwaActual.steering = msg.steering;
+    this->msgSwaActual.steering = convertSteeringActual(msg.steering);
 
     //errors check
     // this->msgCanStatus.sensor_errors = msg.analog1_error == CAN_AS_DASH_AUX_SWA_STATUS_ANALOG1_ERROR_ERROR_CHOICE ?
@@ -474,7 +474,7 @@ void CanHandler::publish_BLDC()
     }
 
     this->createHeader(&this->msgBLDC.header);
-    this->msgBLDC.steering=msg.position_actual_value;
+    this->msgBLDC.steering = convertBLDCSteering(msg.position_actual_value);
 
     this->pubBLDC->publish(this->msgBLDC);
 }

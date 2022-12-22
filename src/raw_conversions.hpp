@@ -58,13 +58,33 @@ uint16_t convertRearRPM(uint16_t hall)
     return (uint16_t)(((1/35.0)/((float)(hall)*0.000001))*60.0);
 }
 
-float convertSteeringActual(uint16_t steeringRaw)
+float convertSteeringActual(float steeringRaw)
 {
-    float steeringActual = (float)((-1.0*(float)steeringRaw/1073.0)+(2014.0/1073.0));
-    steeringActual =    (steeringActual < -1)  ? -1 :
-                        ((steeringActual >  1)  ? 1  : 
-                        steeringActual);
+    float RackToVehicleWheelRatio = 6.95238;
+
+    // float steeringActual = (float)((-1.0*(float)steeringRaw/1073.0)+(2014.0/1073.0));
+    // steeringActual =    (steeringActual < -1)  ? -1 :
+    //                     ((steeringActual >  1)  ? 1  : 
+    //                     steeringActual);
+    float steeringActual = steeringRaw / RackToVehicleWheelRatio; // convert degrees from rack to vehicle's wheels
+    
     return steeringActual;
+}
+
+float convertBLDCSteering(float BLDCSteering)
+{
+    float BLDCToSteeringWheelGR = 3.68;
+    float PinionToRackRatio = 7.0;
+    float RackToVehicleWheelRatio = 6.95238;
+
+    float BLDCActualSteering = BLDCSteering / 1000.0; // convert from thousandth of degrees to degrees
+    BLDCActualSteering = -BLDCActualSteering; // invert it
+    BLDCActualSteering = BLDCActualSteering / BLDCToSteeringWheelGR;  // convert degrees from BLDC to steering wheel
+    BLDCActualSteering = BLDCActualSteering / PinionToRackRatio; // convert degrees from steering wheel to rack
+    BLDCActualSteering = BLDCActualSteering / RackToVehicleWheelRatio; // convert degrees from rack to vehicle's wheels
+    BLDCActualSteering = BLDCActualSteering / RAD2DEG; // convert value from degrees to rads
+
+    return BLDCActualSteering;
 }
 
 /*********************From APU to other devices*********************/
