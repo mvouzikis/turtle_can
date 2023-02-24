@@ -137,10 +137,14 @@ class CanHandler : public rclcpp::Node
 
         rclcpp::Publisher<turtle_interfaces::msg::RPM>::SharedPtr pubMotorRPM;
         turtle_interfaces::msg::RPM msgMotorRPM;
+        bool leftMotorRPMArrived;
+        bool rightMotorRPMArrived;
         void publish_motor_rpm();
 
         rclcpp::Publisher<turtle_interfaces::msg::InverterCommands>::SharedPtr pubInvCmds;
         turtle_interfaces::msg::InverterCommands msgInvCmds;
+        bool leftInverterCommand;
+        bool rightInverterCommand;
         void publish_inverter_commands();
 
         rclcpp::Publisher<turtle_interfaces::msg::InverterInfo>::SharedPtr pubInvRightInfo;
@@ -185,6 +189,10 @@ class CanHandler : public rclcpp::Node
 
         rclcpp::Publisher<turtle_interfaces::msg::ECUParams>::SharedPtr pubEcuParams;
         turtle_interfaces::msg::ECUParams msgECUParamsActual;
+        bool energyArrived;
+        bool idcArrived;
+        bool vdcArrived;
+        bool pdcArrived;
         void publish_ecu_params_actual();
     
         rclcpp::Publisher<turtle_interfaces::msg::Isabellen>::SharedPtr pubIsabellen;

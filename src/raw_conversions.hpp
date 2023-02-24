@@ -62,10 +62,6 @@ float convertSteeringActual(float steeringRaw)
 {
     float RackToVehicleWheelRatio = 6.95238;
 
-    // float steeringActual = (float)((-1.0*(float)steeringRaw/1073.0)+(2014.0/1073.0));
-    // steeringActual =    (steeringActual < -1)  ? -1 :
-    //                     ((steeringActual >  1)  ? 1  : 
-    //                     steeringActual);
     float steeringActual = steeringRaw / RackToVehicleWheelRatio; // convert degrees from rack to vehicle's wheels
     
     return steeringActual;

@@ -77,6 +77,18 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
     this->canRecvTimeout =  this->create_wall_timer(10ms,   std::bind(&CanHandler::handleReceiveTimeout,    this));
     this->canSendTimer =    this->create_wall_timer(1ms,    std::bind(&CanHandler::handleCanTransmit,       this));
 
+    //initiazlize can message state variables
+    this->leftMotorRPMArrived = false;
+    this->rightMotorRPMArrived = false;
+
+    this->leftInverterCommand = false;
+    this->rightInverterCommand = false;
+
+    this->energyArrived = false;
+    this->idcArrived = false;
+    this->vdcArrived = false;
+    this->pdcArrived = false;
+
     res_initialized = false;
 
     RCLCPP_INFO(this->get_logger(), "Communication started");
@@ -158,7 +170,7 @@ void CanHandler::handleCanReceive()
         }
         else if (this->recvFrame.can_id == CAN_MCU_ADU_INVERTER_LEFT_FRAME_ID) {
             if (this->rosConf.publishMotorRPM)
-                this->publish_motor_rpm();
+                this->publish_motor_rpm(); 
             if (this->rosConf.publishInverterCommands)
                 this->publish_inverter_commands();
             if (this->rosConf.publishInverterLeftInfo) 
@@ -170,7 +182,7 @@ void CanHandler::handleCanReceive()
                 this->publish_motor_rpm();
             if (this->rosConf.publishInverterCommands)
                 this->publish_inverter_commands();
-            if (this->rosConf.publishInverterLeftInfo) 
+            if (this->rosConf.publishInverterRightInfo) 
                 this->publish_inverter_right_info();
          
         }
