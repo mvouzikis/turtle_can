@@ -238,7 +238,7 @@ void CanHandler::publish_swa_actual() //TODO
         return;
     }
 
-    this->msgSwaActual.steering = convertSteeringActual(msg.steering);
+    this->msgSwaActual.steering = convertSteeringActual(msg.steering, this->msgEcuControlSystems.steering_offset);
 
     //errors check
     // this->msgCanStatus.sensor_errors = msg.analog1_error == CAN_AS_DASH_AUX_SWA_STATUS_ANALOG1_ERROR_ERROR_CHOICE ?
@@ -484,10 +484,11 @@ void CanHandler::publish_ecu_control_systems()
         return;
     }
 
-    this->msgEcuControlSystems.ed_active=msg.differential_active;
-    this->msgEcuControlSystems.pl_active=msg.pl_active;
-    this->msgEcuControlSystems.regen_active=msg.regen_active;
-    this->msgEcuControlSystems.tc_active=msg.tc_active;
+    this->msgEcuControlSystems.ed_active = msg.differential_active;
+    this->msgEcuControlSystems.pl_active = msg.pl_active;
+    this->msgEcuControlSystems.regen_active = msg.regen_active;
+    this->msgEcuControlSystems.tc_active = msg.tc_active;
+    this->msgEcuControlSystems.steering_offset = msg.steering_offset;
 
     this->createHeader(&this->msgEcuControlSystems.header);
     this->pubEcuControlSystem->publish(this->msgEcuControlSystems);

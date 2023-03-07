@@ -54,7 +54,7 @@ void CanHandler::variablesInit()
         this->pubEbsSupervisor= this->create_publisher<turtle_interfaces::msg::EbsSupervisorInfo>("ebs_supervisor_info", serviceQos);
         this->msgEbsSupervisor = turtle_interfaces::msg::EbsSupervisorInfo();
     } 
-    if (this->rosConf.publishSwaStatus) { //TOCHECK
+    if (this->rosConf.publishSwaStatus) {
         this->pubSwaActual = this->create_publisher<turtle_interfaces::msg::Steering>("steering_actual", sensorQos);
         this->msgSwaActual = turtle_interfaces::msg::Steering();
     }
@@ -79,7 +79,7 @@ void CanHandler::variablesInit()
         this->msgResStatus = turtle_interfaces::msg::ResStatus(); 
     }
 
-    if (this->rosConf.publishECUParamsActaul) {   //TODO
+    if (this->rosConf.publishECUParamsActaul) {
         this->pubEcuParams = this->create_publisher<turtle_interfaces::msg::ECUParams>("ecu_params_actual", serviceQos);
         this->msgECUParamsActual = turtle_interfaces::msg::ECUParams();
     }

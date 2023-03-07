@@ -58,13 +58,14 @@ uint16_t convertRearRPM(uint16_t hall)
     return (uint16_t)(((1/35.0)/((float)(hall)*0.000001))*60.0);
 }
 
-float convertSteeringActual(float steeringRaw)
+float convertSteeringActual(float steeringRaw, int16_t steering_offset)
 {
     float RackToVehicleWheelRatio = 6.95238;
+    float steering_offset_from_ecu = steering_offset / 100.0;  // the scaling factor is defined in the ecu code
 
     float steeringActual = steeringRaw / RackToVehicleWheelRatio; // convert degrees from rack to vehicle's wheels
     
-    return steeringActual;
+    return steeringActual + steering_offset_from_ecu;
 }
 
 float convertBLDCSteering(float BLDCSteering)
