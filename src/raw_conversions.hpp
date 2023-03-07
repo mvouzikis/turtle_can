@@ -63,9 +63,9 @@ float convertSteeringActual(float steeringRaw, int16_t steering_offset)
     float RackToVehicleWheelRatio = 6.95238;
     float steering_offset_from_ecu = steering_offset / 100.0;  // the scaling factor is defined in the ecu code
 
-    float steeringActual = steeringRaw / RackToVehicleWheelRatio; // convert degrees from rack to vehicle's wheels
+    float steeringActual = (steeringRaw + steering_offset_from_ecu) / RackToVehicleWheelRatio; // convert degrees from rack to vehicle's wheels
     
-    return steeringActual + steering_offset_from_ecu;
+    return steeringActual;
 }
 
 float convertBLDCSteering(float BLDCSteering)
