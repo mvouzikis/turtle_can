@@ -229,7 +229,7 @@ void CanHandler::publish_ebs_supervisor()
     this->pubEbsSupervisor->publish(this->msgEbsSupervisor);
 }
 
-void CanHandler::publish_swa_actual() //TODO
+void CanHandler::publish_swa_actual()
 {
     can_mcu_dash_steering_t msg;
 
@@ -239,25 +239,6 @@ void CanHandler::publish_swa_actual() //TODO
     }
 
     this->msgSwaActual.steering = convertSteeringActual(msg.steering, this->msgEcuControlSystems.steering_offset);
-
-    //errors check
-    // this->msgCanStatus.sensor_errors = msg.analog1_error == CAN_AS_DASH_AUX_SWA_STATUS_ANALOG1_ERROR_ERROR_CHOICE ?
-    //                                    this->msgCanStatus.sensor_errors | this->msgCanStatus.SWA_STATUS_ANALOG1_ERROR :
-    //                                    this->msgCanStatus.sensor_errors & ~this->msgCanStatus.SWA_STATUS_ANALOG1_ERROR;
-    // this->msgCanStatus.sensor_errors = msg.analog2_error == CAN_AS_DASH_AUX_SWA_STATUS_ANALOG2_ERROR_ERROR_CHOICE ?
-    //                                    this->msgCanStatus.sensor_errors | this->msgCanStatus.SWA_STATUS_ANALOG2_ERROR :
-    //                                    this->msgCanStatus.sensor_errors & ~this->msgCanStatus.SWA_STATUS_ANALOG2_ERROR;
-    // this->msgCanStatus.sensor_errors = msg.stall_occurred == CAN_AS_DASH_AUX_SWA_STATUS_STALL_OCCURRED_STALL_CHOICE ?
-    //                                    this->msgCanStatus.sensor_errors | this->msgCanStatus.SWA_STATUS_STALL_OCCURED :
-    //                                    this->msgCanStatus.sensor_errors & ~this->msgCanStatus.SWA_STATUS_STALL_OCCURED;                            
-
-    // if (msg.analog1_error == CAN_AS_DASH_AUX_SWA_STATUS_ANALOG1_ERROR_ERROR_CHOICE || 
-    //     msg.analog2_error == CAN_AS_DASH_AUX_SWA_STATUS_ANALOG2_ERROR_ERROR_CHOICE || 
-    //     msg.stall_occurred == CAN_AS_DASH_AUX_SWA_STATUS_STALL_OCCURRED_STALL_CHOICE)
-    // {
-    //     this->createHeader(&this->msgCanStatus.header);
-    //     this->pubCanStatus->publish(this->msgCanStatus);
-    // } CHECK IF WE NEED THEM
 
     this->createHeader(&this->msgSwaActual.header);
     this->pubSwaActual->publish(this->msgSwaActual);

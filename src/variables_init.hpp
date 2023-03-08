@@ -5,7 +5,7 @@ void CanHandler::variablesInit()
     rclcpp::SensorDataQoS sensorQos;
     rclcpp::ServicesQoS serviceQos;
 
-    //Initialize publishers
+    //--------- Initialize publishers
     if (this->rosConf.publishAmiSelectedMission) {
         this->pubAmiSelectedMission = this->create_publisher<turtle_interfaces::msg::Mission>("ami_selected_mission", serviceQos);
         this->msgAmiSelectedMission = turtle_interfaces::msg::Mission();
@@ -110,12 +110,10 @@ void CanHandler::variablesInit()
     }
 
 
-    //Initialize CAN Tx messages
-    //-------------------------
+    //--------- Initialize CAN Tx messages
     if (this->rosConf.transmitApuStateMission || this->rosConf.transmitDvSystemStatus) {
         this->subApuState = this->create_subscription<turtle_interfaces::msg::StateMachineState>("state_flowchart_state", serviceQos, std::bind(&CanHandler::apu_state_callback, this, _1));
         this->subApuMission = this->create_subscription<turtle_interfaces::msg::Mission>("current_mission", serviceQos, std::bind(&CanHandler::apu_mission_callback, this, _1));
-      //  this->subMissionStatus = this->create_subscription<turtle_interfaces::msg::MissionStatus>("mission_status", serviceQos, std::bind(&CanHandler::apu_set_finished_callback, this, _1));
         this->frameApuStateMission.as_mission = CAN_MCU_APU_STATE_MISSION_AS_MISSION_ERROR_MISSION_CHOICE;
         this->frameApuStateMission.as_state = CAN_MCU_APU_STATE_MISSION_AS_STATE_AS_OFF_CHOICE;
         this->frameApuStateMission.as_set_finished = CAN_MCU_APU_STATE_MISSION_AS_SET_FINISHED_SET__FINISHED__FALSE_CHOICE;
@@ -126,9 +124,9 @@ void CanHandler::variablesInit()
     }
     
     if (this->rosConf.transmitSwaCommanded) {
-        this->frameSwaCommanded.position_target = 0;//convertSteeringAngleTarget(0.0); //TOCHECK
-        this->frameSwaCommanded.velocity_target = 0;//convertSteeringRateTarget(0.01); //TOCHECK
-        this->frameSwaCommanded.steering_mode = 1; //CAN_MCU_STEERING_COMMAND ;
+        this->frameSwaCommanded.position_target = 0;  // convertSteeringAngleTarget(0.0); //TOCHECK
+        this->frameSwaCommanded.velocity_target = 0;  // convertSteeringRateTarget(0.01); //TOCHECK
+        this->frameSwaCommanded.steering_mode = 1;  // CAN_MCU_STEERING_COMMAND ;
     }
     
     if (this->rosConf.transmitApuCommand) {
@@ -152,12 +150,12 @@ void CanHandler::variablesInit()
         this->subGPUTemp = this->create_subscription<turtle_interfaces::msg::GpuStatus>("gpu_status", serviceQos, std::bind(&CanHandler::gpu_temp_callback, this, _1));
       	this->subCPUTemps = this->create_subscription<turtle_interfaces::msg::CpuStatus>("cpu_status", serviceQos, std::bind(&CanHandler::cpu_temps_callback, this, _1));
 
-        this->frameAPUTemps.cpu_temp=0;
-        this->frameAPUTemps.gpu_temp=0;
+        this->frameAPUTemps.cpu_temp = 0;
+        this->frameAPUTemps.gpu_temp = 0;
         
     }
 
-    //--------- FOR FSEAST DATA LOGGER-----
+    //--------- FOR FSEAST DATA LOGGER
     if (this->rosConf.transmitDvSystemStatus) {
         this->subControlInfo = this->create_subscription<turtle_interfaces::msg::ControlInfo>("control_info", serviceQos, std::bind(&CanHandler::control_info_callback, this, _1));
         this->subSlamInfo = this->create_subscription<turtle_interfaces::msg::SlamInfo>("slam_info", serviceQos, std::bind(&CanHandler::slam_info_callback, this, _1));

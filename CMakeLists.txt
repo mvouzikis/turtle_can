@@ -24,8 +24,11 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(turtle_interfaces REQUIRED)
 
-add_library(libsocketcan STATIC src/libsocketcan.c)
-add_library(can_messages STATIC src/can_mcu.c src/can_apu_res_dlogger.c)
+add_library(libsocketcan STATIC libs/libsocketcan.c)
+add_library(can_messages STATIC include/can_mcu.c include/can_apu_res_dlogger.c)
+
+# include directories
+include_directories(${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/libs)
 
 add_executable(can_interface src/can_interface.cpp src/can_handler.cpp)
 target_include_directories(can_interface PUBLIC

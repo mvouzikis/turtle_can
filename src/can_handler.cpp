@@ -23,19 +23,7 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
     this->loadRosParams();
     this->variablesInit();
 
-    //initialize channel0
-    // if ((this->rosConf.channel0 != "vcan0") && (can_do_stop(this->rosConf.channel0.c_str()) != 0)) {
-    //     RCLCPP_ERROR(this->get_logger(), "Unable to stop %s.", this->rosConf.channel0.c_str());
-    //     return;
-    // }
-    // if ((this->rosConf.channel0 != "vcan0") && (can_set_bitrate(this->rosConf.channel0.c_str(), this->rosConf.bitrate0) != 0)) {
-    //     RCLCPP_ERROR(this->get_logger(), "Unable to set the bitrate on %s.", this->rosConf.channel0.c_str());
-    //     return;
-    // }
-    // if ((this->rosConf.channel0 != "vcan0") && (can_do_start(this->rosConf.channel0.c_str()) != 0)) {
-    //     RCLCPP_ERROR(this->get_logger(), "Unable to start %s.", this->rosConf.channel0.c_str());
-    //     return;
-    // }  
+    //initialize channel0 
     this->can0Socket = socket(PF_CAN, SOCK_RAW, CAN_RAW);
     if (this->can0Socket < 0) {
         RCLCPP_ERROR(this->get_logger(), "Unable to create socket for %s.", this->rosConf.channel0.c_str());
@@ -111,9 +99,7 @@ void CanHandler::handleCanReceive()
 {
     //For channel 0
     while (recvfrom(this->can0Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, &this->len) >= 8) {
-        ioctl(this->can0Socket, SIOCGSTAMP, &this->recvTime);  //get message timestamp
-
-//        RCLCPP_INFO(this->get_logger(), "%u",this->recvFrame.can_id);
+        ioctl(this->can0Socket, SIOCGSTAMP, &this->recvTime);  // get message timestamp
 
         if (this->recvFrame.can_id == CAN_MCU_AMI_FRAME_ID && this->rosConf.publishAmiSelectedMission) {
             this->publish_ami_selected_mission();
@@ -133,7 +119,6 @@ void CanHandler::handleCanReceive()
                 this->publish_ebs_supervisor();
             if (this->rosConf.publishDashBools)
                 this->publish_dash_bools();
-
         }
         
          else if (this->recvFrame.can_id == CAN_MCU_COOLING_FRAME_ID && this->rosConf.publishCoolingInfo) {
@@ -211,12 +196,9 @@ void CanHandler::handleCanReceive()
             if (this->rosConf.publishBLDC)
             this->publish_BLDC();
         }
-        
-    
-        
     }
 
-   // For channel1
+   //channel1
     while (recvfrom(this->can1Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr1, &this->len) >= 8) {
         ioctl(this->can1Socket, SIOCGSTAMP, &this->recvTime);  //get message timestamp
         if (this->recvFrame.can_id == CAN_APU_RES_DLOGGER_RES_STATUS_FRAME_ID && this->rosConf.publishResStatus) {
@@ -232,8 +214,6 @@ void CanHandler::createHeader(std_msgs::msg::Header *header)
     header->stamp.sec = this->recvTime.tv_sec;
     header->stamp.nanosec = this->recvTime.tv_usec*1000;
 }
-
-
 
 //Fucntions for CAN staus
 void CanHandler::handleReceiveTimeout()
@@ -358,7 +338,6 @@ void CanHandler::handleReceiveTimeout()
 }
 
 //Functions for CAN transmit
-
 void CanHandler::handleCanTransmit()
 {
     this->canTimerCounter++;                //another 1ms passed
@@ -378,10 +357,6 @@ void CanHandler::handleCanTransmit()
         this->transmit_ecu_params();
     }
 
-    //if ((this->rosConf.transmitAPUTemp ==2) && !(this->canTimerCounter % CAN_MCU_)) TODO
-    // if ((this->rosConf.transmitAPUTemp == 2) && !(this->canTimerCounter % CAN_AS_DASH_AUX_ECU_PARAMETERS2_CYCLE_TIME_MS)) {
-    //     this->transmit_apu_temps();
-    // }
     if (this->rosConf.transmitDvSystemStatus && !(this->canTimerCounter % CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_CYCLE_TIME_MS)) {
         this->transmit_dv_system_status();
     }
@@ -392,7 +367,6 @@ void CanHandler::handleCanTransmit()
 
 
 //--------------------------------FOR DATALOGGER-------------------------------
-
 void fill_datalogger_variables(can_apu_res_dlogger_dv_system_status_t *frameDvSystemStatus, can_mcu_apu_state_mission_t *frameApuStateMission, turtle_interfaces::msg::EbsSupervisorInfo *msgEbsSupervisor)
 {
     switch (frameApuStateMission->as_state)

@@ -34,10 +34,6 @@
 #include "turtle_interfaces/msg/cpu_status.hpp"
 #include "turtle_interfaces/msg/mission_status.hpp"
 
-
-
-
-
 #include "can_mcu.h"
 #include "can_apu_res_dlogger.h"
 
@@ -53,6 +49,7 @@ typedef struct {
     uint32_t bitrate0;
     std::string channel1;
     uint32_t bitrate1;
+
     //CAN messages to publish in ROS
     bool publishDashApps;
     bool publishDashBrake;
@@ -78,7 +75,6 @@ typedef struct {
     bool publishEcuControlSystems;
     bool publishCoolingInfo;
     bool publishBLDC;
-
 
     //CAN messages to transmit
     uint8_t transmitApuStateMission;
@@ -117,6 +113,7 @@ class CanHandler : public rclcpp::Node
         //Variables and functions for CAN receive
         rclcpp::TimerBase::SharedPtr canRecvTimer;
         void handleCanReceive();
+
 
         //channel 0
         rclcpp::Publisher<turtle_interfaces::msg::Apps>::SharedPtr pubDashApps;
@@ -211,14 +208,11 @@ class CanHandler : public rclcpp::Node
         turtle_interfaces::msg::Steering msgBLDC;
         void publish_BLDC();
 
-        
-        
+
         //channel 1
         rclcpp::Publisher<turtle_interfaces::msg::ResStatus>::SharedPtr pubResStatus;
         turtle_interfaces::msg::ResStatus msgResStatus;
         void publish_res_status();
-
-        
 
         //Variables and functions for CAN errors
         rclcpp::TimerBase::SharedPtr canRecvTimeout;
@@ -228,11 +222,11 @@ class CanHandler : public rclcpp::Node
         turtle_interfaces::msg::CanStatus msgCanStatus;
         void publish_can_status();
 
-
         //Variables and functions for CAN transmit
         uint16_t canTimerCounter;
         rclcpp::TimerBase::SharedPtr canSendTimer;        
         void handleCanTransmit();
+
 
         //channel 0
         rclcpp::Subscription<turtle_interfaces::msg::StateMachineState>::SharedPtr subApuState;
@@ -240,9 +234,6 @@ class CanHandler : public rclcpp::Node
 
         rclcpp::Subscription<turtle_interfaces::msg::Mission>::SharedPtr subApuMission;                
         void apu_mission_callback(turtle_interfaces::msg::Mission::SharedPtr msgApuMission);
-
-        // rclcpp::Subscription<turtle_interfaces::msg::MissionStatus>::SharedPtr subMissionStatus;                
-        // void apu_set_finished_callback(turtle_interfaces::msg::MissionStatus::SharedPtr msgMissionStatus);
         
         rclcpp::Subscription<turtle_interfaces::msg::ActuatorCmd>::SharedPtr subActuatorCmd;        
         void actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::SharedPtr msgActuatorCmd);
@@ -255,7 +246,6 @@ class CanHandler : public rclcpp::Node
 
         rclcpp::Subscription<turtle_interfaces::msg::GpuStatus>::SharedPtr subGPUTemp;        
         void gpu_temp_callback(turtle_interfaces::msg::GpuStatus::SharedPtr msgGPUTemp);
-
 
         struct can_mcu_apu_state_mission_t frameApuStateMission;
         void transmit_apu_state_mission();
@@ -272,7 +262,8 @@ class CanHandler : public rclcpp::Node
         struct can_mcu_apu_temps_t frameAPUTemps; 
         void transmit_apu_temps();
 
-        // //channel 1
+
+        //channel 1
         rclcpp::Subscription<turtle_interfaces::msg::ControlInfo>::SharedPtr subControlInfo;
         void control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo);
 

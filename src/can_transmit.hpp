@@ -1,5 +1,6 @@
 #include "can_handler.hpp"
 
+//CHANNEL0
 void CanHandler::transmit_apu_state_mission()
 {
     this->sendFrame.can_id = CAN_MCU_APU_STATE_MISSION_FRAME_ID;
@@ -44,8 +45,6 @@ void CanHandler::transmit_apu_command()
 
 void CanHandler ::transmit_apu_temps()
 {
-
-
     this->sendFrame.can_id = CAN_MCU_APU_TEMPS_FRAME_ID;
     this->sendFrame.can_dlc = CAN_MCU_APU_TEMPS_LENGTH;
     if (can_mcu_apu_temps_pack(this->sendFrame.data, &this->frameAPUTemps, sizeof(sendFrame.data)) != CAN_MCU_APU_TEMPS_LENGTH){
@@ -73,11 +72,10 @@ void CanHandler::transmit_ecu_params()
 }
 
 
-
 //CHANNEL1
 void CanHandler::transmit_apu_res_init() 
 {
-    //send CAN initialization thing
+    //send CAN initialization
     this->sendFrame.can_id = CAN_APU_RES_DLOGGER_APU_RES_INIT_FRAME_ID;
     this->sendFrame.can_dlc = CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH;
     if (can_apu_res_dlogger_apu_res_init_pack(this->sendFrame.data, &this->frameApuResInit, sizeof(sendFrame.data)) != CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH){

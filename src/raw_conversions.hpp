@@ -15,6 +15,7 @@ float convertAPPS(uint16_t apps1Raw, uint16_t apps2Raw)
     stroke += 143.40 - 20.35;
     double a = 68.59, b = 120.28;
     double angle1 = acos(-(a*a + b*b- stroke*stroke)/(2*a*b)) * RAD2DEG;
+    
     //APPS2 ADC to Degrees
     u = (double)(4095 - apps2Raw);
     stroke = (-5e-11*u*u*u + 1e-7*u*u + 0.0064*u + 1.9078);
@@ -97,8 +98,9 @@ uint32_t convertSteeringRateTarget(float targetSteeringRate)
     return steeringRateRaw;
 }
 
-uint16_t convertCPUTemp(float CPUTemp[], uint16_t CoresNum){
-return (uint16_t)(*std::max_element(CPUTemp, CPUTemp + CoresNum));
+uint16_t convertCPUTemp(float CPUTemp[], uint16_t CoresNum)
+{
+    return (uint16_t)(*std::max_element(CPUTemp, CPUTemp + CoresNum));
 }
 
 #endif
