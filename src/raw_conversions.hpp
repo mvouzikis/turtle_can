@@ -33,22 +33,6 @@ float convertAPPS(uint16_t apps1Raw, uint16_t apps2Raw)
     return apps;
 }
 
-float convertBrakePressure(uint16_t brakeRaw)
-{
-    float brake = (double)(brakeRaw*5)/4095.0; //ADCtoVolt
-    brake -= 0.5;                               //OffsetRemoval
-    brake = brake * 2500.0 / 4.0;               //VoltToPsi
-    brake = brake / 14.5038;                    //PsiToBar
-    brake = brake < 0.0 ? 0.0 : brake/60.0;     //Saturate and scale
-    return brake;
-}
-
-float convertEbsPressure(uint16_t ebsRaw)
-{
-    float pressure = 2.5 * ((5.0/4095.0)*((float)ebsRaw)) - 2.5; //linear conversion
-    return pressure;                                           //1V -> 0bar | 5V -> 10bar
-}
-
 float convertFrontRPM(uint16_t hall)
 {
     return (float)(((1/30.0)/((float)(hall)*0.000001))*60.0);

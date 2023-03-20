@@ -43,7 +43,7 @@ void CanHandler::publish_ebs_tank_pressure()
         return;
     }
 
-    this->msgEbsTankPressure.ebspressureraw = convertEbsPressure(msg.ebs_tank_pressure); //fix convert function
+    this->msgEbsTankPressure.ebspressureraw = can_mcu_asb_ebs_tank_pressure_decode(msg.ebs_tank_pressure); //fix convert function
 
     this->createHeader(&this->msgEbsTankPressure.header);
     this->pubEbsTankPressure->publish(this->msgEbsTankPressure);
@@ -124,7 +124,7 @@ void CanHandler::publish_dash_brake()
         return;
     }
 
-    this->msgDashBrake.brake = msg.brake_pressure;//convertBrakePressure(msg.brake_pressure);
+    this->msgDashBrake.brake = can_mcu_dash_brake_brake_pressure_decode(msg.brake_pressure);
 
     this->createHeader(&this->msgDashBrake.header);
     this->pubDashBrake->publish(this->msgDashBrake);
