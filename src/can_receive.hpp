@@ -108,8 +108,9 @@ void CanHandler::publish_dash_front_rpm()
         return;
     }
 
-    this->msgDashFrontRPM.left = msg.hall_fl;
-    this->msgDashFrontRPM.right = msg.hall_fr;
+    this->msgDashFrontRPM.left = can_mcu_dash_hall_f_hall_fl_decode(msg.hall_fl);
+    this->msgDashFrontRPM.right = can_mcu_dash_hall_f_hall_fr_decode(msg.hall_fr);
+
 
     this->createHeader(&this->msgDashFrontRPM.header);
     this->pubDashFrontRPM->publish(this->msgDashFrontRPM);
