@@ -120,10 +120,6 @@ void CanHandler::handleCanReceive()
             if (this->rosConf.publishDashBools)
                 this->publish_dash_bools();
         }
-        
-         else if (this->recvFrame.can_id == CAN_MCU_COOLING_FRAME_ID && this->rosConf.publishCoolingInfo) {
-            this->publish_cooling_info();
-        }
         else if (this->recvFrame.can_id == CAN_MCU_DASH_HALL_F_FRAME_ID && this->rosConf.pubishDashFrontRPM) {
             this->publish_dash_front_rpm();
         }
@@ -287,11 +283,6 @@ void CanHandler::handleReceiveTimeout()
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
-
-    if (timeNow - this->msgCoolingInfo.header.stamp > rclcpp::Duration(1s))
-        this->msgCanStatus.message_timeouts |= this->msgCanStatus.COOLING_INFO_TIMEOUT;
-    else
-        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.COOLING_INFO_TIMEOUT;
     
     if (timeNow - this->msgEcuControlSystems.header.stamp > rclcpp::Duration(1s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.ECU_CONTROL_SYSTEMS_TIMEOUT;

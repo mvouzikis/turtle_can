@@ -66,24 +66,6 @@ void CanHandler::publish_aux_tsal_safe_state()
 
 //--------------den to exoume sto neo dbc, theloume na to exoyme?-----------------
 
-void CanHandler::publish_cooling_info()  
-{
-    can_mcu_cooling_t msg;
-
-    if (can_mcu_cooling_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of COOLING INFO");
-        return;
-    }
-
-    this->msgCoolingInfo.pumpsignal = msg.pump_signal;
-    this->msgCoolingInfo.accufanspwm = msg.tsac_fans;
-    this->msgCoolingInfo.hallfanpwm = msg.hall_fans;
-    this->msgCoolingInfo.chassisfans = msg.chassis_fans;
-
-    this->createHeader(&this->msgCoolingInfo.header);
-    this->pubCoolingInfo->publish(this->msgCoolingInfo);
-}
-
 void CanHandler::publish_dash_apps()
 {
     can_mcu_dash_apps_t msg;
@@ -323,7 +305,7 @@ void CanHandler::publish_ecu_params_actual()
     }
 
     this->msgECUParamsActual.inverter_rpm_percentage = msg.inverter_rpm_percentage;
-    this->msgECUParamsActual.inverter_i_rms_max = msg.inverter_i_max;//400.0/1070.0;
+    this->msgECUParamsActual.inverter_i_rms_max = msg.inverter_irms_max;//400.0/1070.0;
     this->msgECUParamsActual.power_target_kw = msg.power_target;///255.0*80.0;
     this->msgECUParamsActual.ed_enable = msg.ed_enable;
     this->msgECUParamsActual.tc_enable = msg.tc_enable;
@@ -356,10 +338,10 @@ void CanHandler::publish_inverter_right_info()
             return;
         }
 
-        this->msgInvRightInfo.irms=msg1.irms_max_right;
-        this->msgInvRightInfo.irms=msg1.i_lim_in_use_right;
-        this->msgInvRightInfo.irms=msg1.irm_right;
-        this->msgInvRightInfo.max_rpm=can_mcu_inverter_right_info_max_rpm_right_decode(msg1.max_rpm_right);
+        this->msgInvRightInfo.irms=msg1.irms_max_r;
+        this->msgInvRightInfo.irms=msg1.i_lim_in_use_r;
+        this->msgInvRightInfo.irms=msg1.irms_r;
+        this->msgInvRightInfo.max_rpm=can_mcu_inverter_right_info_rpm_max_r_decode(msg1.rpm_max_r);
     }
     
     this->createHeader(&this->msgInvRightInfo.header);
@@ -387,10 +369,10 @@ void CanHandler::publish_inverter_left_info()
             return;
         }
         
-        this->msgInvLeftInfo.irms=msg1.irms_max_left;
-        this->msgInvLeftInfo.irms=msg1.i_lim_in_use_left;
-        this->msgInvLeftInfo.irms=msg1.irm_left;
-        this->msgInvLeftInfo.max_rpm=can_mcu_inverter_left_info_max_rpm_left_decode(msg1.max_rpm_left);
+        this->msgInvLeftInfo.irms=msg1.irms_max_l;
+        this->msgInvLeftInfo.irms=msg1.i_lim_in_use_l;
+        this->msgInvLeftInfo.irms=msg1.irms_l;
+        this->msgInvLeftInfo.max_rpm=can_mcu_inverter_left_info_rpm_max_l_decode(msg1.rpm_max_l);
 
     }
 

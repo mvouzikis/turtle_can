@@ -199,10 +199,6 @@ class CanHandler : public rclcpp::Node
         rclcpp::Publisher<turtle_interfaces::msg::ECUControlSystems>::SharedPtr pubEcuControlSystem;
         turtle_interfaces::msg::ECUControlSystems msgEcuControlSystems;
         void publish_ecu_control_systems();
-
-        rclcpp::Publisher<turtle_interfaces::msg::CoolingInfo>::SharedPtr pubCoolingInfo;
-        turtle_interfaces::msg::CoolingInfo msgCoolingInfo;
-        void publish_cooling_info();
     
         rclcpp::Publisher<turtle_interfaces::msg::Steering>::SharedPtr pubBLDC;
         turtle_interfaces::msg::Steering msgBLDC;
@@ -259,7 +255,7 @@ class CanHandler : public rclcpp::Node
         struct can_mcu_ecu_parameters_t frameECUParams; 
         void transmit_ecu_params();
 
-        struct can_mcu_apu_temps_t frameAPUTemps; 
+        struct can_mcu_apu_temp_t frameAPUTemps; 
         void transmit_apu_temps();
 
 

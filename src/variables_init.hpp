@@ -94,11 +94,6 @@ void CanHandler::variablesInit()
         this->msgEcuControlSystems= turtle_interfaces::msg::ECUControlSystems();
     }
 
-    if (this->rosConf.publishCoolingInfo) {  
-        this->pubCoolingInfo = this->create_publisher<turtle_interfaces::msg::CoolingInfo>("cooling_info", sensorQos);
-        this->msgCoolingInfo= turtle_interfaces::msg::CoolingInfo();
-    }
-
     if (this->rosConf.publishCanStatus) {
         this->pubCanStatus = this->create_publisher<turtle_interfaces::msg::CanStatus>("can_status", serviceQos);
         this->msgCanStatus = turtle_interfaces::msg::CanStatus();
@@ -114,7 +109,7 @@ void CanHandler::variablesInit()
     if (this->rosConf.transmitApuStateMission || this->rosConf.transmitDvSystemStatus) {
         this->subApuState = this->create_subscription<turtle_interfaces::msg::StateMachineState>("state_flowchart_state", serviceQos, std::bind(&CanHandler::apu_state_callback, this, _1));
         this->subApuMission = this->create_subscription<turtle_interfaces::msg::Mission>("current_mission", serviceQos, std::bind(&CanHandler::apu_mission_callback, this, _1));
-        this->frameApuStateMission.as_mission = CAN_MCU_APU_STATE_MISSION_AS_MISSION_ERROR_MISSION_CHOICE;
+        this->frameApuStateMission.as_mission = CAN_MCU_APU_STATE_MISSION_AS_MISSION_NO_MISSION_CHOICE;
         this->frameApuStateMission.as_state = CAN_MCU_APU_STATE_MISSION_AS_STATE_AS_OFF_CHOICE;
         this->frameApuStateMission.as_set_finished = CAN_MCU_APU_STATE_MISSION_AS_SET_FINISHED_SET__FINISHED__FALSE_CHOICE;
     }
@@ -137,7 +132,7 @@ void CanHandler::variablesInit()
         this->subECUParams = this->create_subscription<turtle_interfaces::msg::ECUParams>("ecu_params_tune", serviceQos, std::bind(&CanHandler::ecu_params_callback, this, _1));
 
         this->frameECUParams.inverter_rpm_percentage = 100;
-        this->frameECUParams.inverter_i_max = 100;
+        this->frameECUParams.inverter_irms_max = 100;
         this->frameECUParams.power_target = 40.0;
         this->frameECUParams.servo_start_speed = 5;
         this->frameECUParams.regen_min_speed = 5;

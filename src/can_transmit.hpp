@@ -45,14 +45,14 @@ void CanHandler::transmit_apu_command()
 
 void CanHandler ::transmit_apu_temps()
 {
-    this->sendFrame.can_id = CAN_MCU_APU_TEMPS_FRAME_ID;
-    this->sendFrame.can_dlc = CAN_MCU_APU_TEMPS_LENGTH;
-    if (can_mcu_apu_temps_pack(this->sendFrame.data, &this->frameAPUTemps, sizeof(sendFrame.data)) != CAN_MCU_APU_TEMPS_LENGTH){
+    this->sendFrame.can_id = CAN_MCU_APU_TEMP_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_MCU_APU_TEMP_LENGTH;
+    if (can_mcu_apu_temp_pack(this->sendFrame.data, &this->frameAPUTemps, sizeof(sendFrame.data)) != CAN_MCU_APU_TEMP_LENGTH){
         RCLCPP_ERROR(this->get_logger(), "Error during pack of APU_TEMPS");
         return;
     }
 
-    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_MCU_APU_TEMPS_LENGTH) {
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_MCU_APU_TEMP_LENGTH) {
         RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_TEMPS");
     }
 }

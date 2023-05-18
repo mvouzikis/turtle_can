@@ -36,7 +36,7 @@ void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::Shar
 void CanHandler::ecu_params_callback(turtle_interfaces::msg::ECUParams::SharedPtr msgECUParams)
 {
     this->frameECUParams.inverter_rpm_percentage = msgECUParams->inverter_rpm_percentage;
-    this->frameECUParams.inverter_i_max = msgECUParams->inverter_i_rms_max;
+    this->frameECUParams.inverter_irms_max = msgECUParams->inverter_i_rms_max;
     this->frameECUParams.power_target = msgECUParams->power_target_kw;
     this->frameECUParams.ed_enable = msgECUParams->ed_enable;
     this->frameECUParams.tc_enable = msgECUParams->tc_enable;
