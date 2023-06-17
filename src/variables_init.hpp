@@ -1,4 +1,8 @@
+#ifndef VARIABLES_INIT_HPP
+#define VARIABLES_INIT_HPP
+
 #include "can_handler.hpp"
+
 
 void CanHandler::variablesInit()
 {
@@ -169,3 +173,5 @@ void CanHandler::variablesInit()
         this->frameApuResInit.addressed_node = CAN_APU_RES_DLOGGER_APU_RES_INIT_ADDRESSED_NODE_RES_ADDRESS_CHOICE;
     }
 }
+
+#endif

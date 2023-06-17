@@ -1,3 +1,6 @@
+#ifndef LOAD_ROS_PARAMS_HPP
+#define LOAD_ROS_PARAMS_HPP
+
 #include "can_handler.hpp"
 
 
@@ -8,6 +11,7 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<uint32_t>("bitrate0",    this->rosConf.bitrate0, 1000000);
     this->get_parameter_or<std::string>("channel1", this->rosConf.channel1, "can1");
     this->get_parameter_or<uint32_t>("bitrate1",    this->rosConf.bitrate1, 500000);
+    
     //CAN messages to publish in ROS
     this->get_parameter_or<bool>("publishDashApps",             this->rosConf.publishDashApps,              true);
     this->get_parameter_or<bool>("publishDashBrake",            this->rosConf.publishDashBrake,             true);
@@ -32,9 +36,6 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<bool>("publishpublishCoolingInfo",   this->rosConf.publishCoolingInfo,           true);
     this->get_parameter_or<bool>("publishBLDC"              ,   this->rosConf.publishBLDC,                  true);
 
-    
-
-
     //CAN messages to transmit
     this->get_parameter_or<uint8_t>("transmitApuStateMission", this->rosConf.transmitApuStateMission,   1);
     this->get_parameter_or<uint8_t>("transmitSwaCommanded",    this->rosConf.transmitSwaCommanded,      1);
@@ -45,3 +46,5 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<uint8_t>("transmitApuTemp",         this->rosConf.transmitApuTemp,           1);
 
 }
+
+#endif

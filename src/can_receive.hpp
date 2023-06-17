@@ -1,3 +1,6 @@
+#ifndef CAN_RECEIVE_HPP
+#define CAN_RECEIVE_HPP
+
 #include "can_handler.hpp"
 #include "raw_conversions.hpp"
 
@@ -493,3 +496,4 @@ void CanHandler::publish_res_status()
     this->pubResStatus->publish(this->msgResStatus);
 }
 
+#endif

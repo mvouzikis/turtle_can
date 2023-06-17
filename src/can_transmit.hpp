@@ -1,4 +1,8 @@
+#ifndef CAN_TRANSMIT_HPP
+#define CAN_TRANSMIT_HPP
+
 #include "can_handler.hpp"
+
 
 //CHANNEL0
 void CanHandler::transmit_apu_state_mission()
@@ -88,4 +92,4 @@ void CanHandler::transmit_apu_res_init()
     }
 }
 
-
+#endif

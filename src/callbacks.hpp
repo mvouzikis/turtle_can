@@ -1,7 +1,8 @@
+#ifndef CALLBACKS_HPP
+#define CALLBACKS_HPP
+
 #include "can_handler.hpp"
 #include "raw_conversions.hpp"
-
-using std::placeholders::_1;
 
 
 void CanHandler::apu_state_callback(turtle_interfaces::msg::StateMachineState::SharedPtr msgApuState)
@@ -74,3 +75,5 @@ void CanHandler::slam_info_callback(turtle_interfaces::msg::SlamInfo::SharedPtr 
     this->frameDvSystemStatus.cones_count_actual = msgSlamInfo->sensor_cone_count;
     this->frameDvSystemStatus.cones_count_all = msgSlamInfo->total_cone_count;
 }
+
+#endif

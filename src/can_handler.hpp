@@ -1,9 +1,16 @@
 #ifndef CAN_HANDLER_HPP
 #define CAN_HANDLER_HPP
 
+#include <signal.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <linux/can.h>
+#include <linux/sockios.h>
+#include <linux/if_link.h>
+#include <unistd.h>
+#include <chrono>
 #include <string>
 #include <rclcpp/rclcpp.hpp>
-#include <linux/can.h>
 #include <net/if.h>
 
 #include "turtle_interfaces/msg/mission.hpp"
@@ -34,14 +41,20 @@
 #include "turtle_interfaces/msg/cpu_status.hpp"
 #include "turtle_interfaces/msg/mission_status.hpp"
 
+#include "libsocketcan.h"
+
 #include "can_mcu.h"
 #include "can_apu_res_dlogger.h"
+
+using std::placeholders::_1;
+using namespace std::chrono_literals;
 
 
 #define CAN_ERROR      -1
 #define CAN_OK          0
 #define CAN_NOT_READY   1
 #define CAN_READY       2
+
 
 typedef struct {
     //Channels configuration

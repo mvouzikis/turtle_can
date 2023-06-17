@@ -1,22 +1,10 @@
 #include "can_handler.hpp"
 #include "can_receive.hpp"
-#include "loadRosParams.hpp"
+#include "load_ros_params.hpp"
 #include "callbacks.hpp"
 #include "variables_init.hpp"
 #include "can_transmit.hpp"
 
-
-
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <linux/sockios.h>
-#include <linux/if_link.h>
-#include <unistd.h>
-#include <chrono>
-#include "libsocketcan.h"
-
-
-using namespace std::chrono_literals;
 
 CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
 {

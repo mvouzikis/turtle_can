@@ -1,6 +1,5 @@
-#include <signal.h>
-#include <unistd.h>
 #include "can_handler.hpp"
+
 
 int main(int argc, char* argv[])
 {

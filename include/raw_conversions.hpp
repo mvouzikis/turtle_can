@@ -5,7 +5,6 @@
 #include <cmath>
 #include <limits.h>
 
-#define RAD2DEG 57.295779513
 
 float convertAPPS(uint16_t apps1Raw, uint16_t apps2Raw)
 {
@@ -14,14 +13,14 @@ float convertAPPS(uint16_t apps1Raw, uint16_t apps2Raw)
     double stroke = (-4e-11*u*u*u + 3e-8*u*u + 0.0066*u + 2.1254);
     stroke += 143.40 - 20.35;
     double a = 68.59, b = 120.28;
-    double angle1 = acos(-(a*a + b*b- stroke*stroke)/(2*a*b)) * RAD2DEG;
+    double angle1 = acos(-(a*a + b*b- stroke*stroke)/(2*a*b)) * 180 / M_PI;
     
     //APPS2 ADC to Degrees
     u = (double)(4095 - apps2Raw);
     stroke = (-5e-11*u*u*u + 1e-7*u*u + 0.0064*u + 1.9078);
     stroke += 123;
     a = 61.39, b = 120.28;
-    double angle2 = acos(-(a*a + b*b- stroke*stroke)/(2*a*b)) * RAD2DEG;
+    double angle2 = acos(-(a*a + b*b- stroke*stroke)/(2*a*b)) * 180 / M_PI;
 
     double angleMean = (angle1 + angle2) * 0.5;
 
@@ -64,7 +63,7 @@ float convertBLDCSteering(float BLDCSteering)
     BLDCActualSteering = BLDCActualSteering / BLDCToSteeringWheelGR;  // convert degrees from BLDC to steering wheel
     BLDCActualSteering = BLDCActualSteering / PinionToRackRatio; // convert degrees from steering wheel to rack
     BLDCActualSteering = BLDCActualSteering / RackToVehicleWheelRatio; // convert degrees from rack to vehicle's wheels
-    BLDCActualSteering = BLDCActualSteering / RAD2DEG; // convert value from degrees to rads
+    BLDCActualSteering = BLDCActualSteering / 180 / M_PI; // convert value from degrees to rads
 
     return BLDCActualSteering;
 }
