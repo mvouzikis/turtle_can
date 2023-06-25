@@ -42,30 +42,28 @@ uint16_t convertRearRPM(uint16_t hall)
     return (uint16_t)(((1/35.0)/((float)(hall)*0.000001))*60.0);
 }
 
-float convertSteeringActual(float steeringRaw, int16_t steering_offset)
+float convertSteeringActual(float steering_raw, int16_t steering_offset)
 {
-    float RackToVehicleWheelRatio = 6.95238;
+    float steering_ratio = 5.0;
     float steering_offset_from_ecu = steering_offset / 100.0;  // the scaling factor is defined in the ecu code
 
-    float steeringActual = (steeringRaw + steering_offset_from_ecu) / RackToVehicleWheelRatio; // convert degrees from rack to vehicle's wheels
+    float steeringActual = (steering_raw + steering_offset_from_ecu) / steering_ratio; // convert degrees from rack to vehicle's wheels
     
     return steeringActual;
 }
 
-float convertBLDCSteering(float BLDCSteering)
+float convertBLDCSteering(float BLDC_steering)
 {
-    float BLDCToSteeringWheelGR = 3.68;
-    float PinionToRackRatio = 7.0;
-    float RackToVehicleWheelRatio = 6.95238;
+    float BLDC_gear_box_ratio = 25.71;
+    float steering_ratio = 5.0;
 
-    float BLDCActualSteering = BLDCSteering / 1000.0; // convert from thousandth of degrees to degrees
-    BLDCActualSteering = -BLDCActualSteering; // invert it
-    BLDCActualSteering = BLDCActualSteering / BLDCToSteeringWheelGR;  // convert degrees from BLDC to steering wheel
-    BLDCActualSteering = BLDCActualSteering / PinionToRackRatio; // convert degrees from steering wheel to rack
-    BLDCActualSteering = BLDCActualSteering / RackToVehicleWheelRatio; // convert degrees from rack to vehicle's wheels
-    BLDCActualSteering = BLDCActualSteering / 180 / M_PI; // convert value from degrees to rads
+    float BLDC_actual_steering = BLDC_steering / 1000.0; // convert from thousandth of degrees to degrees
+    BLDC_actual_steering = -BLDC_actual_steering; // invert it
+    BLDC_actual_steering = BLDC_actual_steering / BLDC_gear_box_ratio;  // convert degrees from BLDC to steering wheel
+    BLDC_actual_steering = BLDC_actual_steering / steering_ratio; // convert degrees from steering wheel to wheel
+    BLDC_actual_steering = BLDC_actual_steering * M_PI / 180; // convert value from degrees to rads
 
-    return BLDCActualSteering;
+    return BLDC_actual_steering;
 }
 
 /*********************From APU to other devices*********************/
