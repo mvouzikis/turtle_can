@@ -60,8 +60,8 @@ typedef struct {
     //Channels configuration
     std::string channel0;
     uint32_t bitrate0;
-    std::string channel1;
-    uint32_t bitrate1;
+    // std::string channel1;
+    // uint32_t bitrate1;
 
     //CAN messages to publish in ROS
     bool publishDashApps;
@@ -81,7 +81,8 @@ typedef struct {
     bool publishInverterCommands;
     bool publishResStatus;
     bool publishCanStatus;
-    bool publishECUParamsActaul;
+    bool publishECUParamGeneral;
+    bool publishECUParamControl;
     bool publishInverterRightInfo;
     bool publishInverterLeftInfo;
     bool publishIsabellen;
@@ -93,7 +94,7 @@ typedef struct {
     uint8_t transmitApuStateMission;
     uint8_t transmitSwaCommanded;
     uint8_t transmitApuCommand;
-    uint8_t transmitECUParams;
+    uint8_t transmitECUParamAPU;
     uint8_t transmitECUParams2;
     bool transmitDvSystemStatus;
     bool transmitApuResInit;
@@ -110,9 +111,9 @@ class CanHandler : public rclcpp::Node
         struct sockaddr_can addr0;
         struct ifreq ifr0;
 
-        int can1Socket;
-        struct sockaddr_can addr1;
-        struct ifreq ifr1;
+        // int can1Socket;
+        // struct sockaddr_can addr1;
+        // struct ifreq ifr1;
 
         struct timeval recvTime;
         socklen_t len = sizeof(this->addr0);
@@ -197,13 +198,16 @@ class CanHandler : public rclcpp::Node
         turtle_interfaces::msg::EbsSupervisorInfo msgEbsSupervisor;
         void publish_ebs_supervisor();
 
-        rclcpp::Publisher<turtle_interfaces::msg::ECUParams>::SharedPtr pubEcuParams;
-        turtle_interfaces::msg::ECUParams msgECUParamsActual;
+        rclcpp::Publisher<turtle_interfaces::msg::ECUParams>::SharedPtr pubEcuParamGeneral;
+        rclcpp::Publisher<turtle_interfaces::msg::ECUParams>::SharedPtr pubEcuParamControl;
+        turtle_interfaces::msg::ECUParams msgECUParamGeneral;
+        turtle_interfaces::msg::ECUParams msgECUParamControl;
         bool energyArrived;
         bool idcArrived;
         bool vdcArrived;
         bool pdcArrived;
-        void publish_ecu_params_actual();
+        void publish_ecu_param_general();
+        void publish_ecu_param_control();
     
         rclcpp::Publisher<turtle_interfaces::msg::Isabellen>::SharedPtr pubIsabellen;
         turtle_interfaces::msg::Isabellen msgIsabellen;
@@ -247,8 +251,8 @@ class CanHandler : public rclcpp::Node
         rclcpp::Subscription<turtle_interfaces::msg::ActuatorCmd>::SharedPtr subActuatorCmd;        
         void actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::SharedPtr msgActuatorCmd);
 
-        rclcpp::Subscription<turtle_interfaces::msg::ECUParams>::SharedPtr subECUParams;        
-        void ecu_params_callback(turtle_interfaces::msg::ECUParams::SharedPtr msgECUParams);
+        rclcpp::Subscription<turtle_interfaces::msg::ECUParams>::SharedPtr subECUParamAPU;      
+        void ecu_params_callback(turtle_interfaces::msg::ECUParams::SharedPtr msgECUParams);  //maybe rename 
 
         rclcpp::Subscription<turtle_interfaces::msg::CpuStatus>::SharedPtr subCPUTemps;        
         void cpu_temps_callback(turtle_interfaces::msg::CpuStatus::SharedPtr msgCPUTemps);
@@ -265,8 +269,8 @@ class CanHandler : public rclcpp::Node
         struct can_mcu_apu_command_t frameApuCommand;
         void transmit_apu_command();
 
-        struct can_mcu_ecu_parameters_t frameECUParams; 
-        void transmit_ecu_params();
+        struct can_mcu_ecu_param_apu_t frameECUParamAPU; 
+        void transmit_ecu_param_apu();
 
         struct can_mcu_apu_temp_t frameAPUTemps; 
         void transmit_apu_temps();

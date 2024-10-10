@@ -31,22 +31,22 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
     RCLCPP_INFO(this->get_logger(), "%s interface initialized", this->rosConf.channel0.c_str());
 
     //initialize channel1
-    this->can1Socket = socket(PF_CAN, SOCK_RAW, CAN_RAW);
-    if (this->can1Socket < 0) {
-        RCLCPP_ERROR(this->get_logger(), "Unable to create socket for %s.", this->rosConf.channel1.c_str());
-    }
-    strcpy(this->ifr1.ifr_name, this->rosConf.channel1.c_str());
-    if (ioctl(this->can1Socket, SIOCGIFINDEX, &this->ifr1) == -1) {
-        RCLCPP_ERROR(this->get_logger(), "Unable to perform ioctl for %s.", this->rosConf.channel1.c_str());
-        return;
-    }
-    this->addr1.can_family = AF_CAN;
-    this->addr1.can_ifindex = this->ifr1.ifr_ifindex;
-    if (bind(this->can1Socket, (struct sockaddr*)&this->addr1, sizeof(this->addr0)) < 0){
-        RCLCPP_ERROR(this->get_logger(), "Unable to bind socket with %s.", this->rosConf.channel1.c_str());
-        return;
-    }
-    RCLCPP_INFO(this->get_logger(), "%s interface initialized", this->rosConf.channel1.c_str());
+    // this->can1Socket = socket(PF_CAN, SOCK_RAW, CAN_RAW);
+    // if (this->can1Socket < 0) {
+    //     RCLCPP_ERROR(this->get_logger(), "Unable to create socket for %s.", this->rosConf.channel1.c_str());
+    // }
+    // strcpy(this->ifr1.ifr_name, this->rosConf.channel1.c_str());
+    // if (ioctl(this->can1Socket, SIOCGIFINDEX, &this->ifr1) == -1) {
+    //     RCLCPP_ERROR(this->get_logger(), "Unable to perform ioctl for %s.", this->rosConf.channel1.c_str());
+    //     return;
+    // }
+    // this->addr1.can_family = AF_CAN;
+    // this->addr1.can_ifindex = this->ifr1.ifr_ifindex;
+    // if (bind(this->can1Socket, (struct sockaddr*)&this->addr1, sizeof(this->addr0)) < 0){
+    //     RCLCPP_ERROR(this->get_logger(), "Unable to bind socket with %s.", this->rosConf.channel1.c_str());
+    //     return;
+    // }
+    // RCLCPP_INFO(this->get_logger(), "%s interface initialized", this->rosConf.channel1.c_str());
 
     //initialize timers
     this->canRecvTimer =    this->create_wall_timer(500us,  std::bind(&CanHandler::handleCanReceive,        this));
@@ -75,9 +75,9 @@ CanHandler::~CanHandler()
     if (close(this->can0Socket) < 0) {
         RCLCPP_ERROR(this->get_logger(), "Unable to close %s.\n", this->rosConf.channel0.c_str());
     }
-    if (close(this->can1Socket) < 0) {
-        RCLCPP_ERROR(this->get_logger(), "Unable to close %s.\n", this->rosConf.channel1.c_str());
-    }
+    // if (close(this->can1Socket) < 0) {
+    //     RCLCPP_ERROR(this->get_logger(), "Unable to close %s.\n", this->rosConf.channel1.c_str());
+    // }
 }
 
 
@@ -167,8 +167,12 @@ void CanHandler::handleCanReceive()
             this->publish_isabellen();
         }
                
-        else if (this->recvFrame.can_id == CAN_MCU_ECU_PARAMETERS_ACTUAL_FRAME_ID && this->rosConf.publishECUParamsActaul) {
-            this->publish_ecu_params_actual();
+        else if (this->recvFrame.can_id == CAN_MCU_ECU_PARAM_GENERAL_FRAME_ID && this->rosConf.publishECUParamGeneral) {
+            this->publish_ecu_param_general();
+        }
+
+        else if (this->recvFrame.can_id == CAN_MCU_ECU_PARAM_CONTROL_FRAME_ID && this->rosConf.publishECUParamControl) {
+            this->publish_ecu_param_control();
         }
          
         else if (this->recvFrame.can_id == CAN_MCU_ECU_ADU_FRAME_ID){
@@ -183,8 +187,8 @@ void CanHandler::handleCanReceive()
     }
 
    //channel1
-    while (recvfrom(this->can1Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr1, &this->len) >= 8) {
-        ioctl(this->can1Socket, SIOCGSTAMP, &this->recvTime);  //get message timestamp
+    while (recvfrom(this->can0Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, &this->len) >= 8) {
+        ioctl(this->can0Socket, SIOCGSTAMP, &this->recvTime);  //get message timestamp
         if (this->recvFrame.can_id == CAN_APU_RES_DLOGGER_RES_STATUS_FRAME_ID && this->rosConf.publishResStatus) {
             res_initialized = true;
             this->publish_res_status();
@@ -267,7 +271,12 @@ void CanHandler::handleReceiveTimeout()
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.INVERTER_ADU_TIMEOUT;
     
-    if (timeNow - this->msgECUParamsActual.header.stamp > rclcpp::Duration(2s))
+    if (timeNow - this->msgECUParamGeneral.header.stamp > rclcpp::Duration(2s))
+        this->msgCanStatus.message_timeouts |= this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
+    else
+        this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
+
+    if (timeNow - this->msgECUParamControl.header.stamp > rclcpp::Duration(2s))
         this->msgCanStatus.message_timeouts |= this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
     else
         this->msgCanStatus.message_timeouts &= ~this->msgCanStatus.ECU_PARAMS_ACTUAL_TIMEOUT;
@@ -332,8 +341,8 @@ void CanHandler::handleCanTransmit()
     if ((this->rosConf.transmitApuCommand == 2) && !(this->canTimerCounter % CAN_MCU_APU_COMMAND_CYCLE_TIME_MS)) {
         this->transmit_apu_command();
     }
-    if ((this->rosConf.transmitECUParams == 2) && !(this->canTimerCounter % CAN_MCU_ECU_PARAMETERS_CYCLE_TIME_MS)) {
-        this->transmit_ecu_params();
+    if ((this->rosConf.transmitECUParamAPU == 2) && !(this->canTimerCounter % CAN_MCU_ECU_PARAM_APU_CYCLE_TIME_MS)) {
+        this->transmit_ecu_param_apu();
     }
 
     if (this->rosConf.transmitDvSystemStatus && !(this->canTimerCounter % CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_CYCLE_TIME_MS)) {
@@ -445,7 +454,7 @@ void CanHandler::transmit_dv_system_status()
         return;
     }
 
-    if (sendto(this->can1Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr1, this->len) < CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_LENGTH) {
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_LENGTH) {
         RCLCPP_ERROR(this->get_logger(), "Error during transmit of DV_SYSTEM_STATUS");
     }
 }

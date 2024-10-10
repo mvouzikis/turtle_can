@@ -61,17 +61,17 @@ void CanHandler ::transmit_apu_temps()
     }
 }
 
-void CanHandler::transmit_ecu_params() 
+void CanHandler::transmit_ecu_param_apu() 
 {
-    this->sendFrame.can_id = CAN_MCU_ECU_PARAMETERS_FRAME_ID;
-    this->sendFrame.can_dlc = CAN_MCU_ECU_PARAMETERS_LENGTH;
-    if (can_mcu_ecu_parameters_pack(this->sendFrame.data, &this->frameECUParams, sizeof(sendFrame.data)) != CAN_MCU_ECU_PARAMETERS_LENGTH) {
-         RCLCPP_ERROR(this->get_logger(), "Error during pack of ECU_PARAMETERS");
+    this->sendFrame.can_id = CAN_MCU_ECU_PARAM_APU_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_MCU_ECU_PARAM_APU_LENGTH;
+    if (can_mcu_ecu_param_apu_pack(this->sendFrame.data, &this->frameECUParamAPU, sizeof(sendFrame.data)) != CAN_MCU_ECU_PARAM_APU_LENGTH) {
+         RCLCPP_ERROR(this->get_logger(), "Error during pack of ECU_PARAM_APU");
         return;
     }
 
-    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_MCU_ECU_PARAMETERS_LENGTH) {
-        RCLCPP_ERROR(this->get_logger(), "Error during transmit of ECU_PARAMETERS");
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_MCU_ECU_PARAM_APU_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of ECU_PARAM_APU");
     }
 }
 
@@ -87,7 +87,7 @@ void CanHandler::transmit_apu_res_init()
         return;
     }
 
-    if (sendto(this->can1Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr1, this->len) < CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH) {
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH) {
         RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_RES_INIT");
     }
 }

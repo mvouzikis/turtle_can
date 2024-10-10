@@ -83,9 +83,14 @@ void CanHandler::variablesInit()
         this->msgResStatus = turtle_interfaces::msg::ResStatus(); 
     }
 
-    if (this->rosConf.publishECUParamsActaul) {
-        this->pubEcuParams = this->create_publisher<turtle_interfaces::msg::ECUParams>("ecu_params_actual", serviceQos);
-        this->msgECUParamsActual = turtle_interfaces::msg::ECUParams();
+    if (this->rosConf.publishECUParamGeneral) {
+        this->pubEcuParamGeneral = this->create_publisher<turtle_interfaces::msg::ECUParams>("ecu_param_general", serviceQos);
+        this->msgECUParamGeneral = turtle_interfaces::msg::ECUParams();
+    }
+
+    if (this->rosConf.publishECUParamControl) {
+        this->pubEcuParamControl = this->create_publisher<turtle_interfaces::msg::ECUParams>("ecu_params_control", serviceQos);
+        this->msgECUParamControl = turtle_interfaces::msg::ECUParams();
     }
 
     if (this->rosConf.publishIsabellen) {  
@@ -132,16 +137,16 @@ void CanHandler::variablesInit()
         this->frameApuCommand.throttle_brake_commanded = 0.0;
     }
     
-    if (this->rosConf.transmitECUParams) {
-        this->subECUParams = this->create_subscription<turtle_interfaces::msg::ECUParams>("ecu_params_tune", serviceQos, std::bind(&CanHandler::ecu_params_callback, this, _1));
+    if (this->rosConf.transmitECUParamAPU) {
+        this->subECUParamAPU = this->create_subscription<turtle_interfaces::msg::ECUParams>("ecu_params_tune", serviceQos, std::bind(&CanHandler::ecu_params_callback, this, _1));
 
-        this->frameECUParams.inverter_rpm_percentage = 100;
-        this->frameECUParams.inverter_irms_max = 100;
-        this->frameECUParams.power_target = 40.0;
-        this->frameECUParams.servo_start_speed = 5;
-        this->frameECUParams.regen_min_speed = 5;
-        this->frameECUParams.ed_enable = 0;
-        this->frameECUParams.tc_enable= 1;
+        this->frameECUParamAPU.inverter_rpm_percentage = 100;
+        this->frameECUParamAPU.inverter_irms_max = 100;
+        this->frameECUParamAPU.power_target = 40.0;
+        this->frameECUParamAPU.servo_start_speed = 5;
+        this->frameECUParamAPU.regen_min_speed = 5;
+        this->frameECUParamAPU.ed_enable = 0;
+        this->frameECUParamAPU.tc_enable= 1;
     }
 
     if (this->rosConf.transmitApuTemp ) {

@@ -298,25 +298,42 @@ void CanHandler::publish_inverter_commands()
     }
 }
 
-void CanHandler::publish_ecu_params_actual() 
+void CanHandler::publish_ecu_param_general() 
 {
-    can_mcu_ecu_parameters_t msg;
+    can_mcu_ecu_param_general_t msg; //maybe can_mcu_ecu_param_apu_t ???
 
-    if (can_mcu_ecu_parameters_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
-        RCLCPP_ERROR(this->get_logger(), "Error during unpack of ECU_PARAMS_ACTUAL");
+    if (can_mcu_ecu_param_general_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of ECU_PARAM_GENERAL");
         return;
     }
 
-    this->msgECUParamsActual.inverter_rpm_percentage = msg.inverter_rpm_percentage;
-    this->msgECUParamsActual.inverter_i_rms_max = msg.inverter_irms_max;//400.0/1070.0;
-    this->msgECUParamsActual.power_target_kw = msg.power_target;///255.0*80.0;
-    this->msgECUParamsActual.ed_enable = msg.ed_enable;
-    this->msgECUParamsActual.tc_enable = msg.tc_enable;
-    this->msgECUParamsActual.servo_start_speed = msg.servo_start_speed;
-    this->msgECUParamsActual.regen_min_speed = msg.regen_min_speed;
+    this->msgECUParamGeneral.inverter_rpm_percentage = msg.inverter_rpm_max_actual;
+    this->msgECUParamGeneral.inverter_i_rms_max = msg.inverter_irms_max_actual;//400.0/1070.0;
+    this->msgECUParamGeneral.power_target_kw = msg.power_target_actual;//255.0*80.0;
+    // this->msgECUParamGeneral.ed_enable = msg.ed_enable;
+    // this->msgECUParamGeneral.tc_enable = msg.tc_enable;
+    this->msgECUParamGeneral.servo_start_speed = msg.servo_start_speed_actual;
+    // this->msgECUParamsGeneral.regen_min_speed = msg.regen_min_speed;
 
-    this->createHeader(&this->msgECUParamsActual.header);
-    this->pubEcuParams->publish(this->msgECUParamsActual);
+    this->createHeader(&this->msgECUParamGeneral.header);
+    this->pubEcuParamGeneral->publish(this->msgECUParamGeneral);
+}
+
+void CanHandler::publish_ecu_param_control() 
+{
+    can_mcu_ecu_param_control_t msg; //maybe can_mcu_ecu_param_apu_t ???
+
+    if (can_mcu_ecu_param_control_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+        RCLCPP_ERROR(this->get_logger(), "Error during unpack of ECU_PARAM_CONTROL");
+        return;
+    }
+
+    this->msgECUParamControl.ed_enable = msg.ed_enable_actual;
+    this->msgECUParamControl.tc_enable = msg.tc_enable_actual;
+    this->msgECUParamControl.regen_min_speed = msg.regen_min_speed_actual;
+
+    this->createHeader(&this->msgECUParamControl.header);
+    this->pubEcuParamControl->publish(this->msgECUParamControl); 
 }
 
 
