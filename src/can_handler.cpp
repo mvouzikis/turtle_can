@@ -30,24 +30,6 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
     }
     RCLCPP_INFO(this->get_logger(), "%s interface initialized", this->rosConf.channel0.c_str());
 
-    //initialize channel1
-    // this->can1Socket = socket(PF_CAN, SOCK_RAW, CAN_RAW);
-    // if (this->can1Socket < 0) {
-    //     RCLCPP_ERROR(this->get_logger(), "Unable to create socket for %s.", this->rosConf.channel1.c_str());
-    // }
-    // strcpy(this->ifr1.ifr_name, this->rosConf.channel1.c_str());
-    // if (ioctl(this->can1Socket, SIOCGIFINDEX, &this->ifr1) == -1) {
-    //     RCLCPP_ERROR(this->get_logger(), "Unable to perform ioctl for %s.", this->rosConf.channel1.c_str());
-    //     return;
-    // }
-    // this->addr1.can_family = AF_CAN;
-    // this->addr1.can_ifindex = this->ifr1.ifr_ifindex;
-    // if (bind(this->can1Socket, (struct sockaddr*)&this->addr1, sizeof(this->addr0)) < 0){
-    //     RCLCPP_ERROR(this->get_logger(), "Unable to bind socket with %s.", this->rosConf.channel1.c_str());
-    //     return;
-    // }
-    // RCLCPP_INFO(this->get_logger(), "%s interface initialized", this->rosConf.channel1.c_str());
-
     //initialize timers
     this->canRecvTimer =    this->create_wall_timer(500us,  std::bind(&CanHandler::handleCanReceive,        this));
     this->canRecvTimeout =  this->create_wall_timer(10ms,   std::bind(&CanHandler::handleReceiveTimeout,    this));
@@ -75,9 +57,6 @@ CanHandler::~CanHandler()
     if (close(this->can0Socket) < 0) {
         RCLCPP_ERROR(this->get_logger(), "Unable to close %s.\n", this->rosConf.channel0.c_str());
     }
-    // if (close(this->can1Socket) < 0) {
-    //     RCLCPP_ERROR(this->get_logger(), "Unable to close %s.\n", this->rosConf.channel1.c_str());
-    // }
 }
 
 
@@ -186,7 +165,6 @@ void CanHandler::handleCanReceive()
         }
     }
 
-   //channel1
     while (recvfrom(this->can0Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, &this->len) >= 8) {
         ioctl(this->can0Socket, SIOCGSTAMP, &this->recvTime);  //get message timestamp
         if (this->recvFrame.can_id == CAN_APU_RES_DLOGGER_RES_STATUS_FRAME_ID && this->rosConf.publishResStatus) {

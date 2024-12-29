@@ -60,8 +60,6 @@ typedef struct {
     //Channels configuration
     std::string channel0;
     uint32_t bitrate0;
-    // std::string channel1;
-    // uint32_t bitrate1;
 
     //CAN messages to publish in ROS
     bool publishDashApps;
@@ -110,10 +108,6 @@ class CanHandler : public rclcpp::Node
         int can0Socket;
         struct sockaddr_can addr0;
         struct ifreq ifr0;
-
-        // int can1Socket;
-        // struct sockaddr_can addr1;
-        // struct ifreq ifr1;
 
         struct timeval recvTime;
         socklen_t len = sizeof(this->addr0);
@@ -276,7 +270,6 @@ class CanHandler : public rclcpp::Node
         void transmit_apu_temps();
 
 
-        //channel 1
         rclcpp::Subscription<turtle_interfaces::msg::ControlInfo>::SharedPtr subControlInfo;
         void control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo);
 

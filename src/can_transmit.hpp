@@ -4,7 +4,6 @@
 #include "can_handler.hpp"
 
 
-//CHANNEL0
 void CanHandler::transmit_apu_state_mission()
 {
     this->sendFrame.can_id = CAN_MCU_APU_STATE_MISSION_FRAME_ID;
@@ -76,7 +75,6 @@ void CanHandler::transmit_ecu_param_apu()
 }
 
 
-//CHANNEL1
 void CanHandler::transmit_apu_res_init() 
 {
     //send CAN initialization

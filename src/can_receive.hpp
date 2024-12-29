@@ -300,7 +300,7 @@ void CanHandler::publish_inverter_commands()
 
 void CanHandler::publish_ecu_param_general() 
 {
-    can_mcu_ecu_param_general_t msg; //maybe can_mcu_ecu_param_apu_t ???
+    can_mcu_ecu_param_general_t msg; 
 
     if (can_mcu_ecu_param_general_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
         RCLCPP_ERROR(this->get_logger(), "Error during unpack of ECU_PARAM_GENERAL");
@@ -310,10 +310,7 @@ void CanHandler::publish_ecu_param_general()
     this->msgECUParamGeneral.inverter_rpm_percentage = msg.inverter_rpm_max_actual;
     this->msgECUParamGeneral.inverter_i_rms_max = msg.inverter_irms_max_actual;//400.0/1070.0;
     this->msgECUParamGeneral.power_target_kw = msg.power_target_actual;//255.0*80.0;
-    // this->msgECUParamGeneral.ed_enable = msg.ed_enable;
-    // this->msgECUParamGeneral.tc_enable = msg.tc_enable;
     this->msgECUParamGeneral.servo_start_speed = msg.servo_start_speed_actual;
-    // this->msgECUParamsGeneral.regen_min_speed = msg.regen_min_speed;
 
     this->createHeader(&this->msgECUParamGeneral.header);
     this->pubEcuParamGeneral->publish(this->msgECUParamGeneral);
@@ -321,7 +318,7 @@ void CanHandler::publish_ecu_param_general()
 
 void CanHandler::publish_ecu_param_control() 
 {
-    can_mcu_ecu_param_control_t msg; //maybe can_mcu_ecu_param_apu_t ???
+    can_mcu_ecu_param_control_t msg; 
 
     if (can_mcu_ecu_param_control_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
         RCLCPP_ERROR(this->get_logger(), "Error during unpack of ECU_PARAM_CONTROL");

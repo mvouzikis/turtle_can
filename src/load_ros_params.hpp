@@ -9,8 +9,6 @@ void CanHandler::loadRosParams()
     //Channels configuration
     this->get_parameter_or<std::string>("channel0", this->rosConf.channel0, "can0");
     this->get_parameter_or<uint32_t>("bitrate0",    this->rosConf.bitrate0, 500000);
-    // this->get_parameter_or<std::string>("channel1", this->rosConf.channel1, "can1");
-    // this->get_parameter_or<uint32_t>("bitrate1",    this->rosConf.bitrate1, 500000);
     
     //CAN messages to publish in ROS
     this->get_parameter_or<bool>("publishDashApps",             this->rosConf.publishDashApps,              true);
