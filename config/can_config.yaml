@@ -36,6 +36,6 @@ CanInterface:
     transmitECUParams: 1          # /ecu_params
     transmitECUParams2: 1         # /ecu_params
     transmitDvSystemStatus: true  #100ms cyclic time from the competitions
-    transmitApuResInit: true      #does not have publisher
+    transmitApuResInit: true     #does not have publisher
     transmitApuTemp: 1        #apu_monitor
 

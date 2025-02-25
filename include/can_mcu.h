@@ -1520,7 +1520,7 @@ struct can_mcu_adu_inverter_left_t {
     /**
      * Max temperature from Accumulator
      *
-     * Range: 0..198 (0..99 C)
+     * Range: 0..198 (0..99 °C)
      * Scale: 0.5
      * Offset: 0
      */
@@ -2924,14 +2924,14 @@ struct can_mcu_ekf_euler_t {
  */
 struct can_mcu_ekf_pos_t {
     /**
-     * Range: -2147480000000..2147480000000 (-214748..214748 )
+     * Range: -2147480000000..2147480000000 (-214748..214748 °)
      * Scale: 1e-07
      * Offset: 0
      */
     int32_t longitude;
 
     /**
-     * Range: -2147480000000..2147480000000 (-214748..214748 )
+     * Range: -2147480000000..2147480000000 (-214748..214748 °)
      * Scale: 1e-07
      * Offset: 0
      */
@@ -3043,14 +3043,14 @@ struct can_mcu_gps1_vel_t {
  */
 struct can_mcu_gps1_pos_t {
     /**
-     * Range: -2147480000..2147480000 (-214.748..214.748 )
+     * Range: -2147480000..2147480000 (-214.748..214.748 °)
      * Scale: 1e-07
      * Offset: 0
      */
     int32_t gps_latitude;
 
     /**
-     * Range: -2147480000..2147480000 (-214.748..214.748 )
+     * Range: -2147480000..2147480000 (-214.748..214.748 °)
      * Scale: 1e-07
      * Offset: 0
      */
