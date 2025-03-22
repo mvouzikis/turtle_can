@@ -26,7 +26,11 @@ CanInterface:
     publishECUControlsSystems: true # /ecu_control_systems
     publishInverterRightInfo: true  # /inverter_right_info
     publishInverterLeftInfo: true   # /inverter_left_info
-
+    publishSbgImu: true             # /sbg/imu_data
+    publishSbgEkfEuler: true        # /sbg/ekf_euler
+    publishSbgGpsVel: true          # /sbg/gps_vel
+    publishSbgGpsPos: true          # /sbg/gps_pos
+    publishSbgEkfNav: true          # /sbg/ekf_nav
 
     # CAN messages to transmit
     #(0: do not send, 1: use ros publisher callback, 2: use dbc cyclic time)

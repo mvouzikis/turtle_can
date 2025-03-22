@@ -113,6 +113,30 @@ void CanHandler::variablesInit()
         this->msgBLDC = turtle_interfaces::msg::Steering();
     }
 
+    if(this->rosConf.publishSbgImu){
+        this->pubSbgImu = this->create_publisher<sbg_driver::msg::SbgImuData>("sbg/imu_data", sensorQos);
+        this->msgSbgImu = sbg_driver::msg::SbgImuData();
+    }
+
+    if(this->rosConf.publishSbgEkfEuler){
+        this->pubSbgEkfEuler = this->create_publisher<sbg_driver::msg::SbgEkfEuler>("sbg/ekf_euler", sensorQos);
+        this->msgSbgEkfEuler  = sbg_driver::msg::SbgEkfEuler();
+    }
+
+    if(this->rosConf.publishSbgGpsVel){
+        this->pubSbgGpsVel = this->create_publisher<sbg_driver::msg::SbgGpsVel>("sbg/gps_vel", sensorQos);
+        this->msgSbgGpsVel  = sbg_driver::msg::SbgGpsVel();
+    }
+
+    if(this->rosConf.publishSbgGpsPos){
+        this->pubSbgGpsPos = this->create_publisher<sbg_driver::msg::SbgGpsPos>("sbg/gps_pos", sensorQos);
+        this->msgSbgGpsPos  = sbg_driver::msg::SbgGpsPos();
+    }
+
+    if(this->rosConf.publishSbgEkfNav){
+        this->pubSbgEkfNav = this->create_publisher<sbg_driver::msg::SbgEkfNav>("sbg/ekf_nav", sensorQos);
+        this->msgSbgEkfNav  = sbg_driver::msg::SbgEkfNav();
+    }
 
     //--------- Initialize CAN Tx messages
     if (this->rosConf.transmitApuStateMission || this->rosConf.transmitDvSystemStatus) {

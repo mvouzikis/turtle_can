@@ -41,6 +41,12 @@
 #include "turtle_interfaces/msg/cpu_status.hpp"
 #include "turtle_interfaces/msg/mission_status.hpp"
 
+#include <sbg_driver/msg/sbg_ekf_euler.hpp>
+#include <sbg_driver/msg/sbg_ekf_nav.hpp>
+#include <sbg_driver/msg/sbg_imu_data.hpp>
+#include <sbg_driver/msg/sbg_gps_vel.hpp>
+#include <sbg_driver/msg/sbg_gps_pos.hpp>
+
 #include "libsocketcan.h"
 
 #include "can_mcu.h"
@@ -87,6 +93,12 @@ typedef struct {
     bool publishEcuControlSystems;
     bool publishCoolingInfo;
     bool publishBLDC;
+
+    bool publishSbgImu;
+    bool publishSbgEkfEuler;
+    bool publishSbgGpsVel;
+    bool publishSbgGpsPos;
+    bool publishSbgEkfNav;
 
     //CAN messages to transmit
     uint8_t transmitApuStateMission;
@@ -233,6 +245,38 @@ class CanHandler : public rclcpp::Node
         uint16_t canTimerCounter;
         rclcpp::TimerBase::SharedPtr canSendTimer;        
         void handleCanTransmit();
+
+        // sbg publishers
+        rclcpp::Publisher<sbg_driver::msg::SbgEkfEuler>::SharedPtr pubSbgEkfEuler;
+        sbg_driver::msg::SbgEkfEuler msgSbgEkfEuler;
+        void publish_sbg_ekf_euler();
+
+        rclcpp::Publisher<sbg_driver::msg::SbgImuData>::SharedPtr pubSbgImu;
+        sbg_driver::msg::SbgImuData msgSbgImu;
+        bool accelSbgImuArrived;
+        bool gyroSbgImuArrived;
+        void publish_sbg_imu();
+
+        rclcpp::Publisher<sbg_driver::msg::SbgGpsVel>::SharedPtr pubSbgGpsVel;
+        sbg_driver::msg::SbgGpsVel msgSbgGpsVel;
+        bool velSbgGpsVelArrived;
+        bool vel_accSbgGpsVelArrived;
+        void publish_sbg_gps_vel();
+
+        rclcpp::Publisher<sbg_driver::msg::SbgGpsPos>::SharedPtr pubSbgGpsPos;
+        sbg_driver::msg::SbgGpsPos msgSbgGpsPos;
+        bool posSbgGpsPosArrived;
+        bool pos_accSbgGpsPosArrived;
+        void publish_sbg_gps_pos();
+
+        rclcpp::Publisher<sbg_driver::msg::SbgEkfNav>::SharedPtr pubSbgEkfNav;
+        sbg_driver::msg::SbgEkfNav msgSbgEkfNav;
+        bool body_velSbgNavArrived;
+        bool body_acc_velSbgNavArrived;
+        bool lla_posSbgNavArrived;
+        bool lla_acc_posSbgNavArrived;
+        void publish_sbg_ekf_nav();
+
 
 
         //channel 0

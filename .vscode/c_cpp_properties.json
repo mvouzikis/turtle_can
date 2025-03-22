@@ -1,0 +1,35 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/orin/carla_ws/install/carla_waypoint_types/include/**",
+        "/home/orin/carla_ws/install/carla_ros_scenario_runner_types/include/**",
+        "/home/orin/carla_ws/install/carla_ackermann_msgs/include/**",
+        "/home/orin/carla_ws/install/carla_msgs/include/**",
+        "/home/orin/orin_ws/install/turtle_interfaces/include/**",
+        "/home/orin/orin_ws/install/turtle_common/include/**",
+        "/home/orin/orin_ws/install/sbg_driver/include/**",
+        "/opt/ros/humble/include/**",
+        "/home/orin/orin_ws/src/sbg_ros2_driver/include/**",
+        "/home/orin/orin_ws/src/turtle_can/include/**",
+        "/home/orin/orin_ws/src/turtle_common/include/**",
+        "/home/orin/orin_ws/src/turtle_control/include/**",
+        "/home/orin/orin_ws/src/turtle_estimation/include/**",
+        "/home/orin/orin_ws/src/turtle_simulation/turtle_simulation/include/**",
+        "/home/orin/orin_ws/src/turtle_stereo/include/**",
+        "include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-arm64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
