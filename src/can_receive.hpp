@@ -711,7 +711,7 @@ void CanHandler::publish_sbg_ekf_nav(){
         }
 
         this->msgSbgEkfNav.altitude = can_mcu_sbg_ecan_msg_ekf_altitude_altitude_decode(msg_alt.altitude);
-        this->msgSbgEkfNav.undulation = can_mcu_sbg_ecan_msg_ekf_altitude_undulation_decode(msg_pos_lla.undulation);
+        this->msgSbgEkfNav.undulation = can_mcu_sbg_ecan_msg_ekf_altitude_undulation_decode(msg_alt.undulation);
 
         this->altitudeSbgNavArrived = true;
     }
