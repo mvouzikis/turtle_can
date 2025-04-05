@@ -260,21 +260,23 @@ class CanHandler : public rclcpp::Node
         rclcpp::Publisher<sbg_driver::msg::SbgGpsVel>::SharedPtr pubSbgGpsVel;
         sbg_driver::msg::SbgGpsVel msgSbgGpsVel;
         bool velSbgGpsVelArrived;
-        bool vel_accSbgGpsVelArrived;
+        bool velSbgGpsVelAccArrived;
         void publish_sbg_gps_vel();
 
         rclcpp::Publisher<sbg_driver::msg::SbgGpsPos>::SharedPtr pubSbgGpsPos;
         sbg_driver::msg::SbgGpsPos msgSbgGpsPos;
         bool posSbgGpsPosArrived;
-        bool pos_accSbgGpsPosArrived;
+        bool posSbgGpsPosAccArrived;
         void publish_sbg_gps_pos();
 
         rclcpp::Publisher<sbg_driver::msg::SbgEkfNav>::SharedPtr pubSbgEkfNav;
         sbg_driver::msg::SbgEkfNav msgSbgEkfNav;
-        bool body_velSbgNavArrived;
-        bool body_acc_velSbgNavArrived;
+        bool ned_velSbgNavArrived;
+        bool ned_acc_velSbgNavArrived;
         bool lla_posSbgNavArrived;
         bool lla_acc_posSbgNavArrived;
+        bool altitudeSbgNavArrived;
+        bool altAccSbgNavArrived;
         void publish_sbg_ekf_nav();
 
 

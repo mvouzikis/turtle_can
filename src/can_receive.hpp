@@ -490,94 +490,144 @@ void CanHandler::publish_BLDC()
     this->pubBLDC->publish(this->msgBLDC);
 }
 
-    // write pos_acc logic
-    void CanHandler::publish_sbg_imu(){
+// write pos_acc logic
+void CanHandler::publish_sbg_imu(){
 
-        can_mcu_sbg_ecan_msg_imu_accel_t msg_accel;
-        can_mcu_sbg_ecan_msg_imu_gyro_t msg_gyro;
+    can_mcu_sbg_ecan_msg_imu_accel_t msg_accel;
+    can_mcu_sbg_ecan_msg_imu_gyro_t msg_gyro;
     
-        if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_IMU_ACCEL_FRAME_ID){
-            if(can_mcu_sbg_ecan_msg_imu_accel_unpack(&msg_accel, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK){
-                RCLCPP_ERROR(this->get_logger(),"Error during unpack of accel IMU");
-                return;
-            }
-    
-            this->msgSbgImu.accel.x = can_mcu_sbg_ecan_msg_imu_accel_accel_x_decode(msg_accel.accel_x);
-            this->msgSbgImu.accel.y = can_mcu_sbg_ecan_msg_imu_accel_accel_y_decode(msg_accel.accel_y);
-            this->msgSbgImu.accel.z = can_mcu_sbg_ecan_msg_imu_accel_accel_z_decode(msg_accel.accel_z);
-    
-            this->accelSbgImuArrived = true;
-        }
-        if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_IMU_GYRO_FRAME_ID){
-            if(can_mcu_sbg_ecan_msg_imu_gyro_unpack(&msg_gyro, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK){
-                    RCLCPP_ERROR(this->get_logger(),"Error during unpack of IMU");
-                    return;
-                }
-    
-            this->msgSbgImu.gyro.x = can_mcu_sbg_ecan_msg_imu_gyro_gyro_x_decode(msg_gyro.gyro_x);
-            this->msgSbgImu.gyro.y = can_mcu_sbg_ecan_msg_imu_gyro_gyro_y_decode(msg_gyro.gyro_y);
-            this->msgSbgImu.gyro.z = can_mcu_sbg_ecan_msg_imu_gyro_gyro_z_decode(msg_gyro.gyro_z);
-    
-            this->gyroSbgImuArrived = true;
-        }
-        if(this->accelSbgImuArrived && this->gyroSbgImuArrived){
-            this->accelSbgImuArrived = false;
-            this->gyroSbgImuArrived = false;
-    
-            this->createHeader(&this->msgSbgImu.header);
-            this->pubSbgImu->publish(this->msgSbgImu);
-        }
-    }
-    
-    void CanHandler::publish_sbg_ekf_euler(){
-    
-        can_mcu_sbg_ecan_msg_ekf_euler_t msg;
-    
-        if(can_mcu_sbg_ecan_msg_ekf_euler_unpack(&msg,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
-            RCLCPP_ERROR(this->get_logger(),"Error during unpack of EKF Euler");
+    if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_IMU_ACCEL_FRAME_ID){
+        if(can_mcu_sbg_ecan_msg_imu_accel_unpack(&msg_accel, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK){
+            RCLCPP_ERROR(this->get_logger(),"Error during unpack of accel IMU");
             return;
         }
     
-        this->msgSbgEkfEuler.angle.z = can_mcu_sbg_ecan_msg_ekf_euler_yaw_decode(msg.yaw);
+        this->msgSbgImu.accel.x = can_mcu_sbg_ecan_msg_imu_accel_accel_x_decode(msg_accel.accel_x);
+        this->msgSbgImu.accel.y = can_mcu_sbg_ecan_msg_imu_accel_accel_y_decode(msg_accel.accel_y);
+        this->msgSbgImu.accel.z = can_mcu_sbg_ecan_msg_imu_accel_accel_z_decode(msg_accel.accel_z);
     
-        this->createHeader(&this->msgSbgEkfEuler.header);
-        this->pubSbgEkfEuler->publish(this->msgSbgEkfEuler);
+        this->accelSbgImuArrived = true;
     }
-    
-    void CanHandler::publish_sbg_gps_vel(){
-    
-        can_mcu_sbg_ecan_msg_gps1_vel_t msg;
-        // add vel_acc msg
-    
-        if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_GPS1_VEL_FRAME_ID){
-            if(can_mcu_sbg_ecan_msg_gps1_vel_unpack(&msg,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
-                RCLCPP_ERROR(this->get_logger(),"Error during unpack of GPS VEL value");
+    if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_IMU_GYRO_FRAME_ID){
+        if(can_mcu_sbg_ecan_msg_imu_gyro_unpack(&msg_gyro, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK){
+                RCLCPP_ERROR(this->get_logger(),"Error during unpack of IMU");
                 return;
-            }
-    
-            this->msgSbgGpsVel.velocity.x = can_mcu_sbg_ecan_msg_gps1_vel_velocity_n_decode(msg.velocity_n);
-            this->msgSbgGpsVel.velocity.y = can_mcu_sbg_ecan_msg_gps1_vel_velocity_e_decode(msg.velocity_e);
-            this->msgSbgGpsVel.velocity.z = can_mcu_sbg_ecan_msg_gps1_vel_velocity_d_decode(msg.velocity_d);
-    
-            this->velSbgGpsVelArrived = true;
         }
     
-        // write vel_acc logic
+        this->msgSbgImu.gyro.x = can_mcu_sbg_ecan_msg_imu_gyro_gyro_x_decode(msg_gyro.gyro_x);
+        this->msgSbgImu.gyro.y = can_mcu_sbg_ecan_msg_imu_gyro_gyro_y_decode(msg_gyro.gyro_y);
+        this->msgSbgImu.gyro.z = can_mcu_sbg_ecan_msg_imu_gyro_gyro_z_decode(msg_gyro.gyro_z);
     
-        if(this->velSbgGpsVelArrived){
-            this->velSbgGpsVelArrived = false;
+        this->gyroSbgImuArrived = true;
+    }
+    if(this->accelSbgImuArrived && this->gyroSbgImuArrived){
+        this->accelSbgImuArrived = false;
+        this->gyroSbgImuArrived = false;
     
-            this->createHeader(&this->msgSbgGpsVel.header);
-            this->pubSbgGpsVel->publish(this->msgSbgGpsVel);
-        }
+        this->createHeader(&this->msgSbgImu.header);
+        this->pubSbgImu->publish(this->msgSbgImu);
+    }
+}
+    
+void CanHandler::publish_sbg_ekf_euler(){
+    
+    can_mcu_sbg_ecan_msg_ekf_euler_t msg;
+    
+    if(can_mcu_sbg_ecan_msg_ekf_euler_unpack(&msg,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
+        RCLCPP_ERROR(this->get_logger(),"Error during unpack of EKF Euler");
+        return;
     }
     
-    void CanHandler::publish_sbg_gps_pos(){
+    this->msgSbgEkfEuler.angle.z = can_mcu_sbg_ecan_msg_ekf_euler_yaw_decode(msg.yaw);
     
-        can_mcu_sbg_ecan_msg_gps1_pos_t msg;
-        // add pos_acc msg
-    if(this->posSbgGpsPosArrived){
+    this->createHeader(&this->msgSbgEkfEuler.header);
+    this->pubSbgEkfEuler->publish(this->msgSbgEkfEuler);
+}
+    
+void CanHandler::publish_sbg_gps_vel(){
+    
+    can_mcu_sbg_ecan_msg_gps1_vel_t msg_vel_ned;
+    can_mcu_sbg_ecan_msg_gps1_vel_acc_t msg_vel_acc_ned;
+    
+    if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_GPS1_VEL_FRAME_ID){
+        if(can_mcu_sbg_ecan_msg_gps1_vel_unpack(&msg_vel_ned, this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
+            RCLCPP_ERROR(this->get_logger(),"Error during unpack of GPS VEL value");
+            return;
+        }
+    
+        this->msgSbgGpsVel.velocity.x = can_mcu_sbg_ecan_msg_gps1_vel_velocity_n_decode(msg_vel_ned.velocity_n); // north
+        this->msgSbgGpsVel.velocity.y = can_mcu_sbg_ecan_msg_gps1_vel_velocity_e_decode(msg_vel_ned.velocity_e); // east
+        this->msgSbgGpsVel.velocity.z = can_mcu_sbg_ecan_msg_gps1_vel_velocity_d_decode(msg_vel_ned.velocity_d); //down
+    
+        this->velSbgGpsVelArrived = true;
+    }
+
+    if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_GPS1_VEL_ACC_FRAME_ID){
+        if(can_mcu_sbg_ecan_msg_gps1_vel_acc_unpack(&msg_vel_acc_ned, this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
+            RCLCPP_ERROR(this->get_logger(),"Error during unpack of GPS VEL Accuracy value");
+            return;
+        }
+    
+        this->msgSbgGpsVel.velocity_accuracy.x = can_mcu_sbg_ecan_msg_gps1_vel_acc_velocity_acc_n_decode(msg_vel_acc_ned.velocity_acc_n); // north acc
+        this->msgSbgGpsVel.velocity_accuracy.y = can_mcu_sbg_ecan_msg_gps1_vel_acc_velocity_acc_e_decode(msg_vel_acc_ned.velocity_acc_e); // east acc
+        this->msgSbgGpsVel.velocity_accuracy.z = can_mcu_sbg_ecan_msg_gps1_vel_acc_velocity_acc_d_decode(msg_vel_acc_ned.velocity_acc_d); // down acc
+    
+        this->velSbgGpsVelAccArrived = true;
+    }
+    
+    // write vel_acc logic
+    
+    if(this->velSbgGpsVelArrived && this->velSbgGpsVelAccArrived){
+        this->velSbgGpsVelArrived = false;
+        this->velSbgGpsVelAccArrived = false;
+    
+        this->createHeader(&this->msgSbgGpsVel.header);
+        this->pubSbgGpsVel->publish(this->msgSbgGpsVel);
+    }
+}
+    
+void CanHandler::publish_sbg_gps_pos(){
+    
+    can_mcu_sbg_ecan_msg_gps1_pos_t msg_pos_lla; // lat, lon
+    can_mcu_sbg_ecan_msg_gps1_pos_alt_t msg_pos_alt; // alt
+    can_mcu_sbg_ecan_msg_gps1_pos_acc_t msg_pos_acc; // lat, lon, alt accuracy
+ 
+    // for long, lat, alt from GPS
+    if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_GPS1_POS_FRAME_ID){
+        if(can_mcu_sbg_ecan_msg_gps1_pos_unpack(&msg_pos_lla, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK){
+            RCLCPP_ERROR(this->get_logger(),"Error during unpack of SBG Long, Lat Pos");
+            return;
+        }
+
+        if(can_mcu_sbg_ecan_msg_gps1_pos_alt_unpack(&msg_pos_alt, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK){
+            RCLCPP_ERROR(this->get_logger(),"Error during unpack of SBG Altitude");
+            return;
+        }
+        
+        this->msgSbgGpsPos.longitude = can_mcu_sbg_ecan_msg_gps1_pos_longitude_decode(msg_pos_lla.longitude);
+        this->msgSbgGpsPos.latitude = can_mcu_sbg_ecan_msg_gps1_pos_latitude_decode(msg_pos_lla.latitude);
+        this->msgSbgGpsPos.altitude = can_mcu_sbg_ecan_msg_gps1_pos_alt_altitude_decode(msg_pos_alt.altitude);
+
+        this->posSbgGpsPosArrived = true;
+    }
+
+    if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_GPS1_POS_ACC_FRAME_ID){
+        if(can_mcu_sbg_ecan_msg_gps1_pos_acc_unpack(&msg_pos_acc, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK){
+            RCLCPP_ERROR(this->get_logger(),"Error during unpack of SBG Long, Lat Pos");
+            return;
+        }
+        
+        this->msgSbgGpsPos.position_accuracy.x = can_mcu_sbg_ecan_msg_gps1_pos_acc_latitude_acc_decode(msg_pos_acc.latitude_acc);
+        this->msgSbgGpsPos.position_accuracy.y = can_mcu_sbg_ecan_msg_gps1_pos_acc_longitude_acc_decode(msg_pos_acc.longitude_acc);
+        this->msgSbgGpsPos.position_accuracy.z = can_mcu_sbg_ecan_msg_gps1_pos_acc_altitude_acc_decode(msg_pos_acc.altitude_acc);
+
+        this->posSbgGpsPosAccArrived = true;
+    }
+
+    // add pos_acc msg
+    if(this->posSbgGpsPosArrived && this->posSbgGpsPosAccArrived){
         this->posSbgGpsPosArrived = false;
+        this->posSbgGpsPosAccArrived = false;
 
         this->createHeader(&this->msgSbgGpsPos.header);
         this->pubSbgGpsPos->publish(this->msgSbgGpsPos);
@@ -586,24 +636,47 @@ void CanHandler::publish_BLDC()
 
 void CanHandler::publish_sbg_ekf_nav(){
 
-    can_mcu_sbg_ecan_msg_ekf_vel_body_t msg_body_vel;
+    can_mcu_sbg_ecan_msg_ekf_vel_ned_t msg_ned_vel;
+    can_mcu_sbg_ecan_msg_ekf_vel_ned_acc_t msg_vel_acc_ned;
+
     can_mcu_sbg_ecan_msg_ekf_pos_t msg_pos_lla;
+    can_mcu_sbg_ecan_msg_ekf_pos_acc_t msg_pos_acc;
+
+    can_mcu_sbg_ecan_msg_ekf_altitude_t msg_alt;
+
+
     // add body_vel acc and pos acc
 
-    if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_EKF_VEL_BODY_FRAME_ID){
-        if(can_mcu_sbg_ecan_msg_ekf_vel_body_unpack(&msg_body_vel,this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK){
+    // VELOCITY
+    if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_EKF_VEL_NED_FRAME_ID){
+        if(can_mcu_sbg_ecan_msg_ekf_vel_ned_unpack(&msg_ned_vel, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK){
             RCLCPP_ERROR(this->get_logger(),"Error during unpack of SBG Body Vel");
             return;
         }
         
-        this->msgSbgEkfNav.velocity.x = can_mcu_sbg_ecan_msg_ekf_vel_body_velocity_x_decode(msg_body_vel.velocity_x);
-        this->msgSbgEkfNav.velocity.y = can_mcu_sbg_ecan_msg_ekf_vel_body_velocity_y_decode(msg_body_vel.velocity_y);
-        this->msgSbgEkfNav.velocity.z = can_mcu_sbg_ecan_msg_ekf_vel_body_velocity_z_decode(msg_body_vel.velocity_z);
+        this->msgSbgEkfNav.velocity.x = can_mcu_sbg_ecan_msg_ekf_vel_ned_velocity_n_decode(msg_ned_vel.velocity_n);
+        this->msgSbgEkfNav.velocity.y = can_mcu_sbg_ecan_msg_ekf_vel_ned_velocity_e_decode(msg_ned_vel.velocity_e);
+        this->msgSbgEkfNav.velocity.z = can_mcu_sbg_ecan_msg_ekf_vel_ned_velocity_d_decode(msg_ned_vel.velocity_d);
 
-        this->body_velSbgNavArrived = true;
+        this->ned_velSbgNavArrived = true;
     }
 
-    //add vel acc condition
+    // VELOCITY ACCURACY
+    if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_EKF_VEL_NED_ACC_FRAME_ID){
+        if(can_mcu_sbg_ecan_msg_ekf_vel_ned_acc_unpack(&msg_vel_acc_ned, this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
+            RCLCPP_ERROR(this->get_logger(),"Error during unpack of EKF NAV VEL Accuracy value");
+            return;
+        }
+    
+        this->msgSbgGpsVel.velocity_accuracy.x = can_mcu_sbg_ecan_msg_ekf_vel_ned_acc_velocity_acc_n_decode(msg_vel_acc_ned.velocity_acc_n); // north acc
+        this->msgSbgGpsVel.velocity_accuracy.y = can_mcu_sbg_ecan_msg_ekf_vel_ned_acc_velocity_acc_e_decode(msg_vel_acc_ned.velocity_acc_e); // east acc
+        this->msgSbgGpsVel.velocity_accuracy.z = can_mcu_sbg_ecan_msg_ekf_vel_ned_acc_velocity_acc_d_decode(msg_vel_acc_ned.velocity_acc_d); // down acc
+    
+        this->ned_acc_velSbgNavArrived = true;
+    }
+    
+
+    // POSITION
     if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_EKF_POS_FRAME_ID){
         if(can_mcu_sbg_ecan_msg_ekf_pos_unpack(&msg_pos_lla,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
             RCLCPP_ERROR(this->get_logger(),"Error during unpack of SBG Pos LLA");
@@ -612,16 +685,45 @@ void CanHandler::publish_sbg_ekf_nav(){
 
         this->msgSbgEkfNav.longitude = can_mcu_sbg_ecan_msg_ekf_pos_longitude_decode(msg_pos_lla.longitude);
         this->msgSbgEkfNav.latitude = can_mcu_sbg_ecan_msg_ekf_pos_latitude_decode(msg_pos_lla.latitude);
-        //altitude?
 
         this->lla_posSbgNavArrived = true;
     }
 
-    //add pos acc condition
+    // POSITION ACCURACY
+    if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_EKF_POS_ACC_FRAME_ID){
+        if(can_mcu_sbg_ecan_msg_ekf_pos_acc_unpack(&msg_pos_acc, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK){
+            RCLCPP_ERROR(this->get_logger(),"Error during unpack of SBG EKF NAV Long, Lat Alt Accuracy");
+            return;
+        }
+        
+        this->msgSbgEkfNav.position_accuracy.x = can_mcu_sbg_ecan_msg_ekf_pos_acc_latitude_acc_decode(msg_pos_acc.latitude_acc);
+        this->msgSbgEkfNav.position_accuracy.y = can_mcu_sbg_ecan_msg_ekf_pos_acc_longitude_acc_decode(msg_pos_acc.longitude_acc);
+        this->msgSbgEkfNav.position_accuracy.z = can_mcu_sbg_ecan_msg_ekf_pos_acc_altitude_acc_decode(msg_pos_acc.altitude_acc);
 
-    if(this->body_velSbgNavArrived && this->lla_posSbgNavArrived){ // add  acc conditions
-        this->body_velSbgNavArrived = false;
+        this->lla_acc_posSbgNavArrived = true;
+    }
+
+    // ALTITUDE
+    if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_EKF_ALTITUDE_FRAME_ID){
+        if(can_mcu_sbg_ecan_msg_ekf_altitude_unpack(&msg_alt,this->recvFrame.data, this->recvFrame.can_dlc) !=CAN_OK){
+            RCLCPP_ERROR(this->get_logger(),"Error during unpack of SBG EKF NAV Altitude");
+            return;
+        }
+
+        this->msgSbgEkfNav.altitude = can_mcu_sbg_ecan_msg_ekf_altitude_altitude_decode(msg_alt.altitude);
+        this->msgSbgEkfNav.undulation = can_mcu_sbg_ecan_msg_ekf_altitude_undulation_decode(msg_pos_lla.undulation);
+
+        this->altitudeSbgNavArrived = true;
+    }
+
+    if(this->ned_velSbgNavArrived && this->ned_acc_velSbgNavArrived && this->lla_posSbgNavArrived && this->lla_acc_posSbgNavArrived && this->altitudeSbgNavArrived){ // add  acc conditions
+        this->ned_velSbgNavArrived = false;
+        this->ned_acc_velSbgNavArrived = false;
+
         this->lla_posSbgNavArrived = false;
+        this->lla_acc_posSbgNavArrived = false;
+
+        this->altitudeSbgNavArrived = false;
 
         this->createHeader(&this->msgSbgEkfNav.header);
         this->pubSbgEkfNav->publish(this->msgSbgEkfNav);

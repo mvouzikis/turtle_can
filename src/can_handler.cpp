@@ -54,16 +54,19 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
     this->gyroSbgImuArrived = false;
 
     this->velSbgGpsVelArrived = false;
-    this->vel_accSbgGpsVelArrived = false;
+    this->velSbgGpsVelAccArrived = false;
 
-    this->body_velSbgNavArrived = false;
-    this->body_acc_velSbgNavArrived = false;
+    this->ned_velSbgNavArrived = false;
+    this->ned_acc_velSbgNavArrived = false;
 
     this->posSbgGpsPosArrived = false;
-    this->pos_accSbgGpsPosArrived = false;
+    this->posSbgGpsPosAccArrived = false;
 
     this->lla_posSbgNavArrived = false;
     this->lla_acc_posSbgNavArrived = false;
+
+    this->altitudeSbgNavArrived = false;
+    this->altAccSbgNavArrived = false;
 
 
     RCLCPP_INFO(this->get_logger(), "Communication started");
