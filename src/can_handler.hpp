@@ -40,7 +40,7 @@
 #include "turtle_interfaces/msg/gpu_status.hpp"
 #include "turtle_interfaces/msg/cpu_status.hpp"
 #include "turtle_interfaces/msg/mission_status.hpp"
-c
+
 #include "libsocketcan.h"
 
 #include "can_mcu.h"

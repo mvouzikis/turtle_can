@@ -111,7 +111,7 @@ void CanHandler::variablesInit()
     if (this->rosConf.publishCanStatus) {
         this->pubBLDC = this->create_publisher<turtle_interfaces::msg::Steering>("bldc", sensorQos);
         this->msgBLDC = turtle_interfaces::msg::Steering();
-    }s
+    }
 
     //--------- Initialize CAN Tx messages
     if (this->rosConf.transmitApuStateMission || this->rosConf.transmitDvSystemStatus) {
