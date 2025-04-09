@@ -266,6 +266,7 @@ class CanHandler : public rclcpp::Node
         rclcpp::Publisher<sbg_driver::msg::SbgGpsPos>::SharedPtr pubSbgGpsPos;
         sbg_driver::msg::SbgGpsPos msgSbgGpsPos;
         bool posSbgGpsPosArrived;
+        bool posSbgGpsPosAltArrived;
         bool posSbgGpsPosAccArrived;
         void publish_sbg_gps_pos();
 

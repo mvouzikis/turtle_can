@@ -60,6 +60,7 @@ CanHandler::CanHandler(rclcpp::NodeOptions nOpt):Node("CanInterface", "", nOpt)
     this->ned_acc_velSbgNavArrived = false;
 
     this->posSbgGpsPosArrived = false;
+    this->posSbgGpsPosAltArrived = false;
     this->posSbgGpsPosAccArrived = false;
 
     this->lla_posSbgNavArrived = false;
@@ -194,17 +195,17 @@ void CanHandler::handleCanReceive()
             this->publish_sbg_ekf_euler();
         }
 
-        else if(this->recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_GPS1_VEL_FRAME_ID){ // add vel_acc frame id condition
+        else if(this->recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_GPS1_VEL_FRAME_ID || this->recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_GPS1_VEL_ACC_FRAME_ID){ // add vel_acc frame id condition
             if(this->rosConf.publishSbgGpsVel)
             this->publish_sbg_gps_vel();
         }
 
-        else if(this->recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_GPS1_POS_FRAME_ID){ // add pos_acc frame id condition and altitude
+        else if(this->recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_GPS1_POS_FRAME_ID || this->recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_GPS1_POS_ALT_FRAME_ID || this->recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_GPS1_POS_ACC_FRAME_ID){ // add pos_acc frame id condition and altitude
             if(this->rosConf.publishSbgGpsPos)
             this->publish_sbg_gps_pos();
         }
 
-        else if(this->recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_EKF_VEL_BODY_FRAME_ID || this->recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_EKF_POS_FRAME_ID){ // add vel_body_acc and pos_lla_acc
+        else if(this->recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_EKF_VEL_NED_FRAME_ID || this->recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_EKF_POS_FRAME_ID || this->recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_EKF_VEL_NED_ACC_FRAME_ID || this->recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_EKF_POS_ACC_FRAME_ID || this->recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_EKF_ALTITUDE_FRAME_ID){ // add vel_body_acc and pos_lla_acc
             if(this->rosConf.publishSbgEkfNav)
             this->publish_sbg_ekf_nav();
         }

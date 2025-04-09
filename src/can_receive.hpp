@@ -598,17 +598,22 @@ void CanHandler::publish_sbg_gps_pos(){
             RCLCPP_ERROR(this->get_logger(),"Error during unpack of SBG Long, Lat Pos");
             return;
         }
+        
+        this->msgSbgGpsPos.longitude = can_mcu_sbg_ecan_msg_gps1_pos_longitude_decode(msg_pos_lla.longitude);
+        this->msgSbgGpsPos.latitude = can_mcu_sbg_ecan_msg_gps1_pos_latitude_decode(msg_pos_lla.latitude);
 
+        this->posSbgGpsPosArrived = true;
+    }
+
+    if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_GPS1_POS_ALT_FRAME_ID) {
         if(can_mcu_sbg_ecan_msg_gps1_pos_alt_unpack(&msg_pos_alt, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK){
             RCLCPP_ERROR(this->get_logger(),"Error during unpack of SBG Altitude");
             return;
         }
-        
-        this->msgSbgGpsPos.longitude = can_mcu_sbg_ecan_msg_gps1_pos_longitude_decode(msg_pos_lla.longitude);
-        this->msgSbgGpsPos.latitude = can_mcu_sbg_ecan_msg_gps1_pos_latitude_decode(msg_pos_lla.latitude);
+
         this->msgSbgGpsPos.altitude = can_mcu_sbg_ecan_msg_gps1_pos_alt_altitude_decode(msg_pos_alt.altitude);
 
-        this->posSbgGpsPosArrived = true;
+        this->posSbgGpsPosAltArrived = true;
     }
 
     if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_GPS1_POS_ACC_FRAME_ID){
@@ -625,7 +630,7 @@ void CanHandler::publish_sbg_gps_pos(){
     }
 
     // add pos_acc msg
-    if(this->posSbgGpsPosArrived && this->posSbgGpsPosAccArrived){
+    if(this->posSbgGpsPosArrived){ // && this->posSbgGpsPosAccArrived){
         this->posSbgGpsPosArrived = false;
         this->posSbgGpsPosAccArrived = false;
 
@@ -690,7 +695,9 @@ void CanHandler::publish_sbg_ekf_nav(){
     }
 
     // POSITION ACCURACY
+    RCLCPP_INFO(this->get_logger(), "Before EKF NAV POS accuracy");
     if(recvFrame.can_id == CAN_MCU_SBG_ECAN_MSG_EKF_POS_ACC_FRAME_ID){
+        RCLCPP_INFO(this->get_logger(), "In EKF NAV POS accuracy");
         if(can_mcu_sbg_ecan_msg_ekf_pos_acc_unpack(&msg_pos_acc, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK){
             RCLCPP_ERROR(this->get_logger(),"Error during unpack of SBG EKF NAV Long, Lat Alt Accuracy");
             return;
@@ -716,7 +723,8 @@ void CanHandler::publish_sbg_ekf_nav(){
         this->altitudeSbgNavArrived = true;
     }
 
-    if(this->ned_velSbgNavArrived && this->ned_acc_velSbgNavArrived && this->lla_posSbgNavArrived && this->lla_acc_posSbgNavArrived && this->altitudeSbgNavArrived){ // add  acc conditions
+    // if(this->ned_velSbgNavArrived && this->ned_acc_velSbgNavArrived && this->lla_posSbgNavArrived && this->lla_acc_posSbgNavArrived && this->altitudeSbgNavArrived){ // add  acc conditions
+    if(this->ned_velSbgNavArrived && this->ned_acc_velSbgNavArrived && this->lla_posSbgNavArrived && this->lla_acc_posSbgNavArrived && this->altitudeSbgNavArrived){    
         this->ned_velSbgNavArrived = false;
         this->ned_acc_velSbgNavArrived = false;
 
