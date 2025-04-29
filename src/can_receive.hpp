@@ -484,7 +484,7 @@ void CanHandler::publish_BLDC()
         return;
     }
 
-    this->msgBLDC.steering = convertBLDCSteering(msg.position_actual_value);
+    this->msgBLDC.steering = convertFromBLDCToSteering(msg.position_actual_value);
 
     this->createHeader(&this->msgBLDC.header);
     this->pubBLDC->publish(this->msgBLDC);

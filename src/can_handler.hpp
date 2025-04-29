@@ -256,7 +256,8 @@ class CanHandler : public rclcpp::Node
         struct can_mcu_apu_state_mission_t frameApuStateMission;
         void transmit_apu_state_mission();
 
-        struct can_mcu_steering_command_t frameSwaCommanded;
+        struct can_mcu_bldc_rx_2_t frameSwaCommanded;
+
         void transmit_steering_commanded();
 
         struct can_mcu_apu_command_t frameApuCommand;
