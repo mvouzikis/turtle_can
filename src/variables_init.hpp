@@ -9,6 +9,8 @@ void CanHandler::variablesInit()
     rclcpp::SensorDataQoS sensorQos;
     rclcpp::ServicesQoS serviceQos;
 
+    RCLCPP_INFO(this->get_logger(), "steering offset: %.2f", this->steering_offset);
+
     //--------- Initialize publishers
     if (this->rosConf.publishAmiSelectedMission) {
         this->pubAmiSelectedMission = this->create_publisher<turtle_interfaces::msg::Mission>("ami_selected_mission", serviceQos);

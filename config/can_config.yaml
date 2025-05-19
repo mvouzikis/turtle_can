@@ -43,3 +43,5 @@ CanInterface:
     transmitApuResInit: true     #does not have publisher
     transmitApuTemp: 1        #apu_monitor
 
+    steering_offset: -0.085
+

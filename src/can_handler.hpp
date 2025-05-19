@@ -183,6 +183,7 @@ class CanHandler : public rclcpp::Node
         rclcpp::Publisher<turtle_interfaces::msg::Steering>::SharedPtr pubSwaActual;
         turtle_interfaces::msg::Steering msgSwaActual;
         void publish_swa_actual();
+        float steering_offset;
 
         rclcpp::Publisher<turtle_interfaces::msg::EbsServiceBrake>::SharedPtr pubEbsServiceBrake;
         turtle_interfaces::msg::EbsServiceBrake msgEbsServiceBrake;

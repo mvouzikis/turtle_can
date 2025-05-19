@@ -224,8 +224,8 @@ void CanHandler::publish_swa_actual()
         return;
     }
 
-    this->msgSwaActual.steering = convertSteeringActual(msg.steering, this->msgEcuControlSystems.steering_offset);
-
+    // this->msgSwaActual.steering = convertSteeringActual(msg.steering, this->msgEcuControlSystems.steering_offset);
+    this->msgSwaActual.steering = convertSteeringActual(msg.steering, this->steering_offset);
     this->createHeader(&this->msgSwaActual.header);
     this->pubSwaActual->publish(this->msgSwaActual);
 } 
@@ -345,8 +345,8 @@ void CanHandler::publish_inverter_right_info()
             return;
         }
 
-        this->msgInvRightInfo.igbts_temp= msg.igbt_r*0.4;
-        this->msgInvRightInfo.motor_temp=msg.motor_r*0.4;
+        this->msgInvRightInfo.igbts_temp = msg.igbt_r*0.4;
+        this->msgInvRightInfo.motor_temp = msg.motor_r*0.4;
     }
 
     if (recvFrame.can_id == CAN_MCU_INVERTER_RIGHT_INFO_FRAME_ID){
@@ -355,10 +355,10 @@ void CanHandler::publish_inverter_right_info()
             return;
         }
 
-        this->msgInvRightInfo.irms=msg1.irms_max_r;
-        this->msgInvRightInfo.irms=msg1.i_lim_in_use_r;
-        this->msgInvRightInfo.irms=msg1.irms_r;
-        this->msgInvRightInfo.max_rpm=can_mcu_inverter_right_info_rpm_max_r_decode(msg1.rpm_max_r);
+        this->msgInvRightInfo.irms_max = msg1.irms_max_r;
+        this->msgInvRightInfo.i_lim_in_use = msg1.i_lim_in_use_r;
+        this->msgInvRightInfo.irms = msg1.irms_r;
+        this->msgInvRightInfo.max_rpm = can_mcu_inverter_right_info_rpm_max_r_decode(msg1.rpm_max_r);
     }
     
     this->createHeader(&this->msgInvRightInfo.header);
@@ -376,8 +376,8 @@ void CanHandler::publish_inverter_left_info()
             return;
         } 
 
-        this->msgInvLeftInfo.igbts_temp= msg.igbt_l*0.4;
-        this->msgInvLeftInfo.motor_temp=msg.motor_l*0.4; 
+        this->msgInvLeftInfo.igbts_temp = msg.igbt_l*0.4;
+        this->msgInvLeftInfo.motor_temp = msg.motor_l*0.4; 
     }
 
     if (recvFrame.can_id == CAN_MCU_INVERTER_LEFT_INFO_FRAME_ID){
@@ -386,10 +386,10 @@ void CanHandler::publish_inverter_left_info()
             return;
         }
         
-        this->msgInvLeftInfo.irms=msg1.irms_max_l;
-        this->msgInvLeftInfo.irms=msg1.i_lim_in_use_l;
-        this->msgInvLeftInfo.irms=msg1.irms_l;
-        this->msgInvLeftInfo.max_rpm=can_mcu_inverter_left_info_rpm_max_l_decode(msg1.rpm_max_l);
+        this->msgInvLeftInfo.irms_max = msg1.irms_max_l;
+        this->msgInvLeftInfo.i_lim_in_use = msg1.i_lim_in_use_l;
+        this->msgInvLeftInfo.irms = msg1.irms_l;
+        this->msgInvLeftInfo.max_rpm = can_mcu_inverter_left_info_rpm_max_l_decode(msg1.rpm_max_l);
 
     }
 
