@@ -44,9 +44,6 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<bool>("transmitApuResInit",         this->rosConf.transmitApuResInit,        true);
     this->get_parameter_or<uint8_t>("transmitApuTemp",         this->rosConf.transmitApuTemp,           1);
 
-    
-    this->get_parameter_or<float>("steering_offset", this->steering_offset, 0.5);
-
 }
 
 #endif
