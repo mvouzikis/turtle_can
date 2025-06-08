@@ -20,9 +20,9 @@ void CanHandler::apu_mission_callback(turtle_interfaces::msg::Mission::SharedPtr
 
 void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::SharedPtr msgActuatorCmd)
 {
-    float BLDC_steering = convertToBLDCFromSteering(msgActuatorCmd->steering);
-    this->frameSwaCommanded.target_position = BLDC_steering;  // convertSteeringAngleTarget(msgActuatorCmd->steering);
-    this->frameSwaCommanded.profile_velocity = BLDC_steering;   // convertSteeringRateTarget(msgActuatorCmd->steering);
+    this->frameSwaCommanded.position_target = convertSteeringAngleTarget(msgActuatorCmd->steering);
+    this->frameSwaCommanded.velocity_target = convertSteeringRateTarget(msgActuatorCmd->steering);
+    this->frameSwaCommanded.steering_mode = msgActuatorCmd->steering_mode;
    
     if (this->rosConf.transmitSwaCommanded == 1) {
         this->transmit_steering_commanded();

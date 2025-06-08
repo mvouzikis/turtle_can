@@ -18,33 +18,33 @@ void CanHandler::transmit_apu_state_mission()
     }
 }
 
-void CanHandler::transmit_steering_commanded() 
-{
-    this->sendFrame.can_id = CAN_MCU_BLDC_RX_2_FRAME_ID;
-    this->sendFrame.can_dlc = CAN_MCU_BLDC_RX_2_LENGTH;
-    if (can_mcu_bldc_rx_2_pack(this->sendFrame.data, &this->frameSwaCommanded, sizeof(sendFrame.data)) != CAN_MCU_BLDC_RX_2_LENGTH){
-        RCLCPP_ERROR(this->get_logger(), "Error during pack of STEERING_COMMAND");
-        return;
-    }
-    
-    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_MCU_BLDC_RX_2_LENGTH) {
-        RCLCPP_ERROR(this->get_logger(), "Error during transmit of STEERING_COMMAND");
-    }
-}
-
 // void CanHandler::transmit_steering_commanded() 
 // {
-//     this->sendFrame.can_id = CAN_MCU_STEERING_COMMAND_FRAME_ID;
-//     this->sendFrame.can_dlc = CAN_MCU_STEERING_COMMAND_LENGTH;
-//     if (can_mcu_steering_command_pack(this->sendFrame.data, &this->frameSwaCommanded, sizeof(sendFrame.data)) != CAN_MCU_STEERING_COMMAND_LENGTH){
+//     this->sendFrame.can_id = CAN_MCU_BLDC_RX_2_FRAME_ID;
+//     this->sendFrame.can_dlc = CAN_MCU_BLDC_RX_2_LENGTH;
+//     if (can_mcu_bldc_rx_2_pack(this->sendFrame.data, &this->frameSwaCommanded, sizeof(sendFrame.data)) != CAN_MCU_BLDC_RX_2_LENGTH){
 //         RCLCPP_ERROR(this->get_logger(), "Error during pack of STEERING_COMMAND");
 //         return;
 //     }
-    
-//     if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_MCU_STEERING_COMMAND_LENGTH) {
+//     
+//     if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_MCU_BLDC_RX_2_LENGTH) {
 //         RCLCPP_ERROR(this->get_logger(), "Error during transmit of STEERING_COMMAND");
 //     }
 // }
+
+void CanHandler::transmit_steering_commanded() 
+{
+     this->sendFrame.can_id = CAN_MCU_STEERING_COMMAND_FRAME_ID;
+     this->sendFrame.can_dlc = CAN_MCU_STEERING_COMMAND_LENGTH;
+     if (can_mcu_steering_command_pack(this->sendFrame.data, &this->frameSwaCommanded, sizeof(sendFrame.data)) != CAN_MCU_STEERING_COMMAND_LENGTH){
+         RCLCPP_ERROR(this->get_logger(), "Error during pack of STEERING_COMMAND");
+         return;
+     }
+    
+     if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_MCU_STEERING_COMMAND_LENGTH) {
+         RCLCPP_ERROR(this->get_logger(), "Error during transmit of STEERING_COMMAND");
+     }
+}
 
 void CanHandler::transmit_apu_command() 
 {
