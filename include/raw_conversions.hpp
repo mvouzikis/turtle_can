@@ -116,17 +116,6 @@ float convertToBLDCFromSteering(float BLDC_steering) {
 
 /*********************From APU to other devices*********************/
 
-uint16_t convertSteeringAngleTarget(float targetSteeringAngle)
-{
-    return (uint16_t)((-1073.0*targetSteeringAngle)+(2014.0));
-}
-
-uint32_t convertSteeringRateTarget(float targetSteeringRate)
-{
-    uint32_t steeringRateRaw = fabs(targetSteeringRate) < 0.01 ? 0 : (uint32_t)(941.0/fabs(targetSteeringRate));
-    return steeringRateRaw;
-}
-
 uint16_t convertCPUTemp(float CPUTemp[], uint16_t CoresNum)
 {
     return (uint16_t)(*std::max_element(CPUTemp, CPUTemp + CoresNum));
