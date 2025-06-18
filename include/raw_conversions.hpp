@@ -32,16 +32,6 @@ float convertAPPS(uint16_t apps1Raw, uint16_t apps2Raw)
     return apps;
 }
 
-float convertFrontRPM(uint16_t hall)
-{
-    return (float)(((1/30.0)/((float)(hall)*0.000001))*60.0);
-}
-
-uint16_t convertRearRPM(uint16_t hall)
-{
-    return (uint16_t)(((1/35.0)/((float)(hall)*0.000001))*60.0);
-}
-
 float convertSteeringActual(float steering_raw, float steering_offset)
 {
     float steering_ratio = 5.0;
