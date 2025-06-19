@@ -60,17 +60,17 @@ void CanHandler::transmit_apu_command()
     }
 }
 
-void CanHandler::transmit_apu_odom()
+void CanHandler::transmit_apu_estimation()
 {
-    this->sendFrame.can_id = CAN_MCU_APU_ODOM_FRAME_ID;
-    this->sendFrame.can_dlc = CAN_MCU_APU_ODOM_LENGTH;
-    if(can_mcu_apu_odom_pack(this->sendFrame.data, &this->frameApuOdom, sizeof(sendframe.data)) != CAN_MCU_APU_ODOM_LENGTH){
-        RCLCPP_ERROR(this->get_logger(), "Error during pack of APU_ODOM");
+    this->sendFrame.can_id = CAN_MCU_APU_ESTIMATION_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_MCU_APU_ESTIMATION_LENGTH;
+    if(can_mcu_apu_estimation_pack(this->sendFrame.data, &this->frameApuEstimation, sizeof(sendFrame.data)) != CAN_MCU_APU_ESTIMATION_LENGTH){
+        RCLCPP_ERROR(this->get_logger(), "Error during pack of APU_ESTIMATION");
         return;
     }
 
-    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_MCU_APU_ODOM_LENGTH) {
-        RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_TEMPS");
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_MCU_APU_ESTIMATION_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_ESTIMATION");
     }
 }
 

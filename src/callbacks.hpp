@@ -18,12 +18,11 @@ void CanHandler::apu_mission_callback(turtle_interfaces::msg::Mission::SharedPtr
     this->frameApuStateMission.as_mission = msgApuMission->mission;
 }
 
-void CanHandler::apu_odom_callback(turtle_interfaces::msg::Odometry::SharedPtr msgApuOdom)
+void CanHandler::apu_estimation_callback(nav_msgs::msg::Odometry::SharedPtr msgApuEstimation)
 {
-    this->frameApuOdom.child_frame_id = msgApuOdom->child_frame_id;
-    this->frameApuOdom.pose = msgApuOdom->pose;
-    this->frameApuOdom.twist = msgApuOdom->twist;
-    this->frameApuOdom.id = msgApuOdom->id;
+    this->frameApuEstimation.vel_x_estimation = msgApuEstimation->twist.twist.linear.x;
+    this->frameApuEstimation.vel_y_estimation = msgApuEstimation->twist.twist.linear.y;
+    this->frameApuEstimation.yaw_rate_estimation = msgApuEstimation->twist.twist.angular.z;
 }
 
 void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::SharedPtr msgActuatorCmd)
