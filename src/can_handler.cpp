@@ -163,15 +163,13 @@ void CanHandler::handleCanReceive()
             if (this->rosConf.publishBLDC)
             this->publish_BLDC();
         }
-    }
 
-    while (recvfrom(this->can0Socket, &this->recvFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, &this->len) >= 8) {
-        ioctl(this->can0Socket, SIOCGSTAMP, &this->recvTime);  //get message timestamp
-        if (this->recvFrame.can_id == CAN_APU_RES_DLOGGER_RES_STATUS_FRAME_ID && this->rosConf.publishResStatus) {
+        else if (this->recvFrame.can_id == CAN_MCU_RES_STATUS_FRAME_ID && this->rosConf.publishResStatus) {
             res_initialized = true;
             this->publish_res_status();
         }
     }
+
 }
 
 void CanHandler::createHeader(std_msgs::msg::Header *header)
@@ -322,10 +320,10 @@ void CanHandler::handleCanTransmit()
     if ((this->rosConf.transmitECUParamAPU == 2) && !(this->canTimerCounter % CAN_MCU_ECU_PARAM_APU_CYCLE_TIME_MS)) {
         this->transmit_ecu_param_apu();
     }
-    if (this->rosConf.transmitDvSystemStatus && !(this->canTimerCounter % CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_CYCLE_TIME_MS)) {
+    if (this->rosConf.transmitDvSystemStatus && !(this->canTimerCounter % CAN_MCU_DV_SYSTEM_STATUS_CYCLE_TIME_MS)) {
         this->transmit_dv_system_status();
     }
-    if (this->rosConf.transmitApuResInit && !res_initialized && !(this->canTimerCounter % CAN_APU_RES_DLOGGER_APU_RES_INIT_CYCLE_TIME_MS)) {
+    if (this->rosConf.transmitApuResInit && !res_initialized && !(this->canTimerCounter % CAN_MCU_APU_RES_INIT_CYCLE_TIME_MS)) {
         this->transmit_apu_res_init();
     }
     if ((this->rosConf.transmitApuEstimation == 2) && !(this->canTimerCounter % CAN_MCU_APU_ESTIMATION_CYCLE_TIME_MS)) {
@@ -335,32 +333,26 @@ void CanHandler::handleCanTransmit()
 
 
 //--------------------------------FOR DATALOGGER-------------------------------
-void fill_datalogger_variables(can_apu_res_dlogger_dv_system_status_t *frameDvSystemStatus, can_mcu_apu_state_mission_t *frameApuStateMission, turtle_interfaces::msg::EbsSupervisorInfo *msgEbsSupervisor)
+void fill_datalogger_variables(can_mcu_dv_system_status_t *frameDvSystemStatus, can_mcu_apu_state_mission_t *frameApuStateMission, turtle_interfaces::msg::EbsSupervisorInfo *msgEbsSupervisor)
 {
     switch (frameApuStateMission->as_state)
     {
     case CAN_MCU_APU_STATE_MISSION_AS_STATE_AS_OFF_CHOICE:
-        frameDvSystemStatus->assi_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_ASSI_STATE_OFF_CHOICE;
         frameDvSystemStatus->steering_state = 0;
         break;
     case CAN_MCU_APU_STATE_MISSION_AS_STATE_AS_READY_CHOICE:
-        frameDvSystemStatus->assi_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_ASSI_STATE_READY_CHOICE;
         frameDvSystemStatus->steering_state = 1;
         break;
     case CAN_MCU_APU_STATE_MISSION_AS_STATE_AS_DRIVING_CHOICE:
-        frameDvSystemStatus->assi_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_ASSI_STATE_DRIVING_CHOICE;
         frameDvSystemStatus->steering_state = 1;
         break;
     case CAN_MCU_APU_STATE_MISSION_AS_STATE_AS_EMERGENCY_CHOICE:
-        frameDvSystemStatus->assi_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_ASSI_STATE_EMERGENCY_BRAKE_CHOICE;
         frameDvSystemStatus->steering_state = 1;
         break;
     case CAN_MCU_APU_STATE_MISSION_AS_STATE_AS_FINISHED_CHOICE:
-        frameDvSystemStatus->assi_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_ASSI_STATE_FINISH_CHOICE;
         frameDvSystemStatus->steering_state = 0;
         break;
     default:
-        frameDvSystemStatus->assi_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_ASSI_STATE_OFF_CHOICE;
         frameDvSystemStatus->steering_state = 0;
         break;
     }
@@ -368,57 +360,57 @@ void fill_datalogger_variables(can_apu_res_dlogger_dv_system_status_t *frameDvSy
     switch (msgEbsSupervisor->ebsstatus)
     {
     case msgEbsSupervisor->EBS_UNAVAILABLE:
-        frameDvSystemStatus->ebs_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_EBS_STATE_UNANAILABLE_CHOICE;
+        frameDvSystemStatus->asb_ebs_state = CAN_MCU_DV_SYSTEM_STATUS_ASB_EBS_STATE_DEACTIVATED_CHOICE;
         break;
     case msgEbsSupervisor->EBS_ARMED:
-        frameDvSystemStatus->ebs_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_EBS_STATE_ARMED_CHOICE;
+        frameDvSystemStatus->asb_ebs_state = CAN_MCU_DV_SYSTEM_STATUS_ASB_EBS_STATE_INITIAL_CHECKUP_PASSED_CHOICE;
         break;
     case msgEbsSupervisor->EBS_ACTIVATED:
-        frameDvSystemStatus->ebs_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_EBS_STATE_TRIGGERED_CHOICE;
+        frameDvSystemStatus->asb_ebs_state = CAN_MCU_DV_SYSTEM_STATUS_ASB_EBS_STATE_ACTIVATED_CHOICE;
         break;  
     default:
-        frameDvSystemStatus->ebs_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_EBS_STATE_UNANAILABLE_CHOICE;
+        frameDvSystemStatus->asb_ebs_state = CAN_MCU_DV_SYSTEM_STATUS_ASB_EBS_STATE_DEACTIVATED_CHOICE;
         break;
     }
 
     switch (frameApuStateMission->as_mission)
     {
         case CAN_MCU_APU_STATE_MISSION_AS_MISSION_ACCELERATION_CHOICE:
-            frameDvSystemStatus->ami_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_AMI_STATE_ACCELERATION_CHOICE;
+            frameDvSystemStatus->ami_state = CAN_MCU_DV_SYSTEM_STATUS_AMI_STATE_ACCELERATION_CHOICE;
             break;
         case CAN_MCU_APU_STATE_MISSION_AS_MISSION_SKIDPAD_CHOICE:
-            frameDvSystemStatus->ami_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_AMI_STATE_SKIDPAD_CHOICE;
+            frameDvSystemStatus->ami_state = CAN_MCU_DV_SYSTEM_STATUS_AMI_STATE_SKIDPAD_CHOICE;
             break;
         case CAN_MCU_APU_STATE_MISSION_AS_MISSION_TRACKDRIVE_CHOICE:
-            frameDvSystemStatus->ami_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_AMI_STATE_TRACKDRIVE_CHOICE;
+            frameDvSystemStatus->ami_state = CAN_MCU_DV_SYSTEM_STATUS_AMI_STATE_TRACKDRIVE_CHOICE;
             break;
         case CAN_MCU_APU_STATE_MISSION_AS_MISSION_EBSTEST_CHOICE:
-            frameDvSystemStatus->ami_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_AMI_STATE_BRAKETEST_CHOICE;
+            frameDvSystemStatus->ami_state = CAN_MCU_DV_SYSTEM_STATUS_AMI_STATE_BRAKETEST_CHOICE;
             break;
         case CAN_MCU_APU_STATE_MISSION_AS_MISSION_INSPECTION_CHOICE:
-            frameDvSystemStatus->ami_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_AMI_STATE_INSPECTION_CHOICE;
+            frameDvSystemStatus->ami_state = CAN_MCU_DV_SYSTEM_STATUS_AMI_STATE_INSPECTION_CHOICE;
             break;
         case CAN_MCU_APU_STATE_MISSION_AS_MISSION_AUTOCROSS_CHOICE:
-            frameDvSystemStatus->ami_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_AMI_STATE_AUTOCROSS_CHOICE;
+            frameDvSystemStatus->ami_state = CAN_MCU_DV_SYSTEM_STATUS_AMI_STATE_AUTOCROSS_CHOICE;
             break;
         default:
-            frameDvSystemStatus->ami_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_AMI_STATE_ACCELERATION_CHOICE;
+            frameDvSystemStatus->ami_state = CAN_MCU_DV_SYSTEM_STATUS_AMI_STATE_ACCELERATION_CHOICE;
             break;
     }
 
     switch (msgEbsSupervisor->servicebrakestatus)
     {
     case msgEbsSupervisor->SERVICE_BRAKE_DISENGAGED:
-        frameDvSystemStatus->service_brake_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_SERVICE_BRAKE_STATE_DISENGAGED_CHOICE;
+        frameDvSystemStatus->asb_redundancy_state = CAN_MCU_DV_SYSTEM_STATUS_ASB_REDUNDANCY_STATE_DEACTIVATED_CHOICE;
         break;
     case msgEbsSupervisor->SERVICE_BRAKE_ENGAGED:
-        frameDvSystemStatus->service_brake_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_SERVICE_BRAKE_STATE_ENGAGED_CHOICE;
+        frameDvSystemStatus->asb_redundancy_state = CAN_MCU_DV_SYSTEM_STATUS_ASB_REDUNDANCY_STATE_ENGAGED_CHOICE;
         break;
     case msgEbsSupervisor->SERVICE_BRAKE_AVAILABLE:
-        frameDvSystemStatus->service_brake_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_SERVICE_BRAKE_STATE_AVAILABLE_CHOICE;
+        frameDvSystemStatus->asb_redundancy_state = CAN_MCU_DV_SYSTEM_STATUS_ASB_REDUNDANCY_STATE_INITIAL_CHECKUP_PASSED_CHOICE;
         break;
     default:
-    frameDvSystemStatus->service_brake_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_SERVICE_BRAKE_STATE_DISENGAGED_CHOICE;
+    frameDvSystemStatus->asb_redundancy_state = CAN_MCU_DV_SYSTEM_STATUS_ASB_REDUNDANCY_STATE_DEACTIVATED_CHOICE;
         break;
     }
 } 
@@ -427,14 +419,14 @@ void CanHandler::transmit_dv_system_status()
 {
     fill_datalogger_variables(&this->frameDvSystemStatus, &this->frameApuStateMission, &this->msgEbsSupervisor);
 
-    this->sendFrame.can_id = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_FRAME_ID;
-    this->sendFrame.can_dlc = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_LENGTH;
-    if (can_apu_res_dlogger_dv_system_status_pack(this->sendFrame.data, &this->frameDvSystemStatus, sizeof(sendFrame.data)) != CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_LENGTH) {
+    this->sendFrame.can_id = CAN_MCU_DV_SYSTEM_STATUS_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_MCU_DV_SYSTEM_STATUS_LENGTH;
+    if (can_mcu_dv_system_status_pack(this->sendFrame.data, &this->frameDvSystemStatus, sizeof(sendFrame.data)) != CAN_MCU_DV_SYSTEM_STATUS_LENGTH) {
          RCLCPP_ERROR(this->get_logger(), "Error during pack of DV_SYSTEM_STATUS");
         return;
     }
 
-    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_LENGTH) {
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_MCU_DV_SYSTEM_STATUS_LENGTH) {
         RCLCPP_ERROR(this->get_logger(), "Error during transmit of DV_SYSTEM_STATUS");
     }
 }

@@ -493,15 +493,15 @@ void CanHandler::publish_BLDC()
 //CHANNEL1
 void CanHandler::publish_res_status()
 {
-    can_apu_res_dlogger_res_status_t msg;
-    if (can_apu_res_dlogger_res_status_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
+    can_mcu_res_status_t msg;
+    if (can_mcu_res_status_unpack(&msg, this->recvFrame.data, this->recvFrame.can_dlc) != CAN_OK) {
         RCLCPP_ERROR(this->get_logger(), "Error during unpack of RES_STATUS");
         return;
     }
 
-    this->msgResStatus.stop = (msg.stop == CAN_APU_RES_DLOGGER_RES_STATUS_STOP_ON_CHOICE);
-    this->msgResStatus.toggle = (msg.toggle == CAN_APU_RES_DLOGGER_RES_STATUS_TOGGLE_ON_CHOICE);
-    this->msgResStatus.button = (msg.button == CAN_APU_RES_DLOGGER_RES_STATUS_BUTTON_ON_CHOICE);
+    this->msgResStatus.stop = (msg.stop == CAN_MCU_RES_STATUS_STOP_ON_CHOICE);
+    this->msgResStatus.toggle = (msg.toggle == CAN_MCU_RES_STATUS_TOGGLE_ON_CHOICE);
+    this->msgResStatus.button = (msg.button == CAN_MCU_RES_STATUS_BUTTON_ON_CHOICE);
     this->msgResStatus.signal_strength = msg.signal_strength;
 
     this->createHeader(&this->msgResStatus.header);

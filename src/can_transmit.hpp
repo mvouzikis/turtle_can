@@ -106,14 +106,14 @@ void CanHandler::transmit_ecu_param_apu()
 void CanHandler::transmit_apu_res_init() 
 {
     //send CAN initialization
-    this->sendFrame.can_id = CAN_APU_RES_DLOGGER_APU_RES_INIT_FRAME_ID;
-    this->sendFrame.can_dlc = CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH;
-    if (can_apu_res_dlogger_apu_res_init_pack(this->sendFrame.data, &this->frameApuResInit, sizeof(sendFrame.data)) != CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH){
+    this->sendFrame.can_id = CAN_MCU_APU_RES_INIT_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_MCU_APU_RES_INIT_LENGTH;
+    if (can_mcu_apu_res_init_pack(this->sendFrame.data, &this->frameApuResInit, sizeof(sendFrame.data)) != CAN_MCU_APU_RES_INIT_LENGTH){
         RCLCPP_ERROR(this->get_logger(), "Error during pack of APU_RES_INIT");
         return;
     }
 
-    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_APU_RES_DLOGGER_APU_RES_INIT_LENGTH) {
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_MCU_APU_RES_INIT_LENGTH) {
         RCLCPP_ERROR(this->get_logger(), "Error during transmit of APU_RES_INIT");
     }
 }

@@ -46,7 +46,6 @@
 #include "libsocketcan.h"
 
 #include "can_mcu.h"
-#include "can_apu_res_dlogger.h"
 
 using std::placeholders::_1;
 using namespace std::chrono_literals;
@@ -285,11 +284,11 @@ class CanHandler : public rclcpp::Node
         rclcpp::Subscription<turtle_interfaces::msg::SlamInfo>::SharedPtr subSlamInfo;
         void slam_info_callback(turtle_interfaces::msg::SlamInfo::SharedPtr msgSlamInfo);
 
-        struct can_apu_res_dlogger_dv_system_status_t frameDvSystemStatus;
+        struct can_mcu_dv_system_status_t frameDvSystemStatus;
         void transmit_dv_system_status();
 
         // Send RES initialize message unitl it starts sending CAN messages
-        struct can_apu_res_dlogger_apu_res_init_t frameApuResInit;
+        struct can_mcu_apu_res_init_t frameApuResInit;
         bool res_initialized;
         void transmit_apu_res_init();
 

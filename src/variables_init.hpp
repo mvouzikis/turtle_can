@@ -168,18 +168,18 @@ void CanHandler::variablesInit()
         this->subControlInfo = this->create_subscription<turtle_interfaces::msg::ControlInfo>("control_info", serviceQos, std::bind(&CanHandler::control_info_callback, this, _1));
         this->subSlamInfo = this->create_subscription<turtle_interfaces::msg::SlamInfo>("slam_info", serviceQos, std::bind(&CanHandler::slam_info_callback, this, _1));
 
-        this->frameDvSystemStatus.assi_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_ASSI_STATE_OFF_CHOICE;
-        this->frameDvSystemStatus.ebs_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_EBS_STATE_UNANAILABLE_CHOICE;
-        this->frameDvSystemStatus.ami_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_AMI_STATE_ACCELERATION_CHOICE;
+        this->frameDvSystemStatus.as_state = CAN_MCU_DV_SYSTEM_STATUS_AS_STATE_OFF_CHOICE;
+        this->frameDvSystemStatus.asb_ebs_state = CAN_MCU_DV_SYSTEM_STATUS_ASB_EBS_STATE_DEACTIVATED_CHOICE;
+        this->frameDvSystemStatus.ami_state = CAN_MCU_DV_SYSTEM_STATUS_AMI_STATE_ACCELERATION_CHOICE;
         this->frameDvSystemStatus.steering_state = 0;
-        this->frameDvSystemStatus.service_brake_state = CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_SERVICE_BRAKE_STATE_DISENGAGED_CHOICE;
+        this->frameDvSystemStatus.asb_redundancy_state = CAN_MCU_DV_SYSTEM_STATUS_ASB_REDUNDANCY_STATE_DEACTIVATED_CHOICE;
         this->frameDvSystemStatus.lap_counter = 0;
         this->frameDvSystemStatus.cones_count_actual = 0;
         this->frameDvSystemStatus.cones_count_all = 0;
     }
     if (this->rosConf.transmitApuResInit) {
-        this->frameApuResInit.requested_state = CAN_APU_RES_DLOGGER_APU_RES_INIT_REQUESTED_STATE_OPERATIONAL_CHOICE;
-        this->frameApuResInit.addressed_node = CAN_APU_RES_DLOGGER_APU_RES_INIT_ADDRESSED_NODE_RES_ADDRESS_CHOICE;
+        this->frameApuResInit.requested_state = CAN_MCU_APU_RES_INIT_REQUESTED_STATE_OPERATIONAL_CHOICE;
+        this->frameApuResInit.addresed_node = CAN_MCU_APU_RES_INIT_ADDRESED_NODE_RES_ADDRESS_CHOICE;
     }
 }
 
