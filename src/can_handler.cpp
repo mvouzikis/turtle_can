@@ -322,12 +322,14 @@ void CanHandler::handleCanTransmit()
     if ((this->rosConf.transmitECUParamAPU == 2) && !(this->canTimerCounter % CAN_MCU_ECU_PARAM_APU_CYCLE_TIME_MS)) {
         this->transmit_ecu_param_apu();
     }
-
     if (this->rosConf.transmitDvSystemStatus && !(this->canTimerCounter % CAN_APU_RES_DLOGGER_DV_SYSTEM_STATUS_CYCLE_TIME_MS)) {
         this->transmit_dv_system_status();
     }
     if (this->rosConf.transmitApuResInit && !res_initialized && !(this->canTimerCounter % CAN_APU_RES_DLOGGER_APU_RES_INIT_CYCLE_TIME_MS)) {
         this->transmit_apu_res_init();
+    }
+    if ((this->rosConf.transmitApuOdom == 2) && !(this->canTimerCounter % CAN_MCU_APU_COMMAND_CYCLE_TIME_MS)) {
+        this->transmit_apu_odom();
     }
 }
 

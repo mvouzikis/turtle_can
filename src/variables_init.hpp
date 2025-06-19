@@ -124,6 +124,10 @@ void CanHandler::variablesInit()
         this->frameApuStateMission.as_set_finished = CAN_MCU_APU_STATE_MISSION_AS_SET_FINISHED_SET__FINISHED__FALSE_CHOICE;
     }
 
+    if (this->rosConf.transmitApuOdom) {
+        this->subApuOdom = this->create_subscription<turtle_interfaces::msg::Odometry>("odom", serviceQos, std::bind(&CanHandler::apu_odom_callback, this, _1));
+    }
+
     if (this->rosConf.transmitSwaCommanded || this->rosConf.transmitApuCommand) {
         this->subActuatorCmd = this->create_subscription<turtle_interfaces::msg::ActuatorCmd>("cmd", sensorQos, std::bind(&CanHandler::actuator_cmd_callback, this, _1));
     }

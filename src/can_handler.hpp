@@ -40,6 +40,8 @@
 #include "turtle_interfaces/msg/gpu_status.hpp"
 #include "turtle_interfaces/msg/cpu_status.hpp"
 #include "turtle_interfaces/msg/mission_status.hpp"
+#include "turtle_interfaces/msg/odometry.hpp"
+#include "/opt/ros/humble/include/geometry_msgs/geometry_msgs/msg/pose_with_covariance.hpp"
 
 #include "libsocketcan.h"
 
@@ -98,6 +100,7 @@ typedef struct {
     bool transmitApuResInit;
     uint8_t transmitApuTemp;
     uint8_t transmitSetFinished;
+    uint8_t transmitApuOdom;
 
 
 } RosConfig;
@@ -236,6 +239,9 @@ class CanHandler : public rclcpp::Node
         void handleCanTransmit();
 
         //channel 0
+        rclcpp::Subscription<turtle_interfaces::msg::Odometry>::SharedPtr subApuOdom;
+        void apu_odom_callback(turtle_interfaces::msg::Odometry::SharedPtr msgApuOdom);
+
         rclcpp::Subscription<turtle_interfaces::msg::StateMachineState>::SharedPtr subApuState;
         void apu_state_callback(turtle_interfaces::msg::StateMachineState::SharedPtr msgApuState);
 
@@ -258,13 +264,16 @@ class CanHandler : public rclcpp::Node
         void transmit_apu_state_mission();
 
         struct can_mcu_steering_command_t frameSwaCommanded;
-	 void transmit_steering_commanded();
+	    void transmit_steering_commanded();
 
         struct can_mcu_apu_command_t frameApuCommand;
         void transmit_apu_command();
 
         struct can_mcu_ecu_param_apu_t frameECUParamAPU; 
         void transmit_ecu_param_apu();
+
+        struct can_mcu_apu_odom_t frameApuOdom;
+        void transmit_apu_odom();
 
         struct can_mcu_apu_temp_t frameAPUTemps; 
         void transmit_apu_temps();
