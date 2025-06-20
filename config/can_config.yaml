@@ -43,5 +43,5 @@ CanInterface:
     transmitApuResInit: true     #does not have publisher
     transmitApuTemp: 1        #apu_monitor
     transmitApuEstimation: 1
-
-    
+    transmitDrivingDynamics1: 1
+    transmitDrivingDynamics2: 1

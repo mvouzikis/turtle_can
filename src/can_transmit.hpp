@@ -62,6 +62,7 @@ void CanHandler::transmit_apu_command()
 
 void CanHandler::transmit_apu_estimation()
 {
+    
     this->sendFrame.can_id = CAN_MCU_APU_ESTIMATION_FRAME_ID;
     this->sendFrame.can_dlc = CAN_MCU_APU_ESTIMATION_LENGTH;
     if(can_mcu_apu_estimation_pack(this->sendFrame.data, &this->frameApuEstimation, sizeof(sendFrame.data)) != CAN_MCU_APU_ESTIMATION_LENGTH){

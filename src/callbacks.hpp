@@ -19,16 +19,19 @@ void CanHandler::apu_mission_callback(turtle_interfaces::msg::Mission::SharedPtr
 }
 
 void CanHandler::apu_estimation_callback(nav_msgs::msg::Odometry::SharedPtr msgApuEstimation)
-{
-    this->frameApuEstimation.vel_x_estimation = msgApuEstimation->twist.twist.linear.x;
-    this->frameApuEstimation.vel_y_estimation = msgApuEstimation->twist.twist.linear.y;
-    this->frameApuEstimation.yaw_rate_estimation = msgApuEstimation->twist.twist.angular.z;
+{   
+    this->frameApuEstimation.vel_x_estimation = can_mcu_apu_estimation_vel_x_estimation_encode((msgApuEstimation->twist.twist.linear.x) * 100);
+    this->frameApuEstimation.vel_y_estimation = can_mcu_apu_estimation_vel_y_estimation_encode((msgApuEstimation->twist.twist.linear.y) * 100);
+    this->frameApuEstimation.yaw_rate_estimation = can_mcu_apu_estimation_yaw_rate_estimation_encode((msgApuEstimation->twist.twist.angular.z) * 100);
+    this->frameDvDrivingDynamics1.speed_actual = can_mcu_dv_driving_dynamics_1_speed_actual_encode((msgApuEstimation->twist.twist.linear.x) * 3.6);
+    this->frameDvDrivingDynamics2.yaw_rate = this->frameApuEstimation.yaw_rate_estimation;
 }
 
 void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::SharedPtr msgActuatorCmd)
 {
     this->frameSwaCommanded.position_target = msgActuatorCmd->steering; 
     this->frameSwaCommanded.steering_mode = msgActuatorCmd->steering_mode;
+    this->frameDvDrivingDynamics1.steering_angle_target = can_mcu_dv_driving_dynamics_1_steering_angle_target_encode((msgActuatorCmd->steering) * (180.0/M_PI))
    
     if (this->rosConf.transmitSwaCommanded == 1) {
         this->transmit_steering_commanded();
@@ -74,12 +77,18 @@ void CanHandler::gpu_temp_callback(turtle_interfaces::msg::GpuStatus::SharedPtr 
 void CanHandler::control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo)
 {
     this->frameDvSystemStatus.lap_counter = msgControlInfo->lap;
+    this->frameDvDrivingDynamics1.speed_target = can_mcu_dv_driving_dynamics_1_speed_target_encode((msgControlInfo->vx_desired)*3.6);
 }
 
 void CanHandler::slam_info_callback(turtle_interfaces::msg::SlamInfo::SharedPtr msgSlamInfo)
 {
     this->frameDvSystemStatus.cones_count_actual = msgSlamInfo->sensor_cone_count;
     this->frameDvSystemStatus.cones_count_all = msgSlamInfo->total_cone_count;
+}
+
+void CanHandler::sbg_imu_data_callback(sbg_driver::msg::SbgImuData::SharedPtr msgSbgImuData){
+    this->frameDvDrivingDynamics2.acceleration_lateral = msgSbgImuData.accel_y;
+    this->frameDvDrivingDynamics2.acceleration_longitudinal= msgSbgImuData.accel_x;
 }
 
 #endif

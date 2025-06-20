@@ -163,7 +163,7 @@ void CanHandler::variablesInit()
         
     }
 
-    //--------- FOR FSEAST DATA LOGGER
+    //--------- FOR FSG DATA LOGGER
     if (this->rosConf.transmitDvSystemStatus) {
         this->subControlInfo = this->create_subscription<turtle_interfaces::msg::ControlInfo>("control_info", serviceQos, std::bind(&CanHandler::control_info_callback, this, _1));
         this->subSlamInfo = this->create_subscription<turtle_interfaces::msg::SlamInfo>("slam_info", serviceQos, std::bind(&CanHandler::slam_info_callback, this, _1));
@@ -180,6 +180,24 @@ void CanHandler::variablesInit()
     if (this->rosConf.transmitApuResInit) {
         this->frameApuResInit.requested_state = CAN_MCU_APU_RES_INIT_REQUESTED_STATE_OPERATIONAL_CHOICE;
         this->frameApuResInit.addresed_node = CAN_MCU_APU_RES_INIT_ADDRESED_NODE_RES_ADDRESS_CHOICE;
+    }
+
+    if (this->rosConf.transmitDvDrivingDynamics1) {
+        this->frameDvDrivingDynamics1.speed_actual = 0;
+        this->frameDvDrivingDynamics1.speed_target = 0;
+        this->frameDvDrivingDynamics1.steering_angle_actual = 0;
+        this->frameDvDrivingDynamics1.steering_angle_target = 0;
+        this->frameDvDrivingDynamics1.brake_hydr_acrtual = 0;
+        this->frameDvDrivingDynamics1.brake_hydr_target = 0;
+        this->frameDvDrivingDynamics1.motor_moment_actual = 0;
+        this->frameDvDrivingDynamics1.motor_moment_target = 0;
+    }
+
+    if(this->rosConf.transmitDvDrivingDynamics2) {
+        this->subControlInfo = this->create_subscription<sbg_driver::msg::SbgImuData>("sbg_imu", serviceQos, std::bind(&CanHandler::sbg_imu_data_callback, this, _1));
+        this->frameDvDrivingDynamics2.acceleration_longitudinal = 0;
+        this->frameDvDrivingDynamics2.acceleration_lateral = 0;
+        this->frameDvDrivingDynamics2.yaw_rate = 0;
     }
 }
 

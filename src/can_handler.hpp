@@ -55,7 +55,8 @@ using namespace std::chrono_literals;
 #define CAN_OK          0
 #define CAN_NOT_READY   1
 #define CAN_READY       2
-
+#define MAX_SERVO_BAR 30
+//max_servo_bar is needed in order to calculate the percentage of the brake_hydr_actual
 
 typedef struct {
     //Channels configuration
@@ -100,7 +101,8 @@ typedef struct {
     uint8_t transmitApuTemp;
     uint8_t transmitSetFinished;
     uint8_t transmitApuEstimation;
-
+    uint8_t transmitDvDrivingDynamics1;
+    uint8_t transmitDvDrivingDynamics2;
 
 } RosConfig;
 
@@ -277,6 +279,8 @@ class CanHandler : public rclcpp::Node
         struct can_mcu_apu_temp_t frameAPUTemps; 
         void transmit_apu_temps();
 
+        rclcpp::Subscription<sbg_driver::msg::SbgImuData::>::SharedPtr subSbgImuData;
+        void sbg_imu_data_callback(sbg_driver::msg::SbgImuData::SharedPtr msgSbgImuData);
 
         rclcpp::Subscription<turtle_interfaces::msg::ControlInfo>::SharedPtr subControlInfo;
         void control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo);
@@ -286,6 +290,12 @@ class CanHandler : public rclcpp::Node
 
         struct can_mcu_dv_system_status_t frameDvSystemStatus;
         void transmit_dv_system_status();
+
+        struct can_mcu_dv_driving_dynamics_1_t frameDvDrivingDynamics1;
+        void transmit_driving_dynamics_1();
+
+        struct can_mcu_dv_driving_dynamics_2_t frameDvDrivingDynamics2;
+        void transmit_driving_dynamics_2();
 
         // Send RES initialize message unitl it starts sending CAN messages
         struct can_mcu_apu_res_init_t frameApuResInit;

@@ -110,6 +110,8 @@ void CanHandler::publish_dash_brake()
         return;
     }
 
+    this->frameDvDrivingDynamics1.brake_hydr_acrtual = msg.brake_pressure / MAX_SERVO_BAR;
+
     this->msgDashBrake.brake = can_mcu_dash_brake_brake_pressure_decode(msg.brake_pressure);
 
     this->createHeader(&this->msgDashBrake.header);
@@ -226,6 +228,7 @@ void CanHandler::publish_swa_actual()
 
     // this->msgSwaActual.steering = convertSteeringActual(msg.steering, this->msgEcuControlSystems.steering_offset);
     this->msgSwaActual.steering = convertSteeringActual(msg.steering, this->steering_offset);
+    this->frameDvDrivingDynamics1.steering_angle_actual = can_mcu_dv_driving_dynamics_1_steering_angle_actual_encode(msgSwaActual.steering * (180.0 / M_PI));
     this->createHeader(&this->msgSwaActual.header);
     this->pubSwaActual->publish(this->msgSwaActual);
 } 

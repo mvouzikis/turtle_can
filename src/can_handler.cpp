@@ -329,6 +329,12 @@ void CanHandler::handleCanTransmit()
     if ((this->rosConf.transmitApuEstimation == 2) && !(this->canTimerCounter % CAN_MCU_APU_ESTIMATION_CYCLE_TIME_MS)) {
         this->transmit_apu_estimation();
     }
+    if((this->rosConf.transmitDvDrivingDynamics1==2) && !(this->canTimerCounter % CAN_MCU_DV_DRIVING_DYNAMICS_1_CYCLE_TIME_MS)) {
+        this->transmit_driving_dynamics_1();
+    }
+    if((this->rosConf.transmitDvDrivingDynamics2==2) && !(this->canTimerCounter % CAN_MCU_DV_DRIVING_DYNAMICS_2_CYCLE_TIME_MS)) {
+        this->transmit_driving_dynamics_2();
+    }
 }
 
 
@@ -431,3 +437,29 @@ void CanHandler::transmit_dv_system_status()
     }
 }
 
+void CanHandler::transmit_driving_dynamics_1()
+{
+    this->sendFrame.can_id = CAN_MCU_DV_DRIVING_DYNAMICS_1_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_MCU_DV_DRIVING_DYNAMICS_1_LENGTH;
+    if(can_mcu_dv_driving_dynamics_1_pack(this->sendFrame.data, &this->frameDvDrivingDynamics1, sizeof(sendFrame.data)) != CAN_MCU_DV_DRIVING_DYNAMICS_1_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during pack of DV_DRIVING_DYNAMICS_1");
+    }
+
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_MCU_DV_DRIVING_DYNAMICS_1_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of DV_DRIVING_DYNAMICS_1");
+    }
+
+}
+
+void CanHandler::transmit_driving_dynamics_2()
+{
+    this->sendFrame.can_id = CAN_MCU_DV_DRIVING_DYNAMICS_2_FRAME_ID;
+    this->sendFrame.can_dlc = CAN_MCU_DV_DRIVING_DYNAMICS_2_LENGTH;
+    if(can_mcu_dv_driving_dynamics_2_pack(this->sendFrame.data, &this->frameDvDrivingDynamics2, sizeof(sendFrame.data)) != CAN_MCU_DV_DRIVING_DYNAMICS_2_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during pack of DV_DRIVING_DYNAMICS_2");
+    }
+
+    if (sendto(this->can0Socket, &this->sendFrame, sizeof(struct can_frame), MSG_DONTWAIT, (struct sockaddr*)&this->addr0, this->len) < CAN_MCU_DV_DRIVING_DYNAMICS_2_LENGTH) {
+        RCLCPP_ERROR(this->get_logger(), "Error during transmit of DV_DRIVING_DYNAMICS_2");
+    }
+}
