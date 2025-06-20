@@ -34,9 +34,9 @@ CanInterface:
 
     # CAN messages to transmit
     #(0: do not send, 1: use ros publisher callback, 2: use dbc cyclic time)
-    transmitApuStateMission: 1    # /state_machine_state /current_mission
-    transmitSwaCommanded: 1       # /cmd
-    transmitApuCommand: 1         # /cmd
+    transmitApuStateMission: 2    # /state_machine_state /current_mission
+    transmitSwaCommanded: 2       # /cmd
+    transmitApuCommand: 2         # /cmd
     transmitECUParams: 1          # /ecu_params
     transmitECUParams2: 1         # /ecu_params
     transmitDvSystemStatus: true  #100ms cyclic time from the competitions

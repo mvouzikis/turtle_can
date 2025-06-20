@@ -36,9 +36,9 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<bool>("publishBLDC"              ,   this->rosConf.publishBLDC,                  true);
 
     //CAN messages to transmit
-    this->get_parameter_or<uint8_t>("transmitApuStateMission", this->rosConf.transmitApuStateMission,   1);
-    this->get_parameter_or<uint8_t>("transmitSwaCommanded",    this->rosConf.transmitSwaCommanded,      1);
-    this->get_parameter_or<uint8_t>("transmitApuCommand",      this->rosConf.transmitApuCommand,        1);
+    this->get_parameter_or<uint8_t>("transmitApuStateMission", this->rosConf.transmitApuStateMission,   2);
+    this->get_parameter_or<uint8_t>("transmitSwaCommanded",    this->rosConf.transmitSwaCommanded,      2);
+    this->get_parameter_or<uint8_t>("transmitApuCommand",      this->rosConf.transmitApuCommand,        2);
     this->get_parameter_or<uint8_t>("transmitECUParamAPU",     this->rosConf.transmitECUParamAPU,       1);
     this->get_parameter_or<bool>("transmitDvSystemStatus",     this->rosConf.transmitDvSystemStatus,    true);
     this->get_parameter_or<bool>("transmitApuResInit",         this->rosConf.transmitApuResInit,        true);
