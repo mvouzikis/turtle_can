@@ -34,7 +34,7 @@ void CanHandler::actuator_cmd_callback(turtle_interfaces::msg::ActuatorCmd::Shar
 {
     this->frameSwaCommanded.position_target = msgActuatorCmd->steering; 
     this->frameSwaCommanded.steering_mode = msgActuatorCmd->steering_mode;
-    this->frameDvDrivingDynamics1.steering_angle_target = can_mcu_dv_driving_dynamics_1_steering_angle_target_encode((msgActuatorCmd->steering) * (180.0/M_PI))
+    this->frameDvDrivingDynamics1.steering_angle_target = can_mcu_dv_driving_dynamics_1_steering_angle_target_encode((msgActuatorCmd->steering) * (180.0/M_PI));
    
     if (this->rosConf.transmitSwaCommanded == 1) {
         this->transmit_steering_commanded();
