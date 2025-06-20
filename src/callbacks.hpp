@@ -22,6 +22,9 @@ void CanHandler::apu_estimation_callback(nav_msgs::msg::Odometry::SharedPtr msgA
 {   
     this->frameApuEstimation.vel_x_estimation = can_mcu_apu_estimation_vel_x_estimation_encode((msgApuEstimation->twist.twist.linear.x) * 100);
     this->frameApuEstimation.vel_y_estimation = can_mcu_apu_estimation_vel_y_estimation_encode((msgApuEstimation->twist.twist.linear.y) * 100);
+    if(this->rosConf.transmitApuEstimation == 1){
+        this->transmit_apu_estimation();
+    }
     this->frameApuEstimation.yaw_rate_estimation = can_mcu_apu_estimation_yaw_rate_estimation_encode((msgApuEstimation->twist.twist.angular.z) * 100);
     this->frameDvDrivingDynamics1.speed_actual = can_mcu_dv_driving_dynamics_1_speed_actual_encode((msgApuEstimation->twist.twist.linear.x) * 3.6);
     this->frameDvDrivingDynamics2.yaw_rate = this->frameApuEstimation.yaw_rate_estimation;

@@ -329,7 +329,6 @@ void CanHandler::handleCanTransmit()
     if ((this->rosConf.transmitApuEstimation == 2) && !(this->canTimerCounter % CAN_MCU_APU_ESTIMATION_CYCLE_TIME_MS)) {
         this->transmit_apu_estimation();
     }
-    
     if((this->rosConf.transmitDvDrivingDynamics1==2) && !(this->canTimerCounter % CAN_MCU_DV_DRIVING_DYNAMICS_1_CYCLE_TIME_MS)) {
         this->transmit_driving_dynamics_1();
     }
