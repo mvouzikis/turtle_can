@@ -97,6 +97,13 @@ typedef struct {
     bool publishCoolingInfo;
     bool publishBLDC;
 
+    bool publishSbgImu;
+    bool publishSbgEkfEuler;
+    bool publishSbgGpsVel;
+    bool publishSbgGpsPos;
+    bool publishSbgEkfNav;
+
+
     //CAN messages to transmit
     uint8_t transmitApuStateMission;
     uint8_t transmitSwaCommanded;
