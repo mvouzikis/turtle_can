@@ -125,7 +125,7 @@ void CanHandler::variablesInit()
     }
 
     if (this->rosConf.transmitApuEstimation) {
-        this->subApuEstimation = this->create_subscription<nav_msgs::msg::Odometry>("odom", serviceQos, std::bind(&CanHandler::apu_estimation_callback, this, _1));
+        this->subApuEstimation = this->create_subscription<nav_msgs::msg::Odometry>("odom", sensorQos, std::bind(&CanHandler::apu_estimation_callback, this, _1));
         this->frameApuEstimation.vel_x_estimation = 0;
         this->frameApuEstimation.vel_y_estimation = 0;
         this->frameApuEstimation.yaw_rate_estimation = 0;
