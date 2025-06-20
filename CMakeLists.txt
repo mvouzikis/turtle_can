@@ -24,6 +24,8 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(turtle_interfaces REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(sbg_driver REQUIRED)
+
 
 add_library(libsocketcan STATIC libs/libsocketcan.c)
 add_library(can_messages STATIC include/can_mcu.c)
@@ -37,7 +39,7 @@ target_include_directories(can_interface PUBLIC
   $<INSTALL_INTERFACE:include>)
 target_link_libraries(can_interface libsocketcan can_messages)
 add_dependencies(can_interface libsocketcan can_messages)
-ament_target_dependencies(can_interface rclcpp turtle_interfaces nav_msgs)
+ament_target_dependencies(can_interface rclcpp turtle_interfaces nav_msgs sbg_driver)
 
 install(TARGETS can_interface
   DESTINATION lib/${PROJECT_NAME})

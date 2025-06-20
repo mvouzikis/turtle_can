@@ -35,6 +35,13 @@ void CanHandler::loadRosParams()
     this->get_parameter_or<bool>("publishpublishCoolingInfo",   this->rosConf.publishCoolingInfo,           true);
     this->get_parameter_or<bool>("publishBLDC"              ,   this->rosConf.publishBLDC,                  true);
 
+    this->get_parameter_or<bool>("publishSbgImu",   this->rosConf.publishSbgImu,           true);
+    this->get_parameter_or<bool>("publishSbgEkfEuler", this->rosConf.publishSbgEkfEuler,           true);
+    this->get_parameter_or<bool>("publishSbgGpsVel",   this->rosConf.publishSbgGpsVel,           true);
+    this->get_parameter_or<bool>("publishSbgGpsPos",   this->rosConf.publishSbgGpsPos,           true);
+    this->get_parameter_or<bool>("publishSbgEkfNav",   this->rosConf.publishSbgEkfNav,           true);
+
+
     //CAN messages to transmit
     this->get_parameter_or<uint8_t>("transmitApuStateMission", this->rosConf.transmitApuStateMission,   2);
     this->get_parameter_or<uint8_t>("transmitSwaCommanded",    this->rosConf.transmitSwaCommanded,      2);
