@@ -527,9 +527,9 @@ void CanHandler::publish_sbg_imu(){
         this->accelSbgImuArrived = false;
         this->gyroSbgImuArrived = false;
     
-        this->frameDvDrivingDynamics2.acceleration_lateral = msg_accel.accel_y;
-        this->frameDvDrivingDynamics2.acceleration_longitudinal = msg_accel.accel_x;
-        this->frameDvDrivingDynamics2.yaw_rate = msg_gyro.gyro_z;
+        this->frameDvDrivingDynamics2.acceleration_lateral = can_mcu_dv_driving_dynamics_2_acceleration_lateral_encode(msg_accel.accel_y);
+        this->frameDvDrivingDynamics2.acceleration_longitudinal = can_mcu_dv_driving_dynamics_2_acceleration_longitudinal_encode(msg_accel.accel_x);
+        this->frameDvDrivingDynamics2.yaw_rate = can_mcu_dv_driving_dynamics_2_yaw_rate_encode(msg_gyro.gyro_z);
 
         this->createHeader(&this->msgSbgImu.header);
         this->pubSbgImu->publish(this->msgSbgImu);
