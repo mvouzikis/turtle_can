@@ -279,9 +279,6 @@ class CanHandler : public rclcpp::Node
         struct can_mcu_apu_temp_t frameAPUTemps; 
         void transmit_apu_temps();
 
-        rclcpp::Subscription<sbg_driver::msg::SbgImuData::>::SharedPtr subSbgImuData;
-        void sbg_imu_data_callback(sbg_driver::msg::SbgImuData::SharedPtr msgSbgImuData);
-
         rclcpp::Subscription<turtle_interfaces::msg::ControlInfo>::SharedPtr subControlInfo;
         void control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo);
 

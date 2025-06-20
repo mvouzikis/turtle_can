@@ -86,9 +86,4 @@ void CanHandler::slam_info_callback(turtle_interfaces::msg::SlamInfo::SharedPtr 
     this->frameDvSystemStatus.cones_count_all = msgSlamInfo->total_cone_count;
 }
 
-void CanHandler::sbg_imu_data_callback(sbg_driver::msg::SbgImuData::SharedPtr msgSbgImuData){
-    this->frameDvDrivingDynamics2.acceleration_lateral = msgSbgImuData.accel_y;
-    this->frameDvDrivingDynamics2.acceleration_longitudinal= msgSbgImuData.accel_x;
-}
-
 #endif

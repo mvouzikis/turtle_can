@@ -194,7 +194,6 @@ void CanHandler::variablesInit()
     }
 
     if(this->rosConf.transmitDvDrivingDynamics2) {
-        this->subControlInfo = this->create_subscription<sbg_driver::msg::SbgImuData>("sbg_imu", serviceQos, std::bind(&CanHandler::sbg_imu_data_callback, this, _1));
         this->frameDvDrivingDynamics2.acceleration_longitudinal = 0;
         this->frameDvDrivingDynamics2.acceleration_lateral = 0;
         this->frameDvDrivingDynamics2.yaw_rate = 0;

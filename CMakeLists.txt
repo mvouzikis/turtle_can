@@ -24,7 +24,6 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(turtle_interfaces REQUIRED)
 find_package(nav_msgs REQUIRED)
-find_package(sbg_driver REQUIRED)
 
 add_library(libsocketcan STATIC libs/libsocketcan.c)
 add_library(can_messages STATIC include/can_mcu.c)
