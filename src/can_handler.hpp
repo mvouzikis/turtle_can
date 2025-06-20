@@ -261,6 +261,12 @@ class CanHandler : public rclcpp::Node
         rclcpp::Subscription<turtle_interfaces::msg::GpuStatus>::SharedPtr subGPUTemp;        
         void gpu_temp_callback(turtle_interfaces::msg::GpuStatus::SharedPtr msgGPUTemp);
 
+        rclcpp::Subscription<turtle_interfaces::msg::ControlInfo>::SharedPtr subControlInfo;
+        void control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo);
+
+        rclcpp::Subscription<turtle_interfaces::msg::SlamInfo>::SharedPtr subSlamInfo;
+        void slam_info_callback(turtle_interfaces::msg::SlamInfo::SharedPtr msgSlamInfo);
+
         struct can_mcu_apu_state_mission_t frameApuStateMission;
         void transmit_apu_state_mission();
 
@@ -278,12 +284,6 @@ class CanHandler : public rclcpp::Node
 
         struct can_mcu_apu_temp_t frameAPUTemps; 
         void transmit_apu_temps();
-
-        rclcpp::Subscription<turtle_interfaces::msg::ControlInfo>::SharedPtr subControlInfo;
-        void control_info_callback(turtle_interfaces::msg::ControlInfo::SharedPtr msgControlInfo);
-
-        rclcpp::Subscription<turtle_interfaces::msg::SlamInfo>::SharedPtr subSlamInfo;
-        void slam_info_callback(turtle_interfaces::msg::SlamInfo::SharedPtr msgSlamInfo);
 
         struct can_mcu_dv_system_status_t frameDvSystemStatus;
         void transmit_dv_system_status();
