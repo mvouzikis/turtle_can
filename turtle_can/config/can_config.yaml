@@ -1,0 +1,47 @@
+CanInterface:
+  ros__parameters:
+    # Channels configuration
+    channel0: "can0"
+    bitrate0: 500000
+    # CAN messages to publish in ROS
+    publishDashApps: true           # /apps
+    publishDashBrake: true          # /brake
+    publishDashButtons: true        # /dash_buttons
+    pubishDashFrontRPM: true        # /rpm_front
+    publishAuxRearRPM: true         # /rpm_rear
+    publishAuxTsalSafeState: true   # /tsal_safe_state
+    publishAuxPumpsFans: true       # /cooling_info
+    publishAuxBrakelight: true      # /brake_light
+    publishDashLEDs: true           # /dash_leds
+    publishEbsTankPressure: true    # /ebs_tank_pressure
+    publishAmiSelectedMission: true # /ami_selected_mission
+    publishSwaStatus: true          # /steering_actual
+    publishEbsServiceBrake: true    # /ebs_service_brake
+    publishEbsSupervisor: true      # /ebs_supervisor_info
+    publishMotorRPM: true           # /rpm_motor
+    publishInvererCommands: true    # /inverter_commands
+    publishResStatus: true          # /res_status
+    publishCanStatus: true          # /can_status
+    publishECUParamsActaul: true    # /ecu_params_actual
+    publishECUControlsSystems: true # /ecu_control_systems
+    publishInverterRightInfo: true  # /inverter_right_info
+    publishInverterLeftInfo: true   # /inverter_left_info
+    publishSbgImu: true             # /sbg/imu_data
+    publishSbgEkfEuler: true        # /sbg/ekf_euler
+    publishSbgGpsVel: true          # /sbg/gps_vel
+    publishSbgGpsPos: true          # /sbg/gps_pos
+    publishSbgEkfNav: true          # /sbg/ekf_nav
+
+    # CAN messages to transmit
+    #(0: do not send, 1: use ros publisher callback, 2: use dbc cyclic time)
+    transmitApuStateMission: 2    # /state_machine_state /current_mission
+    transmitSwaCommanded: 2       # /cmd
+    transmitApuCommand: 2         # /cmd
+    transmitECUParams: 1          # /ecu_params
+    transmitECUParams2: 1         # /ecu_params
+    transmitDvSystemStatus: true  #100ms cyclic time from the competitions
+    transmitApuResInit: true     #does not have publisher
+    transmitApuTemp: 1        #apu_monitor
+    transmitApuEstimation: 2
+    transmitDrivingDynamics1: 2
+    transmitDrivingDynamics2: 2
