@@ -1,5 +1,0 @@
-<launch>
-  <node pkg="turtle_can" exec="can_interface" output="screen">
-  	<param from="$(find-pkg-share turtle_can)/config/can_config.yaml"/>
-  </node>
-</launch>
